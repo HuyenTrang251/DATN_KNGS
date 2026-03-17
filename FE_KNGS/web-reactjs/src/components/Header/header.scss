@@ -1,0 +1,31 @@
+.headercss {
+    background-color:white;
+    color: black;
+    font-family: Arial, sans-serif;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    z-index: 1000;
+}
+.navbar {
+    background-color: #f1f8fb;
+}
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+.navbar-brand img {
+    height: 40px;
+    margin-right: 10px;
+    border-radius: 15px;
+}
+.navbar-nav .nav-link {
+    color: #0c024c !important;
+    font-weight: 550;
+    font-size: 17px;
+}
+.navbar-nav .nav-link.active {
+    background-color: #fec52e;
+    border-radius: 5px;
+}

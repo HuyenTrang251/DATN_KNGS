@@ -1,0 +1,105 @@
+.manage-apps-container {
+  padding: 20px;
+
+  h1 {
+    font-size: 24px;
+    color: #0c024c;
+    font-weight: 700;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f1f8fb;
+    padding-bottom: 10px;
+  }
+
+  .app-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+  }
+
+  .app-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #dee2e6; // Mặc định là màu xám
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    // Accent border based on status
+    &.agreed {
+      border-left-color: #28a745;
+    }
+    &.pending {
+      border-left-color: #ffc107;
+    }
+
+    h3 {
+      font-size: 18px;
+      color: #0c024c;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: #666;
+
+      b {
+        font-weight: 600;
+      }
+    }
+
+    .text-success {
+      color: #28a745 !important;
+    }
+
+    .btn-payment {
+      background-color: #0c024c;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      &::before {
+        content: "\f613"; // Bootstrap icon qr-code
+        font-family: "bootstrap-icons";
+      }
+
+      &:hover {
+        background-color: #1a06a0;
+        box-shadow: 0 4px 10px rgba(12, 2, 76, 0.3);
+      }
+    }
+  }
+}
+
+// Responsive cho thiết bị di động
+@media (max-width: 576px) {
+  .manage-apps-container {
+    padding: 15px;
+    
+    .app-list {
+      grid-template-columns: 1fr;
+    }
+    
+    h1 {
+      font-size: 20px;
+    }
+  }
+}

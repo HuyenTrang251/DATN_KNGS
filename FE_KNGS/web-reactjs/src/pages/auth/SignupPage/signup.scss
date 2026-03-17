@@ -1,0 +1,58 @@
+.containerSignup {
+    background-color: #f1f8fb;
+    height: 100vh;
+  
+    &.card{
+    padding: 1rem;
+    width: 400px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+    
+    .h3 {
+      text-align: center;
+      color: #ff8500;
+    }
+    .rdoRole{
+        font-size: 18px;
+        margin-right: 50px;
+        margin-bottom: 20px;
+    }
+    .form-SignUp {
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+
+            &::placeholder {
+            color: black;
+            opacity: 1;
+            }
+
+            &:invalid {
+            border: 1px solid rgb(163, 160, 160);
+            }
+
+            &:invalid:focus {
+            outline: none;
+            box-shadow: 0 0 5px 1px rgba(186, 185, 185, 0.6);
+            }
+        }
+
+        button.btnDK {
+        height: 45px;
+        background-color: #10B1ff;
+        color: #333;
+        border: #f8f9fa;
+        font-size: 18px;
+        border-radius: 5px;
+        font-weight: 500;
+
+        &:hover {
+            background-color: #ff8500;
+            color: #333;
+        }
+        }
+    }
+}

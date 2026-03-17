@@ -1,0 +1,128 @@
+.manage-bookings-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+  h1 {
+    font-size: 24px;
+    color: #0c024c;
+    font-weight: 700;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f1f8fb;
+    padding-bottom: 10px;
+  }
+
+  .tutor-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+
+    thead {
+      tr {
+        background-color: #f1f8fb;
+        th {
+          padding: 15px;
+          color: #0c024c;
+          font-weight: 600;
+          text-align: left;
+          border-bottom: 2px solid #dee2e6;
+          &:first-child { border-top-left-radius: 8px; }
+          &:last-child { border-top-right-radius: 8px; }
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        transition: background-color 0.3s ease;
+        &:hover {
+          background-color: #f8f9fa;
+        }
+
+        td {
+          padding: 15px;
+          vertical-align: middle;
+          border-bottom: 1px solid #eee;
+          color: #444;
+          font-size: 15px;
+        }
+      }
+    }
+  }
+
+  // Trạng thái (Badges)
+  .status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+
+    &.pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    &.approved {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    &.rejected {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    &.connecting {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+  }
+
+  // Các nút hành động
+  td {
+    .btn-approve {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 15px;
+      border-radius: 6px;
+      margin-right: 8px;
+      font-size: 14px;
+      transition: 0.3s;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #218838;
+        transform: translateY(-1px);
+      }
+    }
+
+    .btn-reject {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: 0.3s;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #c82333;
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+// Responsive cho Mobile
+@media (max-width: 768px) {
+  .manage-bookings-container {
+    padding: 10px;
+    overflow-x: auto;
+
+    .tutor-table {
+      min-width: 600px; // Cho phép scroll ngang trên màn hình nhỏ
+    }
+  }
+}

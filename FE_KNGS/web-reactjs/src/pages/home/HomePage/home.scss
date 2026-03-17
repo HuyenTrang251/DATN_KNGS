@@ -1,0 +1,294 @@
+.header-content {
+    height: 580px;
+    text-align: left;
+    padding: 150px 100px;
+    background-image: url('public/image/bg1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-top: 70px;
+}
+.header-content h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+.header-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+.header-content .btn {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+}
+
+.mainContent1{
+    width: 1300px;
+    margin: 0px auto;
+}
+
+// slideShowHome
+.slide-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .image-slide {
+    width: 100%;
+  
+    .image-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  
+  .image-item {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+  
+    img {
+      width: 100%;
+      max-height: 175px;
+      transition: transform 0.2s ease-in-out;
+    }
+  
+    &:hover img {
+      transform: scale(1.1);
+    }
+  
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      transition: background 0.5s ease-in-out;
+      z-index: 1;
+    }
+  
+    &:hover::after {
+      // background: rgba(121, 120, 120, 0.215);
+      background-image: url('../../assets/slide.jpg');
+      background-size: cover; /* Hoặc contain, auto 
+      background-repeat: no-repeat; /* Ngăn lặp lại ảnh nếu không muốn */
+      background-position: center; 
+    }
+  
+    .image-alt {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #e81616;
+      font-size: 1.2rem;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+      text-align: center;
+      z-index: 2;
+    }
+  
+    &:hover .image-alt {
+      opacity: 1;
+    }
+  }
+  .slide-btn {
+    background-color: #10B1ff;
+    border: none;
+    padding: 10px 15px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+    border-radius: 5px;
+  
+    &:hover {
+      background-color: #9fd3ed;
+    }
+  }
+  
+  .left-btn {
+    margin-right: 10px;
+  }
+  
+  .right-btn {
+    margin-left: 10px;
+  }
+
+// CommentTutor
+$border-color: #ddd;
+$bg-color: rgb(255, 245, 221);
+$star-color: #ffcc00;
+
+.section2 {
+  .container {
+    // border: 1px solid $border-color;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fff;
+  }
+
+  .star {
+    color: $star-color;
+
+    .mystar {
+      color: gray;
+    }
+  }
+
+  .commen {
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 0px 30px;
+    background-color: $bg-color;
+  }
+  .img-dg{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-left: 20px;
+  }
+  h4 {
+    margin-bottom: 10px;
+  }
+
+  h3 {
+    color: black;
+  }
+
+  p {
+    margin-top: 10px;
+  }
+}
+
+//SignUp
+.sectionSignUp {
+  // background-image: url(../../assets/b.jpg);
+  // background-size: cover;
+  // background-position: center;
+
+  .containerSignUp {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+  }
+
+  .card {
+    padding: 1rem;
+    width: 400px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      text-align: center;
+      color: #ff8500;
+    }
+
+    .form-SignUp {
+        input {
+          width: 100%;
+          padding: 0.5rem;
+          border-radius: 5px;
+          border: 1px solid #ddd;
+
+          &::placeholder {
+            color: black;
+            opacity: 1;
+          }
+
+          &:invalid {
+            border: 1px solid rgb(163, 160, 160);
+          }
+
+          &:invalid:focus {
+            outline: none;
+            box-shadow: 0 0 5px 1px rgba(186, 185, 185, 0.6);
+          }
+      }
+
+      button.btnDK {
+        height: 45px;
+        background-color: #ffcc00;
+        color: #333;
+        border: #f8f9fa;
+        font-size: 18px;
+        border-radius: 5px;
+        font-weight: 500;
+
+        &:hover {
+          background-color: #ff8500;
+          color: #333;
+        }
+      }
+    }
+  }
+}
+
+// Login
+.sectionLogin {
+  background-color: #f1f8fb;
+
+  .containerLogin{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  .card {
+    padding: 1rem;
+    width: 400px;
+    border-radius: 10px;
+    box-shadow: 0 -5px 3px 0 #10B1ff;
+
+    h3 {
+      text-align: center;
+      color: #ff8500;
+    }
+
+    .form-Login {
+        input {
+          width: 80%;
+          padding: 0.5rem;
+          border-radius: 5px;
+          border: 1px solid #ddd;
+          margin: 0px auto;
+          &::placeholder {
+            color: black;
+            opacity: 1;
+          }
+
+          &:invalid {
+            border: 1px solid rgb(163, 160, 160);
+          }
+
+          &:invalid:focus {
+            outline: none;
+            box-shadow: 0 0 5px 1px rgba(186, 185, 185, 0.6);
+          }
+      }
+
+      button.btnDN {
+        width: 80%;
+        height: 45px;
+        margin-left: 55px;
+        background-color: #10B1ff;
+        color: #333;
+        border: #f8f9fa;
+        font-size: 18px;
+        border-radius: 5px;
+        font-weight: 500;
+        &:hover {
+          background-color: #ff8500;
+          color: #333;
+        }
+      }
+    }
+  }
+}

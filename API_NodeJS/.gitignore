@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# environment variables (rất quan trọng)
+.env
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# uploaded files
+uploads/
+uploadsCV/
+
+# build / cache
+dist/
+build/
+.cache/
+
+# system files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# temporary files
+*.tmp
+*.temp

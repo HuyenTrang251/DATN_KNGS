@@ -1,0 +1,35 @@
+.class-content{
+    .form-class{
+        width: 220px;
+    }
+    .btn{
+        width: 115px;
+        background-color: #10B1ff;
+    }
+}
+
+.text-class{
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.offer-btn {
+    // background-color: #10B1ff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    // transition: background-color 0.3s ease;
+  
+    &:hover {
+      background-color: darken(#10B1ff, 10%);
+    }
+  
+    &:disabled {
+      background-color: #cccccc; 
+      color: #666666; 
+      cursor: not-allowed; 
+      border: 1px solid #cccccc; 
+    }
+  }

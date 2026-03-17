@@ -1,0 +1,147 @@
+.header-admin {
+  height: 70px;
+  width: 100vw;
+  padding: 0 20px;
+  background-color: #f1f8fb;
+  position: fixed;
+  z-index: 100;
+  box-shadow: 1px 1px 10px rgba(161, 182, 253, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  /* Trái */
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  
+    .menu-icon {
+      font-size: 28px;
+      color: #0c024c;
+      cursor: pointer;
+      &:hover {
+        color: black;
+      }
+    }
+  
+    .logo {
+      height: 40px;
+    }
+  }
+  
+  /* Giữa */
+  .header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  
+    .search-form {
+      display: flex;
+      align-items: center;
+      width: 500px;
+      height: 38px;
+      max-width: 100%;
+      background: #f1f8fb;
+      border: 1px solid #333;
+      border-radius: 20px;
+      padding: 5px 10px;
+  
+      .search-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        outline: none;
+        padding: 8px;
+      }
+  
+      .search-icon {
+        padding: 5px;
+        cursor: pointer;
+        color: #000000;
+        font-size: 20px;
+        font-weight: bold;
+        &:hover {
+          color: #0c024c;
+        }
+      }
+    }
+  }
+  
+  /* Phải */
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  
+    .nav-link {
+      font-size: 24px;
+      color: #0c024c;
+      transition: color 0.3s ease;
+  
+      &:hover {
+        color: black;
+      }
+    }
+  
+    .user-dropdown {
+      position: relative;
+  
+      .avatar-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+  
+        img {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+        }
+        i {
+          color: #0c024c;
+          &:hover {
+            color: black;
+          }
+        }
+      }
+  
+      .dropdown-menu {
+        position: absolute;
+        right: -15px;
+        top: 56px;
+        background: #f1f8fb;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        min-width: 160px;
+        display: none;
+  
+        &.show {
+          display: block;
+        }
+  
+        .dropdown-item {
+          padding: 10px 20px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 16px;
+          color: black;
+  
+          cursor: pointer;
+          transition: background 0.3s ease;
+  
+          &:hover {
+            background-color: #e3e3e3;
+            cursor: pointer;
+          }
+  
+          &.logout {
+            color: red;
+          }
+        }
+      }
+    }
+  }
+}
+  
+  

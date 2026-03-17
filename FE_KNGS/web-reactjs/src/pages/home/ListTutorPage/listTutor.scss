@@ -1,0 +1,54 @@
+
+.list-tutor {
+    margin-top: 30px;
+}
+
+.card-info {
+    margin-bottom: 20px;
+    display: flex;  
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-title {
+        font-weight: bold;
+    }
+    .card-body {
+        flex-grow: 1; 
+    }
+
+    .card-text {
+        color: black;
+    }
+
+    .btn-custom {
+        background-color: #10B1ff;
+        color: white;
+        position: absolute;
+        bottom: 10px;
+
+        &:hover {
+            background-color: #9cd7f4;
+        }
+    }
+}
+
+.filter-select {
+    margin-bottom: 20px;
+}
+
+.headerListTutor {
+    margin-bottom: 20px;
+
+    h2 {
+        margin: 0;
+    }
+
+    span {
+        color: #6c757d;
+    }
+}
