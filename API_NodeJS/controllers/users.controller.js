@@ -57,13 +57,35 @@ module.exports = {
     } catch (e) { res.status(500).send(e.message); }
 },
 
-  update: async (req, res) => {
-      try {
-          // Khi update profile, validation thường lỏng hơn hoặc cần schema riêng
-          await Service.edit(req.params.id, req.body);
-          res.send('Cập nhật thông tin thành công');
-      } catch (e) { res.status(500).send(e.message); }
-  },
+//   updateProfile: async (req, res) => {
+//         const userId = req.user.id;
+//         const { full_name, phone, address, gender } = req.body;
+        
+//         // Gom dữ liệu vào 1 object
+//         const updateData = { full_name, phone, address, gender };
+        
+//         await Service.updateInfo(userId, updateData);
+//         res.json({ message: "Đã cập nhật thông tin cá nhân" });
+//     },
+
+    updateProfile: async (req, res) => {
+        try {
+            const userId = req.user.id; // Lấy từ middleware authentic
+            const profileData = req.body; // Dữ liệu JSON từ frontend
+
+            await Service.updateInfo(userId, profileData);
+
+            res.json({
+                success: true,
+                message: "Cập nhật thông tin cá nhân thành công!"
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
 
   // API đổi mật khẩu
   changePassword: async (req, res) => {
@@ -87,18 +109,29 @@ module.exports = {
   },
 
   updateAvatar: async (req, res) => {
-    try {
-        if (!req.file) return res.status(400).send("Vui lòng chọn ảnh!");
-        
-        // CHỈ LẤY TÊN FILE: avatar-123456.jpg
-        const fileNameOnly = req.file.filename; 
-        
-        await Service.updateAvatar(req.userId, fileNameOnly);
-        res.json({ 
-            message: "Cập nhật thành công", 
-            filename: fileNameOnly 
-        });
-    } catch (e) { res.status(500).send(e.message); }
-  },
+        try {
+            // Kiểm tra xem trong req.user có những gì
+            console.log("Dữ liệu user từ Token:", req.user); 
+
+            if (!req.file) return res.status(400).send("Vui lòng chọn ảnh!");
+            
+            const userId = req.user.id; 
+            const fileNameOnly = req.file.filename; 
+
+            if (!userId) {
+                return res.status(401).send("Không tìm thấy ID người dùng trong Token");
+            }
+
+            await Service.updateAvatar(userId, fileNameOnly);
+            
+            res.json({ 
+                message: "Cập nhật thành công", 
+                filename: fileNameOnly 
+            });
+        } catch (e) { 
+            console.error(e);
+            res.status(500).send(e.message); 
+        }
+    },
 };
 

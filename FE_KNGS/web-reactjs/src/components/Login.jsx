@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Cookies from "js-cookie";
-import { login } from "../services/authApi";
+import { login  as loginAPI } from "../services/authApi";
+import { useAuth } from "./../contexts/AuthContext";
 import "../pages/home/HomePage/home.scss";
 
 function Login() {
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +35,7 @@ function Login() {
 
       setLoading(true);
 
-      const res = await login({
+      const res = await loginAPI({
         email: email,
         password: password
       });
@@ -47,10 +49,12 @@ function Login() {
       });
 
       // lưu user
-      localStorage.setItem("user", JSON.stringify(data.user));
+      login(data.user);
+
+      // localStorage.setItem("user", JSON.stringify(data.user));
 
       const role = data.user.role_id;
-
+      
       // redirect theo role
       if (role === 1) {
         navigate("/admin");
@@ -66,13 +70,11 @@ function Login() {
       }
 
     } catch (error) {
-
       console.error(error);
       alert(
         error.response?.data?.message ||
         "Đăng nhập thất bại"
       );
-
     } finally {
 
       setLoading(false);

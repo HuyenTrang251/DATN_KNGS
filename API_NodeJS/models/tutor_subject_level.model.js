@@ -20,6 +20,16 @@ const Model = {
 
   delete: async (id) => {
     return await db.query('UPDATE tutor_subject_level SET deleted_at = NOW() WHERE tutor_subject_level_id = ?', [id]);
+  },
+
+  // Lấy danh sách môn dạy theo tutor_id
+  getByTutorId: async (tutorId) => {
+    const sql = `
+      SELECT tsl.*, s.name as subject_name 
+      FROM tutor_subject_level tsl
+      JOIN subjects s ON tsl.subject_id = s.subject_id
+      WHERE tsl.tutor_id = ? AND tsl.deleted_at IS NULL`;
+    return await db.query(sql, [tutorId]);
   }
 };
 

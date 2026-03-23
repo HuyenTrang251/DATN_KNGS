@@ -1,11 +1,8 @@
 const Service = require('../services/tutors.service');
+const Model = require('../models/tutors.model');
 const { validate } = require('../validations/tutors.validation');
 
-module.exports = {
-  getAll: async (req, res) => {
-    try { const data = await Service.findAll(); res.json(data); } catch (e) { res.status(500).send(e.message); }
-  },
-  
+module.exports = {  
   getById: async (req, res) => {
     try {
         const data = await Service.findOne(req.params.id);
@@ -30,20 +27,78 @@ module.exports = {
     } catch (e) { res.status(500).send(e.message); }
   },
 
-  create: async (req, res) => {
+  // Admin lấy tất cả gia sư (Quản trị)
+  getAllAdmin: async (req, res) => {
+    try { res.json(await Model.getAllDetailed()); } 
+    catch (e) { res.status(500).send(e.message); }
+  },
+
+  // Lấy danh sách gia sư (Trang chủ)
+  getPublicList: async (req, res) => {
     try {
-      const { error } = validate(req.body);
-      if (error) return res.status(400).send(error.details[0].message);
-      const result = await Service.add(req.body);
-      res.status(201).json(result);
+        const rows = await Model.getApprovedList();
+        
+        if (!rows || rows.length === 0) {
+            return res.json([]);
+        }
+
+        const formattedData = rows.map(item => {
+            return {
+                ...item,
+                // Kiểm tra nếu có dữ liệu mới split, nếu không trả về mảng rỗng
+                locations: item.locations ? item.locations.split('||') : [],
+                
+                subject_details: item.subject_details ? item.subject_details.split('||').map(s => {
+                    const parts = s.split('|');
+                    return { 
+                        subject_name: parts[0] || '', 
+                        level: parts[1] || '', 
+                        tuition: parts[2] || 0,
+                        tutor_subject_level_id: parts[3] || null 
+                    };
+                }) : [],
+                
+                schedules: item.schedules ? item.schedules.split('||').map(sc => {
+                    const parts = sc.split('|');
+                    const day = parts[0] || '';
+                    const time = parts[1] || '-';
+                    const [start, end] = time.split('-');
+                    return { day, start: start || '', end: end || '' };
+                }) : []
+            };
+        });
+
+        res.json(formattedData);
+    } catch (e) {
+        console.error("🔥 Lỗi Backend Controller:", e);
+        res.status(500).json({ message: "Lỗi xử lý dữ liệu gia sư", error: e.message });
+    }
+  },
+
+  // Cập nhật Profile (Dùng chung cho lần đầu và sửa đổi)
+  updateProfile: async (req, res) => {
+    try {
+      await Service.updateFullProfile(req.user.id, req.body);
+      res.json({ message: "Cập nhật hồ sơ thành công" });
     } catch (e) { res.status(500).send(e.message); }
   },
-  update: async (req, res) => {
-    try { await Service.edit(req.params.id, req.body); res.send('Updated successfully'); } catch (e) { res.status(500).send(e.message); }
+
+  // Admin duyệt tích xanh
+  verifyTutor: async (req, res) => {
+    try {
+      await Service.verifyBlueTick(req.params.id);
+      res.json({ message: "Đã cấp tích xanh cho gia sư" });
+    } catch (e) { res.status(400).send(e.message); }
   },
-  delete: async (req, res) => {
-    try { await Service.remove(req.params.id); res.send('Deleted successfully'); } catch (e) { res.status(500).send(e.message); }
+
+  // Admin khóa tài khoản
+  lockAccount: async (req, res) => {
+    try {
+      await db.query('UPDATE users SET status = "locked" WHERE user_id = ?', [req.params.userId]);
+      res.json({ message: "Đã khóa tài khoản" });
+    } catch (e) { res.status(500).send(e.message); }
   },
+
   updateMedia: async (req, res) => {
     try {
         const mediaData = {};

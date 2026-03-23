@@ -6,7 +6,10 @@ const Service = {
   findOne: async (id) => await Model.getById(id),
   add: async (data) => await Model.create(data),
   edit: async (id, data) => await Model.update(id, data),
-  remove: async (id) => await Model.delete(id)
+  remove: async (id) => await Model.delete(id),
+  findByTutorId: async (tutorId) => {
+    return await Model.getByTutorId(tutorId);
+  }
 };
 
 module.exports = Service;

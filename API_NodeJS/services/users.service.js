@@ -45,7 +45,33 @@ const UsersService = {
     remove: async (id) => await Model.delete(id),
 
     updateAvatar: async (userId, avatarPath) => {
-    return await Model.update(userId, { avatar: avatarPath }); },
+    return await Model.updateAvatar(userId, avatarPath); },
+
+    // updateAvatar: async (userId, avatarPath) => {
+    //     return await Model.updateAvatar(userId, avatarPath);
+    // },
+
+    // Viết thêm hàm updateInfo
+    updateInfo: async (userId, rawData) => {
+        // 1. Chỉ lọc ra những trường cho phép user tự sửa
+        const { full_name, phone, gender, date_of_birth, address } = rawData;
+        
+        // 2. Tạo object sạch (loại bỏ những trường undefined)
+        const updateData = {};
+        if (full_name !== undefined) updateData.full_name = full_name;
+        if (phone !== undefined) updateData.phone = phone;
+        if (gender !== undefined) updateData.gender = gender;
+        if (date_of_birth !== undefined) updateData.date_of_birth = date_of_birth;
+        if (address !== undefined) updateData.address = address;
+
+        // 3. Kiểm tra nếu không có dữ liệu gì để cập nhật thì dừng lại
+        if (Object.keys(updateData).length === 0) {
+            throw new Error("Không có thông tin nào được thay đổi");
+        }
+
+        // 4. Gọi xuống Model để thực thi SQL
+        return await Model.update(userId, updateData);
+    },
 
     // THÊM HÀM NÀY ĐỂ PHỤC VỤ ĐĂNG NHẬP
     findByEmail: async (email) => {

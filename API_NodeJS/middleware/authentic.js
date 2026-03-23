@@ -33,54 +33,73 @@ const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.SECRET_KEY;
 
 if (!SECRET_KEY) {
-    throw new Error("SECRET_KEY chưa được cấu hình trong .env");
+  throw new Error("SECRET_KEY chưa được cấu hình trong .env");
 }
 
-const authentic = (requiredRoles = []) => {
+/**
+ * Middleware xác thực + phân quyền
+ * @param {Array} allowedRoles - danh sách role_id được phép
+ */
+const authentic = (allowedRoles = []) => {
+  return (req, res, next) => {
 
-    return (req, res, next) => {
+    try {
 
-        const authHeader = req.headers.authorization;
+      const authHeader = req.headers.authorization;
 
-        if (!authHeader) {
-            return res.status(401).json({
-                message: "Thiếu Authorization header"
-            });
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+          message: "Thiếu hoặc sai định dạng Authorization header"
+        });
+      }
+
+      const token = authHeader.split(" ")[1];
+
+      const decoded = jwt.verify(token, SECRET_KEY);
+
+      req.user = decoded;
+
+      // 🔥 check role
+      if (allowedRoles.length > 0) {
+        if (!allowedRoles.includes(decoded.role_id)) {
+          return res.status(403).json({
+            message: "Không có quyền truy cập"
+          });
         }
+      }
 
-        const token = authHeader.split(" ")[1];
+      next();
 
-        if (!token) {
-            return res.status(401).json({
-                message: "Thiếu token"
-            });
-        }
+    } catch (error) {
 
-        try {
+      return res.status(401).json({
+        message: "Token không hợp lệ hoặc đã hết hạn"
+      });
 
-            const decoded = jwt.verify(token, SECRET_KEY);
-
-            req.user = decoded;
-
-            // kiểm tra role nếu có yêu cầu
-            if (requiredRoles.length > 0) {
-                if (!requiredRoles.includes(decoded.role_id)) {
-                    return res.status(403).json({
-                        message: "Không có quyền truy cập"
-                    });
-                }
-            }
-
-            next();
-
-        } catch (error) {
-
-            return res.status(401).json({
-                message: "Token không hợp lệ hoặc đã hết hạn"
-            });
-
-        }
-    };
+    }
+  };
 };
 
-module.exports = authentic;
+/**
+ * Middleware phân quyền riêng (dễ đọc hơn)
+ */
+const authorize = (roles = []) => {
+  return (req, res, next) => {
+
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Chưa xác thực"
+      });
+    }
+
+    if (!roles.includes(req.user.role_id)) {
+      return res.status(403).json({
+        message: "Không có quyền"
+      });
+    }
+
+    next();
+  };
+};
+
+module.exports = {authentic, authorize};

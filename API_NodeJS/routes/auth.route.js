@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/auth.controller");
-const authentic = require("../middleware/authentic");
+const {authentic} = require("../middleware/authentic");
 
 router.post("/register/student", controller.registerStudent);
 router.post("/register/tutor", controller.registerTutor);

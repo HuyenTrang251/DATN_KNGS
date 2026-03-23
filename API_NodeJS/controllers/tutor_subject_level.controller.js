@@ -21,5 +21,14 @@ module.exports = {
   },
   delete: async (req, res) => {
     try { await Service.remove(req.params.id); res.send('Deleted successfully'); } catch (e) { res.status(500).send(e.message); }
+  },
+
+  getByTutorId: async (req, res) => {
+    try {
+      const data = await Service.findByTutorId(req.params.tutorId);
+      res.json(data);
+    } catch (e) {
+      res.status(500).send(e.message);
+    }
   }
 };

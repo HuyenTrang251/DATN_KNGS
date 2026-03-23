@@ -3,13 +3,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../components/Header/header.scss";
-// import { useHideAuth } from "../contexts/HideAuthContext";
+import { useAuth } from "../contexts/AuthContext"; 
 
 function MenuHeader()
 {
-    // const hideAuth = false
-    // const { hideAuth } = useHideAuth(); // Lấy giá trị từ context
-    // const navigate = useNavigate();
+    const { user } = useAuth(); // Lấy thông tin user từ context toàn cục
+    const navigate = useNavigate();
 
     // const handleGoBack = () => {
     //     const previousPage = sessionStorage.getItem('previousPage');
@@ -147,7 +146,7 @@ function MenuHeader()
 
                 {/* Ẩn/hiện nút Đăng ký và Đăng nhập dựa trên trạng thái đăng nhập */}
                 {/* {!hideAuth && ( */}
-                    <>
+                    {/* <>
                     <li className="nav-item ps-5">
                         <Link className="nav-link active" to="/dang-ki">
                         Đăng ký
@@ -158,7 +157,7 @@ function MenuHeader()
                         Đăng nhập
                         </Link>
                     </li>
-                    </>
+                    </> */}
                 {/* )} */}
 
                 {/* Hiển thị nút Quay lại
@@ -169,6 +168,34 @@ function MenuHeader()
                     </button>
                     </li>
                 )} */}
+
+                {/* LOGIC XỬ LÝ ẨN/HIỆN NÚT ĐĂNG KÝ/ĐĂNG NHẬP */}
+                {!user ? (
+                    // NẾU CHƯA ĐĂNG NHẬP (user === null) -> HIỆN NÚT
+                    <>
+                        <li className="nav-item ps-5">
+                            <Link className="nav-link active" to="/dang-ki">
+                            Đăng ký
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/dang-nhap">
+                            Đăng nhập
+                            </Link>
+                        </li>
+                    </>
+                ) : (
+                    // NẾU ĐÃ ĐĂNG NHẬP -> HIỆN NÚT VÀO TRANG CÁ NHÂN (DASHBOARD)
+                    <li className="nav-item ps-lg-5">
+                        <Link 
+                            className="nav-link active fw-bold text-primary" 
+                            to={user.role_id === 1 ? "/admin" : user.role_id === 2 ? "/tutor" : "/student"}
+                        >
+                            <i className="bi bi-person-circle me-1"></i>
+                            {user.full_name || "Trang cá nhân"}
+                        </Link>
+                    </li>
+                )}
             </ul>
         </div>
         </>

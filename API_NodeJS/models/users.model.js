@@ -21,10 +21,22 @@ const Model = {
     return await db.query(sql, data);
   },
 
-  update: async (id, data) => {
-    return await db.query('UPDATE users SET ? WHERE user_id = ?', [data, id]);
+  updateAvatar: async (id, fileName) => {
+      const sql = 'UPDATE users SET avatar = ? WHERE user_id = ?';
+      return await db.query(sql, [fileName, id]);
   },
 
+  // Hàm 2: Chuyên cập nhật thông tin cá nhân (Hàm này linh hoạt hơn)
+  updateInfo: async (id, data) => {
+      // data là 1 object: { full_name: '...', phone: '...', gender: '...' }
+      // Chúng ta tạo câu SQL động để chỉ cập nhật những gì người dùng gửi lên
+      const fields = Object.keys(data).map(key => `${key} = ?`).join(', ');
+      const values = Object.values(data);
+      values.push(id); // Thêm ID vào cuối mảng cho WHERE user_id = ?
+
+      const sql = `UPDATE users SET ${fields} WHERE user_id = ?`;
+      return await db.query(sql, values);
+  },
   delete: async (id) => {
     return await db.query('UPDATE users SET deleted_at = NOW() WHERE user_id = ?', [id]);
   }

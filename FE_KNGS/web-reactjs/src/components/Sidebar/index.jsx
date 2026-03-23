@@ -1,58 +1,141 @@
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
+// import { NavLink, useLocation } from "react-router-dom";
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap-icons/font/bootstrap-icons.css";
+// import "./sidebar.scss";
+// // import { getUserLogined } from "../../../services/UserService";
+
+// function Sidebar({ isOpen, menuItems }) {
+//     const location = useLocation();
+//     const [activePath, setActivePath] = useState(location.pathname);
+//     const [userData, setUserData] = useState(null);
+
+//     // useEffect(() => {
+//     //     setActivePath(location.pathname);
+//     // }, [location]);
+
+//     // useEffect(() => {
+//     //     const FetchUserData = async () =>{
+//     //         const data = await getUserLogined();
+//     //         if (data) {
+//     //             setUserData({
+//     //                 img: data.img,          
+//     //                 name: data.name,       
+//     //             });
+//     //         } else {
+//     //             setUserData({ img: '', name: 'User' });
+//     //         }
+//     //     };
+//     //     FetchUserData();
+//     // }, []);
+
+//     const userImage = userData?.img;
+//     const userName = userData?.name;
+
+//     return(
+//         <>
+//         <nav className={`sidebar ${isOpen ? "open" : "closed"}`}>
+//         <div className="display-layout d-flex flex-column align-items-center mt-3">
+//             <img src={userImage? `http://localhost:3300/uploads/avatars/${userImage}` : "/image/avatar.jpg"} alt="avatar" className="rounded-circle mb-3" style={{width:'120px', height:'120px', objectFit:'auto', padding: '10px'}}></img>
+//             <h5>{userName}</h5>
+//         </div>
+//         <ul className="nav-options">
+//             {menuItems.map((item, index) => (
+//             <NavLink
+//                 to={item.path}
+//                 key={index}
+//                 className={`nav-option ${activePath === item.path ? "active" : ""}`}
+//             >
+//                 <i className={`${item.icon} nav-img`} />
+//                 <span className="nav-text">{item.label}</span>
+//             </NavLink>
+//             ))}
+//         </ul>
+//         </nav>
+//         </>
+//     )
+// }
+// export default Sidebar;
+
+import React, { useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./sidebar.scss";
-// import { getUserLogined } from "../../../services/UserService";
+// Import useAuth để lấy dữ liệu người dùng toàn cục
+import { useAuth } from "../../contexts/AuthContext";
 
 function Sidebar({ isOpen, menuItems }) {
     const location = useLocation();
-    const [activePath, setActivePath] = useState(location.pathname);
-    const [userData, setUserData] = useState(null);
+    const { user } = useAuth(); // Lấy thông tin user từ Context
+    // console.log("Dữ liệu user trong Sidebar:", user);
 
-    // useEffect(() => {
-    //     setActivePath(location.pathname);
-    // }, [location]);
+    // --- LOGIC XỬ LÝ ẢNH (Giống hệt Header để đảm bảo hiển thị được) ---
+    const avatarUrl = useMemo(() => {
+        if (!user?.avatar) return "/image/avatar.jpg";
 
-    // useEffect(() => {
-    //     const FetchUserData = async () =>{
-    //         const data = await getUserLogined();
-    //         if (data) {
-    //             setUserData({
-    //                 img: data.img,          
-    //                 name: data.name,       
-    //             });
-    //         } else {
-    //             setUserData({ img: '', name: 'User' });
-    //         }
-    //     };
-    //     FetchUserData();
-    // }, []);
+        let fileName = user.avatar;
 
-    const userImage = userData?.img;
-    const userName = userData?.name;
+        // Xử lý nếu dữ liệu bị dính định dạng JSON {"avatar":"img-xxx.png"}
+        if (typeof fileName === "string" && fileName.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(fileName);
+                fileName = parsed.avatar;
+            } catch (e) {
+                console.error("Lỗi parse avatar trong Sidebar:", e);
+            }
+        }
 
-    return(
+        return `http://localhost:3300/uploads/avatars/${fileName}`;
+    }, [user?.avatar]);
+
+    return (
         <>
-        <nav className={`sidebar ${isOpen ? "open" : "closed"}`}>
-        <div className="display-layout d-flex flex-column align-items-center mt-3">
-            <img src={userImage? `http://localhost:3300/uploads/${userImage}` : "/image/avatar.jpg"} alt="avatar" className="rounded-circle mb-3" style={{width:'120px', height:'120px', objectFit:'auto', padding: '10px'}}></img>
-            <h5>{userName}</h5>
-        </div>
-        <ul className="nav-options">
-            {menuItems.map((item, index) => (
-            <NavLink
-                to={item.path}
-                key={index}
-                className={`nav-option ${activePath === item.path ? "active" : ""}`}
-            >
-                <i className={`${item.icon} nav-img`} />
-                <span className="nav-text">{item.label}</span>
-            </NavLink>
-            ))}
-        </ul>
-        </nav>
+            <nav className={`sidebar ${isOpen ? "open" : "closed"}`}>
+                <div className="display-layout d-flex flex-column align-items-center mt-3">
+                    {/* Hiển thị ảnh đại diện */}
+                    <img 
+                        src={avatarUrl} 
+                        alt="avatar" 
+                        className="rounded-circle mb-3 shadow-sm" 
+                        style={{ 
+                            width: '130px', 
+                            height: '130px', 
+                            objectFit: 'cover', // Đổi từ auto sang cover để ảnh không bị méo
+                            padding: '5px',
+                            border: '2px solid #eee'
+                        }}
+                        onError={(e) => { e.target.src = "/image/avatar.jpg"; }}
+                    />
+                    
+                    {/* Hiển thị tên người dùng (full_name từ database) */}
+                    <h5 className="text-center px-1 fw-bold mt-2">
+                        {user?.name || "Đang tải..."} 
+                    </h5>
+                    
+                    {/* Hiển thị Role nhỏ phía dưới nếu muốn (Tùy chọn) */}
+                    <small className="text-muted mb-3">
+                        {user?.role_id === 1 ? "Quản trị viên" : user?.role_id === 2 ? "Gia sư" : "Học viên"}
+                    </small>
+                </div>
+
+                <ul className="nav-options">
+                    {menuItems.map((item, index) => (
+                        <NavLink
+                            to={item.path}
+                            key={index}
+                            className={({ isActive }) => 
+                                `nav-option ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <i className={`${item.icon} nav-img`} />
+                            <span className="nav-text">{item.label}</span>
+                        </NavLink>
+                    ))}
+                </ul>
+            </nav>
         </>
-    )
+    );
 }
+
 export default Sidebar;

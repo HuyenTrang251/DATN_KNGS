@@ -69,7 +69,7 @@ function HomePage() {
             </div>
             
             <div className="container my-4">
-                <h2 className="text-center mb-5">Tìm gia sư theo môn học</h2>
+                {/* <h2 className="text-center mb-5">Tìm gia sư theo môn học</h2> */}
                 <SlideShowHome />
             </div>
 

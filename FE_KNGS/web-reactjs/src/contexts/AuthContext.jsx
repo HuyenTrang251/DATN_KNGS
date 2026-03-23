@@ -1,15 +1,37 @@
-import React, { createContext, useState, useContext } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-export const HideAuthProvider = ({ children }) => {
-  const [hideAuth, setHideAuth] = useState(false);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const login = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
 
   return (
-    <HideAuthContext.Provider value={{ hideAuth, setHideAuth }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout
+      }}
+    >
       {children}
-    </HideAuthContext.Provider>
+    </AuthContext.Provider>
   );
 };
 
-export const useHideAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);

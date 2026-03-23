@@ -5,6 +5,11 @@ export const SidebarStudent = [
     path: "/danh-sach-gia-su",
     },
     {
+    icon: "bi bi-chat-square-quote-fill",
+    label: "Đăng bài",
+    path: "/student/dang-bai",
+    },
+    {
     icon: "bi bi-file-earmark-post",
     label: "Quản lý bài đăng",
     path: "/student/quan-ly-bai-dang",
@@ -16,8 +21,8 @@ export const SidebarStudent = [
     },
     {
     icon: "bi bi-chat-square-quote-fill",
-    label: "Quản lý đánh giá",
-    path: "/student/quan-ly-danh-gia",
+    label: "Quản lý lớp",
+    path: "/student/quan-ly-lop",
     },
     {
     icon: "bi bi-person-square",

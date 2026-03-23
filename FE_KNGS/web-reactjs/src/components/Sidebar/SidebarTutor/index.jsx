@@ -5,6 +5,11 @@ export const SidebarTutor = [
     path: "/danh-sach-lop-moi",
     },
     {
+    icon: "bi bi-chat-square-quote-fill",
+    label: "Quản lý nhận lớp",
+    path: "/tutor/quan-ly-nhan-lop",
+    },
+    {
     icon: "bi bi-calendar-check-fill",
     label: "Thông tin đặt lịch",
     path: "/tutor/thong-tin-dat-lich",
@@ -15,13 +20,8 @@ export const SidebarTutor = [
     path: "/tutor/quan-ly-lop",
     },
     {
-    icon: "bi bi-chat-square-quote-fill",
-    label: "Đánh giá",
-    path: "/tutor/quan-ly-danh-gia",
-    },
-    {
     icon: "bi bi-person-square",
-    label: "Quản lý thông tin",
+    label: "Thông tin cá nhân",
     path: "/tutor/thong-tin-ca-nhan",
     },
 ];

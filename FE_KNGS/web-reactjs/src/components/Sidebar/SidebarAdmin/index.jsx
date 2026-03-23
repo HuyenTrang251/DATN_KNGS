@@ -13,7 +13,7 @@ function SidebarAdmin({ isOpen }) {
     const menuItems = [
         {
         icon: "bi bi-person-circle",
-        label: "Quản lý người dùng",
+        label: "Quản lý học viên",
         path: "/admin/quan-ly-nguoi-dung",
         },
         {
@@ -23,7 +23,7 @@ function SidebarAdmin({ isOpen }) {
         },
         {
         icon: "bi bi-person-square",
-        label: "Quản lý học viên",
+        label: "Quản lý nhân viên",
         path: "/admin/quan-ly-hoc-vien",
         },
         {
@@ -36,11 +36,11 @@ function SidebarAdmin({ isOpen }) {
         label: "Quản lý đặt lịch",
         path: "/admin/quan-ly-dat-lich",
         },
-        // {
-        // icon: "bi bi-chat-right-quote-fill",
-        // label: "Quản lý phản hồi",
-        // path: "/admin/quan-ly-phan-hoi",
-        // },
+        {
+        icon: "bi bi-chat-right-quote-fill",
+        label: "Quản lý lớp đã két nối",
+        path: "/admin/quan-ly-phan-hoi",
+        },
         {
         icon: "bi bi-chat-square-quote-fill",
         label: "Quản lý đánh giá",

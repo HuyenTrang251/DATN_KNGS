@@ -4,11 +4,12 @@ const fs = require('fs');
 
 // --- Cấu hình chung ---
 // Định nghĩa đường dẫn. Sử dụng path.join để tương thích với mọi hệ điều hành.
-const uploadsDir = path.join(__dirname, '../uploads'); // Thư mục 'uploads' ở gốc dự án
-const cvsDir = path.join(__dirname, '../uploadsCV');     // Thư mục 'uploadsCV' ở gốc dự án
+const avatarsDir = path.join(__dirname, '../uploads/avatars'); 
+// Lưu CV vào uploads/cvs (Sửa uploadsCV thành uploads/cvs cho đồng bộ)
+const cvsDir = path.join(__dirname, '../uploads/cvs'); 
 
 // Đảm bảo các thư mục tồn tại, nếu không thì tạo mới
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fs.existsSync(avatarsDir)) fs.mkdirSync(avatarsDir, { recursive: true });
 if (!fs.existsSync(cvsDir)) fs.mkdirSync(cvsDir, { recursive: true });
 
 
@@ -17,7 +18,7 @@ if (!fs.existsSync(cvsDir)) fs.mkdirSync(cvsDir, { recursive: true });
 // Storage cho ảnh đại diện (avatar)
 const avatarStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadsDir);
+    cb(null, avatarsDir);
   },
   filename: (req, file, cb) => {
     cb(null, 'img-' + Date.now() + path.extname(file.originalname));
