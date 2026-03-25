@@ -37,7 +37,7 @@ export const getPublicTutors = () => {
  * Admin: Lấy toàn bộ danh sách gia sư kèm thông tin chi tiết 5 bảng
  */
 export const getAllTutorsAdmin = () => {
-  return axiosClient.get("/tutors/admin-all");
+  return axiosClient.get("/tutors");
 };
 
 /**
@@ -63,4 +63,12 @@ export const lockTutorAccount = (userId) => {
  */
 export const updateApproveStatus = (tutorId, data) => {
   return axiosClient.put(`/tutors/approve-status/${tutorId}`, data);
+};
+
+// Thêm vào tutorApi.jsx
+/**
+ * Lấy thông tin chi tiết hồ sơ của gia sư đang đăng nhập (để đổ vào form sửa)
+ */
+export const getOwnTutorProfile = () => {
+  return axiosClient.get("/tutors/me"); 
 };

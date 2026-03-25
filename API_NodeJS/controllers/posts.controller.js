@@ -27,41 +27,60 @@ module.exports = {
 
   getStudentPosts: async (req, res) => {
     try {
+        const userId = req.user.id; 
 
-      const data = await Service.findStudentPosts(req.user.user_id);
-      res.json(data);
+        if (!userId) {
+            return res.status(401).send("Không xác định được danh tính người dùng");
+        }
 
+        const data = await Service.findStudentPosts(userId);
+        res.json(data);
     } catch (e) {
-      res.status(500).send(e.message);
+        console.error("🔥 Lỗi getStudentPosts:", e.message);
+        res.status(500).send(e.message);
     }
   },
 
   getTutorApplications: async (req, res) => {
     try {
-
-      const data = await Service.findTutorApplications(req.user.user_id);
-      res.json(data);
-
+        const userId = req.user.id; 
+        if (!userId) {
+            return res.status(401).json({ message: "Không xác định được danh tính gia sư" });
+        }
+        const data = await Service.findTutorApplications(userId);
+        res.json(data);
     } catch (e) {
-      res.status(500).send(e.message);
+        console.error("🔥 Lỗi getTutorApplications:", e.message);
+        res.status(500).send(e.message);
     }
   },
 
+   // API Duyệt trạng thái từ trang Admin
   updateStatus: async (req, res) => {
     try {
-      const { status, reason } = req.body;
+      const postId = req.params.id;
+      const { status, reason, commissionPercent, supportPercent } = req.body;
+      const adminId = req.user.id; // Lấy ID admin từ Token
 
-      await Service.updateStatus(
-        req.params.id,
-        status,
-        reason,
-        req.user.user_id
-      );
+      if (status === 'approved') {
+        // Nếu duyệt: tính phí và lưu bảng offer
+        const result = await Service.approveAndCalculateFee(postId, commissionPercent, supportPercent, adminId);
+        return res.json({ message: "Đã duyệt và tính phí", data: result });
+      } 
+      
+      if (status === 'rejected') {
+        // Nếu từ chối: lưu lý do
+        await Service.rejectPost(postId, reason, adminId);
+        return res.json({ message: "Đã từ chối bài đăng" });
+      }
 
+      // Các trạng thái khác (pending, cancelled...)
+      await Model.update(postId, { status });
       res.json({ message: "Cập nhật trạng thái thành công" });
 
     } catch (e) {
-      res.status(500).send(e.message);
+      console.error("🔥 Error Post Controller:", e.message);
+      res.status(500).json({ message: e.message });
     }
   },
 
@@ -78,16 +97,24 @@ module.exports = {
 
   create: async (req, res) => {
     try {
+      // req.user.id lấy từ middleware authentic
+      const userId = req.user.id; 
+      const postData = req.body;
 
-      const { error } = validate(req.body);
-      if (error)
-        return res.status(400).send(error.details[0].message);
+      // Gọi service để xử lý toàn bộ logic
+      const result = await Service.add(userId, postData);
 
-      const result = await Service.add(req.body);
-      res.status(201).json(result);
+      res.status(201).json({
+        message: "Đăng bài thành công! Bài viết của bạn đang chờ phê duyệt.",
+        data: result
+      });
 
     } catch (e) {
-      res.status(500).send(e.message);
+      console.error("🔥 Lỗi PostController:", e.message);
+      
+      // Nếu lỗi do không tìm thấy học viên thì trả về 403, còn lại trả về 400
+      const status = e.message.includes("không có hồ sơ") ? 403 : 400;
+      res.status(status).json({ message: e.message });
     }
   },
 

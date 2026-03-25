@@ -37,6 +37,13 @@ const Model = {
       const sql = `UPDATE users SET ${fields} WHERE user_id = ?`;
       return await db.query(sql, values);
   },
+  update: async (id, data) => {
+    // Tự động tạo câu lệnh: UPDATE users SET status = ?, full_name = ? ... WHERE user_id = ?
+    const fields = Object.keys(data).map(key => `${key} = ?`).join(', ');
+    const values = [...Object.values(data), id];
+    const sql = `UPDATE users SET ${fields} WHERE user_id = ?`;
+    return await db.query(sql, values);
+  },
   delete: async (id) => {
     return await db.query('UPDATE users SET deleted_at = NOW() WHERE user_id = ?', [id]);
   }

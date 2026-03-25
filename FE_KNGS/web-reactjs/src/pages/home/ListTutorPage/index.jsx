@@ -180,43 +180,6 @@ function ListTutorPage() {
 
     return (
         <Container className="list-tutor mt-5 pt-5 pb-5">
-            {/* <h2 className="fw-bold mb-4 text-uppercase text-primary">Danh sách gia sư</h2>
-
-            {/* BỘ LỌC TÌM KIẾM */}
-            {/* <div className="filter-section mb-5 p-4 bg-white rounded shadow-sm border">
-                <Row className="g-3">
-                    <Col md={2}>
-                        <Form.Label className="small fw-bold">Địa điểm</Form.Label>
-                        <Form.Select size="sm" value={selectedTinh} onChange={(e) => setSelectedTinh(e.target.value)}>
-                            <option value="">Tất cả tỉnh thành</option>
-                            {tinh.map(t => <option key={t.code} value={t.name.replace(/^Thành phố\s|^Tỉnh\s/, '')}>{t.name}</option>)}
-                        </Form.Select>
-                    </Col>
-                    <Col md={2}>
-                        <Form.Label className="small fw-bold">Quận/Huyện</Form.Label>
-                        <Form.Select size="sm" value={selectedHuyen} onChange={(e) => setSelectedHuyen(e.target.value)}>
-                            <option value="">Tất cả huyện</option>
-                            {huyen.map(h => <option key={h.code} value={h.name}>{h.name}</option>)}
-                        </Form.Select>
-                    </Col>
-                    <Col md={3}>
-                        <Form.Label className="small fw-bold">Môn học</Form.Label>
-                        <Form.Control size="sm" placeholder="Tìm tên môn học..." value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)} />
-                    </Col>
-                    <Col md={3}>
-                        <Form.Label className="small fw-bold">Hình thức</Form.Label>
-                        <Form.Select size="sm" value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)}>
-                            <option value="">Tất cả hình thức</option>
-                            {methods.map(m => <option key={m} value={m}>{m === 'online' ? 'Trực tuyến' : m === 'offline' ? 'Tại nhà' : 'Tất cả'}</option>)}
-                        </Form.Select>
-                    </Col>
-                    <Col md={2} className="d-flex align-items-end">
-                        <Button variant="primary" className="w-100 fw-bold" onClick={handleSearch}>
-                            <i className="bi bi-search me-2"></i>Tìm kiếm
-                        </Button>
-                    </Col>
-                </Row>
-            </div> */} 
 
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="fw-bold">DANH SÁCH GIA SƯ</h5>

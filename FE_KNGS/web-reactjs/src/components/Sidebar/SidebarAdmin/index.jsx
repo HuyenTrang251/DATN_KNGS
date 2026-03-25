@@ -14,7 +14,7 @@ function SidebarAdmin({ isOpen }) {
         {
         icon: "bi bi-person-circle",
         label: "Quản lý học viên",
-        path: "/admin/quan-ly-nguoi-dung",
+        path: "/admin/quan-ly-hoc-vien",
         },
         {
         icon: "bi bi-person-vcard",
@@ -24,7 +24,7 @@ function SidebarAdmin({ isOpen }) {
         {
         icon: "bi bi-person-square",
         label: "Quản lý nhân viên",
-        path: "/admin/quan-ly-hoc-vien",
+        path: "/admin/quan-ly-nhan-vien",
         },
         {
         icon: "bi bi-card-heading",
@@ -38,8 +38,8 @@ function SidebarAdmin({ isOpen }) {
         },
         {
         icon: "bi bi-chat-right-quote-fill",
-        label: "Quản lý lớp đã két nối",
-        path: "/admin/quan-ly-phan-hoi",
+        label: "Quản lý lớp đã kết nối",
+        path: "/admin/quan-ly-lop",
         },
         {
         icon: "bi bi-chat-square-quote-fill",

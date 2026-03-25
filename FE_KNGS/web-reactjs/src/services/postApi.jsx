@@ -1,29 +1,40 @@
 import axiosClient from "../api/axiosClient";
 
-// Hàm lấy danh sách lớp đã duyệt
-export const getApprovedPosts = async () => {
-    const res = await axiosClient.get("/posts/approved");
-    return res.data;
-};
+// --- NHÓM API BÀI ĐĂNG (POSTS) ---
+export const getAllPostsAdmin = () => axiosClient.get("/posts");
+export const getApprovedPosts = () => axiosClient.get("/posts/approved");
+export const getPostById = (id) => axiosClient.get(`/posts/${id}`);
+export const createPost = (data) => axiosClient.post("/posts", data);
+export const updatePost = (id, data) => axiosClient.put(`/posts/${id}`, data);
+export const deletePost = (id) => axiosClient.delete(`/posts/${id}`);
+export const getStudentPosts = () => axiosClient.get("/posts/my-posts");
 
-// Hàm lấy danh sách môn học
-export const getAllSubjects = async () => {
-    const res = await axiosClient.get("/subjects");
-    return res.data;
-};
+// --- NHÓM API DUYỆT & PHÍ (ADMIN) ---
+export const approvePostWithFee = (postId, data) => 
+    axiosClient.put(`/posts/${postId}/status`, data);
 
-// Hàm lấy thông tin user hiện tại
-export const getMe = async (token) => {
-    const res = await axiosClient.get("/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-};
+// --- NHÓM API ỨNG TUYỂN (APPLICATIONS) ---
+export const applyPost = (data) => axiosClient.post("/postApplications", data);
 
-// Hàm gửi đề nghị dạy
-export const applyPost = async (data, token) => {
-    const res = await axiosClient.post("/post-applications", data, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-};
+// Lấy danh sách gia sư ứng tuyển vào bài (Dùng cho học viên)
+export const getApplicationsByPostId = (postId) => 
+    axiosClient.get(`/postApplications/${postId}`);
+
+// Phản hồi gia sư (Đồng ý/Từ chối)
+export const updateApplicationStatus = (appId, data) => 
+    axiosClient.put(`/postApplications/${appId}/status`, data);
+
+// Danh sách lớp đã ứng tuyển (Dùng cho gia sư)
+export const getTutorApplications = () => axiosClient.get("/posts/my-applications");
+
+// --- NHÓM API THANH TOÁN (PAYMENTS) ---
+export const createPayment = (data) => axiosClient.post("/payments", data);
+export const getAllPayments = () => axiosClient.get("/payments");
+export const approvePayment = (id, data) => axiosClient.put(`/payments/${id}`, data);
+
+// --- NHÓM API LỚP HỌC (CLASS SESSIONS) ---
+export const createClassSession = (data) => axiosClient.post("/class-sessions", data);
+
+// --- NHÓM USER & SUBJECT ---
+export const getMe = () => axiosClient.get("/auth/me");
+export const getAllSubjects = () => axiosClient.get("/subjects");

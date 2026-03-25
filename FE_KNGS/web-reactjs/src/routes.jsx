@@ -145,7 +145,9 @@ import SignupPage from "./pages/auth/SignupPage";
 
 // Admin
 import Dashboard from "./pages/admin/Dashboard";
-import UserManagement from "./pages/admin/UserManagement";
+import StudentManagement from "./pages/admin/StudentManagement";
+import TutorManagement from "./pages/admin/TutorManagement";
+import PostManagement from "./pages/admin/PostManagement";
 
 // Tutor
 import ManageApplications from "./pages/tutor/ManageApplications";
@@ -158,6 +160,7 @@ import ManageBookingsS from "./pages/student/ManageBookings";
 import ManagePosts from "./pages/student/ManagePosts";
 import ConnectedClasses from "./pages/student/ConnectedClasses";
 import ProfileS from "./pages/student/Profile";
+
 
 // Bạn cần tạo/import thêm các component con ở đây để nó hiển thị nội dung
 // Ví dụ: import ManageUser from "./pages/admin/ManageUser";
@@ -175,10 +178,10 @@ function AppRoutes() {
       {/* 2. ROUTES CHO ADMIN */}
       <Route path="/admin" element={<LayoutAdmin />}>
         {/* Các đường dẫn phải khớp với SidebarAdmin.jsx */}
-        <Route path="quan-ly-nguoi-dung" element={<UserManagement />} />
-        <Route path="quan-ly-gia-su" element={<div>Trang Quản lý gia sư</div>} />
-        <Route path="quan-ly-hoc-vien" element={<div>Trang Quản lý học viên</div>} />
-        <Route path="quan-ly-bai-dang" element={<div>Trang Quản lý bài đăng</div>} />
+        <Route path="quan-ly-hoc-vien" element={<StudentManagement />} />
+        <Route path="quan-ly-gia-su" element={<TutorManagement />} />
+        <Route path="quan-ly-nhan-vien" element={<div>Trang Quản lý học viên</div>} />
+        <Route path="quan-ly-bai-dang" element={<PostManagement />} />
         <Route path="quan-ly-dat-lich" element={<div>Trang Quản lý đặt lịch</div>} />
         <Route path="quan-ly-danh-gia" element={<div>Trang Quản lý đánh giá</div>} />
         <Route path="tong-quan" element={<Dashboard />} />
@@ -190,7 +193,7 @@ function AppRoutes() {
         <Route path="dang-bai" element={<CreatePost />} />
         <Route path="quan-ly-bai-dang" element={<ManagePosts />} />
         <Route path="quan-ly-dat-lich" element={<ManageBookingsS />} />
-        <Route path="quan-ly-lop-da-ket-noi" element={<ConnectedClasses />} />
+        <Route path="quan-ly-lop" element={<ConnectedClasses />} />
         <Route path="thong-tin-ca-nhan" element={<ProfileS />} />
       </Route>
 

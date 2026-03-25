@@ -7,9 +7,11 @@ const { uploadAvatar } = require('../middleware/multerConfig');
 router.get('/', Controller.getAll);
 router.get('/:id', Controller.getById);
 // router.post('/', Controller.create); // Đăng ký
-router.post('/add-employee', authentic(['admin']), Controller.addEmployee); // thêm nhân viên
+router.post('/add-employee', authentic([1]), Controller.addEmployee); // thêm nhân viên
+// Admin cập nhật trạng thái user 
+router.put('/status/:id', authentic([1]), Controller.updateStatus);
 router.put('/:id', authentic(), Controller.updateProfile); // Sửa profile (cần login)
-router.delete('/:id', authentic(['admin']), Controller.delete); // Chỉ admin mới được xóa
+router.delete('/:id', authentic([1]), Controller.delete); // Chỉ admin mới được xóa
 
 // Route riêng cho đổi mật khẩu
 router.post('/change-password', authentic(), Controller.changePassword);

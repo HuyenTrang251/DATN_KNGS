@@ -1,25 +1,34 @@
 const Service = require('../services/students.service');
-const { validate } = require('../validations/students.validation');
 
 module.exports = {
+  // Lấy danh sách cho trang quản lý Admin
   getAll: async (req, res) => {
-    try { const data = await Service.findAll(); res.json(data); } catch (e) { res.status(500).send(e.message); }
+    try { 
+      const data = await Service.findAll(); 
+      res.json(data); 
+    } catch (e) { 
+      res.status(500).json({ message: e.message }); 
+    }
   },
+
+  // Lấy chi tiết để đổ vào form edit
   getById: async (req, res) => {
-    try { const data = await Service.findOne(req.params.id); res.json(data); } catch (e) { res.status(500).send(e.message); }
+    try { 
+      const data = await Service.findOne(req.params.id); 
+      if (!data) return res.status(404).json({ message: "Không tìm thấy học viên" });
+      res.json(data); 
+    } catch (e) { 
+      res.status(500).json({ message: e.message }); 
+    }
   },
-  create: async (req, res) => {
-    try {
-      const { error } = validate(req.body);
-      if (error) return res.status(400).send(error.details[0].message);
-      const result = await Service.add(req.body);
-      res.status(201).json(result);
-    } catch (e) { res.status(500).send(e.message); }
-  },
+
+  // Update profile tích hợp 2 bảng
   update: async (req, res) => {
-    try { await Service.edit(req.params.id, req.body); res.send('Updated successfully'); } catch (e) { res.status(500).send(e.message); }
-  },
-  delete: async (req, res) => {
-    try { await Service.remove(req.params.id); res.send('Deleted successfully'); } catch (e) { res.status(500).send(e.message); }
+    try { 
+      const result = await Service.editProfile(req.params.id, req.body); 
+      res.json(result); 
+    } catch (e) { 
+      res.status(500).json({ message: e.message }); 
+    }
   }
 };

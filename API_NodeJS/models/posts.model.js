@@ -1,7 +1,6 @@
 const db = require('../common/db');
 
 const Model = {
-
   getAll: async () => {
     return await db.query(`
       SELECT 
@@ -17,14 +16,24 @@ const Model = {
       JOIN students st ON p.student_id = st.student_id
       JOIN users u ON st.user_id = u.user_id
       LEFT JOIN offer o ON p.post_id = o.offer_id  -- Kết nối với bảng offer
-      WHERE p.status = 'approved' 
-      AND p.deleted_at IS NULL;
+      WHERE p.deleted_at IS NULL;
     `);
   },
 
-  saveOffer: async (postId, feeReceive, support) => {
-    const sql = `REPLACE INTO offer (offer_id, fee_receive, support) VALUES (?, ?, ?)`;
-    return await db.query(sql, [postId, feeReceive, support]);
+  update: async (id, data) => {
+    const fields = Object.keys(data).map(key => `${key} = ?`).join(', ');
+    const values = [...Object.values(data), id];
+    const sql = `UPDATE posts SET ${fields} WHERE post_id = ?`;
+    return await db.query(sql, values);
+  },
+
+  // Lưu thông tin vào bảng offer (Dùng logic INSERT ... ON DUPLICATE KEY UPDATE)
+  saveOffer: async (postId, fee, support) => {
+    const sql = `
+      INSERT INTO offer (offer_id, fee_receive, support) 
+      VALUES (?, ?, ?) 
+      ON DUPLICATE KEY UPDATE fee_receive = VALUES(fee_receive), support = VALUES(support)`;
+    return await db.query(sql, [postId, fee, support]);
   },
 
   getApproved: async () => {
@@ -46,35 +55,53 @@ const Model = {
   },
 
   getByStudent: async (userId) => {
-    return await db.query(`
+    // Thêm [rows] để lấy đúng mảng dữ liệu bài đăng
+    const rows = await db.query(`
       SELECT 
         p.*,
+        s.name AS subject_name,
         o.fee_receive, 
         o.support,
-        COUNT(pa.application_id) AS total_applications
+        -- Subquery đếm chính xác số lượng ứng tuyển cho từng bài
+        (SELECT COUNT(*) FROM post_applications pa WHERE pa.post_id = p.post_id AND pa.deleted_at IS NULL) AS total_applications
       FROM posts p
-      JOIN post_applications pa ON p.post_id = pa.post_id
+      JOIN subjects s ON p.subject_id = s.subject_id
+      JOIN students st ON p.student_id = st.student_id
       LEFT JOIN offer o ON p.post_id = o.offer_id
-      WHERE p.student_id = (
-        SELECT student_id FROM students WHERE user_id = ?
-      )
-      GROUP BY p.post_id
+      WHERE st.user_id = ? AND p.deleted_at IS NULL
+      ORDER BY p.created_at DESC
     `, [userId]);
+    
+    return rows; // Trả về mảng các bài đăng
+  },
+
+  getContactDetail: async (postId) => {
+    return await db.query(`
+      SELECT u.phone, u.address, u.full_name 
+      FROM posts p
+      JOIN students s ON p.student_id = s.student_id
+      JOIN users u ON s.user_id = u.user_id
+      WHERE p.post_id = ?`, [postId]);
   },
 
   getTutorApplications: async (userId) => {
-    return await db.query(`
+    const sql = `
       SELECT 
-        p.*,
-        o.fee_receive, 
-        o.support,
-        pa.status AS apply_status
+        p.*, sub.name AS subject_name, o.fee_receive, o.support,
+        pa.status AS apply_status, pa.tutor_id,
+        u.phone, u.address,
+        pay.status AS payment_status, pay.transaction_code -- Lấy thêm trạng thái tiền
       FROM post_applications pa
       JOIN tutors t ON pa.tutor_id = t.tutor_id
-      JOIN posts p ON pa.post_id = p.post_id
+      JOIN posts p ON p.post_id = pa.post_id
+      JOIN subjects sub ON p.subject_id = sub.subject_id
+      JOIN students s ON p.student_id = s.student_id
+      JOIN users u ON s.user_id = u.user_id
       LEFT JOIN offer o ON p.post_id = o.offer_id
-      WHERE t.user_id = ?
-    `, [userId]);
+      LEFT JOIN payments pay ON pay.post_id = p.post_id AND pay.tutor_id = t.tutor_id -- Join lấy trạng thái thanh toán
+      WHERE t.user_id = ? AND pa.deleted_at IS NULL
+    `;
+    return await db.query(sql, [userId]);
   },
 
   getById: async (id) => {
@@ -87,15 +114,20 @@ const Model = {
     return rows[0];
   },
 
-  create: async (data) => {
-    return await db.query('INSERT INTO posts SET ?', data);
+  getStudentIdByUserId: async (userId) => {
+    const sql = "SELECT student_id FROM students WHERE user_id = ? AND deleted_at IS NULL";
+    const [rows] = await db.query(sql, [userId]); 
+    // Console log ở đây để kiểm tra trên màn hình Terminal của Node.js
+    console.log("Dữ liệu từ DB trả về cho User ID " + userId + ":", rows);
+    return rows; // Trả về student_id: ...
   },
 
-  update: async (id, data) => {
-    return await db.query(
-      'UPDATE posts SET ? WHERE post_id = ?',
-      [data, id]
-    );
+  create: async (data) => {
+    const fields = Object.keys(data).join(', ');
+    const placeholders = Object.keys(data).map(() => '?').join(', ');
+    const values = Object.values(data);
+    const sql = `INSERT INTO posts (${fields}) VALUES (${placeholders})`;
+    return await db.query(sql, values);
   },
 
   delete: async (id) => {

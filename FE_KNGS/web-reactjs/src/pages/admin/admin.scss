@@ -1,0 +1,70 @@
+// Màu chủ đạo bạn yêu cầu
+$admin-main-color: #0c024c;
+$model-detal-fontsize: 1.05rem;
+.admin-management-wrapper {
+  padding: 20px;
+  margin-top: 20px;
+
+  .page-title {
+    font-weight: 700;
+    color: $admin-main-color;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+    // border-left: 5px solid $admin-main-color;
+    padding-left: 5px;
+  }
+
+  // Style cho bảng dùng chung
+  .custom-table {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    thead {
+      background-color: $admin-main-color !important;
+      height: 30px;
+      
+      th {
+        color: #ffffff !important;
+        box-shadow: none !important;
+        font-weight: 600;
+        padding: 15px;
+        vertical-align: middle;
+        background-color: #0c024c !important; 
+        border-color: #908d9d !important; // Làm mờ đường kẻ giữa các th
+        text-align: center;
+      }
+    }
+
+    tbody td {
+      vertical-align: middle;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    // Định dạng ảnh tròn trong bảng
+    .table-avatar {
+      width: 45px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 1px solid #ddd;
+    }
+  }
+
+  // Tiêu đề các mục trong Modal chi tiết
+  .detail-section-title {
+    font-weight: 700;
+    color: $admin-main-color;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+
+    i {
+      margin-right: 10px;
+    }
+  }
+}

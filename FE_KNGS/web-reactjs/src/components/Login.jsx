@@ -23,6 +23,65 @@ function Login() {
     setPassword(event.target.value);
   };
 
+  // const handleLogin = async (event) => {
+  //   event.preventDefault();
+
+  //   if (!email || !password) {
+  //     alert("Vui lòng nhập email và mật khẩu");
+  //     return;
+  //   }
+
+  //   try {
+
+  //     setLoading(true);
+
+  //     const res = await loginAPI({
+  //       email: email,
+  //       password: password
+  //     });
+
+  //     const data = res.data;
+
+  //     // lưu token
+  //     Cookies.set("token", data.token, {
+  //       expires: 1,
+  //       path: "/"
+  //     });
+
+  //     // lưu user
+  //     login(data.user);
+
+  //     // localStorage.setItem("user", JSON.stringify(data.user));
+
+  //     const role = data.user.role_id;
+      
+  //     // redirect theo role
+  //     if (role === 1) {
+  //       navigate("/admin");
+  //     }
+  //     else if (role === 2) {
+  //       navigate("/tutor");
+  //     }
+  //     else if (role === 3) {
+  //       navigate("/student");
+  //     }
+  //     else {
+  //       alert("Không có quyền truy cập");
+  //     }
+
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert(
+  //       error.response?.data?.message ||
+  //       "Đăng nhập thất bại"
+  //     );
+  //   } finally {
+
+  //     setLoading(false);
+
+  //   }
+  // };
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -32,53 +91,46 @@ function Login() {
     }
 
     try {
-
       setLoading(true);
 
+      // Gọi API
       const res = await loginAPI({
         email: email,
         password: password
       });
 
-      const data = res.data;
+      // VÌ ĐÃ CÓ INTERCEPTOR, 'res' CHÍNH LÀ DỮ LIỆU CẦN THIẾT
+      // Bạn có thể gán thẳng hoặc đổi tên biến cho dễ hiểu
+      const data = res; 
 
-      // lưu token
-      Cookies.set("token", data.token, {
-        expires: 1,
-        path: "/"
-      });
+      if (data && data.token) {
+        // lưu token vào Cookie
+        Cookies.set("token", data.token, {
+          expires: 1,
+          path: "/"
+        });
 
-      // lưu user
-      login(data.user);
+        // lưu user vào Context và LocalStorage
+        login(data.user);
 
-      // localStorage.setItem("user", JSON.stringify(data.user));
+        const role = data.user.role_id;
+        
+        // redirect theo role
+        if (role === 1) navigate("/admin");
+        else if (role === 2) navigate("/tutor");
+        else if (role === 3) navigate("/student");
+        else alert("Không có quyền truy cập");
 
-      const role = data.user.role_id;
-      
-      // redirect theo role
-      if (role === 1) {
-        navigate("/admin");
-      }
-      else if (role === 2) {
-        navigate("/tutor");
-      }
-      else if (role === 3) {
-        navigate("/student");
-      }
-      else {
-        alert("Không có quyền truy cập");
+      } else {
+        alert("Phản hồi từ server không hợp lệ");
       }
 
     } catch (error) {
       console.error(error);
-      alert(
-        error.response?.data?.message ||
-        "Đăng nhập thất bại"
-      );
+      // Xử lý lỗi cũng cần gọn hơn vì interceptor có thể đã xử lý một phần
+      alert(error.response?.data?.message || "Đăng nhập thất bại");
     } finally {
-
       setLoading(false);
-
     }
   };
 

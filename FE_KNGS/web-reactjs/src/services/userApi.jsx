@@ -7,3 +7,7 @@ export const getMe = () => {
 export const changePassword = (data) => {
   return axiosClient.put("/users/change-password", data);
 };
+
+export const updateUserStatus = (id, status) => {
+  return axiosClient.put(`/users/status/${id}`, { status });
+};
