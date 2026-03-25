@@ -242,13 +242,13 @@ const ManagePosts = () => {
                                             <div className="small text-dark"><b>Kinh nghiệm:</b> {app.experience}</div>
                                             <div className="mt-1">
                                                 Trạng thái: 
-                                                <Badge bg={app.status === 'pending' ? 'warning' : app.status === 'agreed' ? 'success' : 'danger'} className="ms-2">
-                                                    {app.status === 'pending' ? 'Đang chờ' : app.status === 'agreed' ? 'Đã đồng ý' : 'Đã từ chối'}
+                                                <Badge bg={app.apply_status === 'pending' ? 'warning' : app.apply_status === 'agreed' ? 'success' : 'danger'} className="ms-2">
+                                                    {app.apply_status === 'pending' ? 'Đang chờ' : app.apply_status === 'agreed' ? 'Đã đồng ý' : 'Đã từ chối'}
                                                 </Badge>
                                             </div>
                                         </Col>
                                         <Col xs={4} className="text-end">
-                                            {app.status === 'pending' ? (
+                                            {app.apply_status === 'pending' ? (
                                                 <div className="d-flex flex-column gap-2">
                                                     <Button variant="success" size="sm" onClick={() => handleFeedback(app.post_application_id, 'agreed', app.post_id)}>Đồng ý</Button>
                                                     <Button variant="outline-danger" size="sm" onClick={() => handleFeedback(app.post_application_id, 'rejected', app.post_id)}>Từ chối</Button>

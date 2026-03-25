@@ -1,16 +1,14 @@
 const Service = require('../services/posts.service');
-const { validate } = require('../validations/posts.validation');
+const Model = require('../models/posts.model');
 
 module.exports = {
 
   getAll: async (req, res) => {
     try {
-
-      const data = await Service.findAll();
-      res.json(data);
-
+        const data = await Model.getAllAdmin(); 
+        res.json(data);
     } catch (e) {
-      res.status(500).send(e.message);
+        res.status(500).send(e.message);
     }
   },
 

@@ -1,7 +1,7 @@
 const db = require('../common/db');
 
 const Model = {
-  getAll: async () => {
+  getAllAdmin: async () => {
     return await db.query(`
       SELECT 
         p.*, 
@@ -10,16 +10,28 @@ const Model = {
         u.full_name, 
         u.avatar,
         o.fee_receive, 
-        o.support
+        o.support,
+        -- SUBQUERY: Đếm chính xác số lượng gia sư đã nhấn "Nhận lớp" cho bài này
+        (SELECT COUNT(*) 
+         FROM post_applications pa 
+         WHERE pa.post_id = p.post_id 
+         AND pa.deleted_at IS NULL) AS total_applications,
+        -- THÊM LOGIC ĐẾM SỐ GIAO DỊCH ĐANG CHỜ DUYỆT TIỀN
+        (SELECT COUNT(*) 
+         FROM payments pay 
+         WHERE pay.post_id = p.post_id 
+         AND pay.status = 'pending' 
+         AND pay.payment_type = 'receive_job') AS pending_payments
       FROM posts p
       JOIN subjects s ON p.subject_id = s.subject_id
       JOIN students st ON p.student_id = st.student_id
       JOIN users u ON st.user_id = u.user_id
-      LEFT JOIN offer o ON p.post_id = o.offer_id  -- Kết nối với bảng offer
-      WHERE p.deleted_at IS NULL;
+      LEFT JOIN offer o ON p.post_id = o.offer_id
+      WHERE p.deleted_at IS NULL
+      ORDER BY pending_payments DESC, p.created_at DESC;
     `);
   },
-
+  
   update: async (id, data) => {
     const fields = Object.keys(data).map(key => `${key} = ?`).join(', ');
     const values = [...Object.values(data), id];

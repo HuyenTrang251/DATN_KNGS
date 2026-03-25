@@ -4,17 +4,21 @@ const Model = {
   getByPostId: async (postId) => {
     const sql = `
       SELECT 
-        pa.post_application_id, pa.post_id, pa.tutor_id, pa.status, pa.created_at,
-        u.full_name, u.avatar, t.education, t.experience
+        pa.post_application_id, pa.post_id, pa.tutor_id, pa.status as apply_status, pa.created_at,
+        u.full_name, u.avatar, u.phone AS tutor_phone, u.address AS tutor_address,
+        t.education, t.experience,
+        pay.status AS payment_status, pay.id AS payment_id, pay.transaction_code, pay.amount
       FROM post_applications pa
       JOIN tutors t ON pa.tutor_id = t.tutor_id
       JOIN users u ON t.user_id = u.user_id
+      LEFT JOIN payments pay ON pay.post_id = pa.post_id 
+           AND pay.tutor_id = pa.tutor_id 
+           AND pay.payment_type = 'receive_job'
       WHERE pa.post_id = ? AND pa.deleted_at IS NULL
       ORDER BY pa.created_at DESC
     `;
-    // THÊM [rows] để bóc tách dữ liệu
     const rows = await db.query(sql, [postId]);
-    return rows; 
+    return rows;
   },
   
   updateStatus: async (id, status) => {

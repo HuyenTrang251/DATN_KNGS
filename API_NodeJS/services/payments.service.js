@@ -29,6 +29,16 @@ const Service = {
       });
     }
   },
+
+  // Hàm xử lý duyệt
+  approvePayment: async (id, status, adminId) => {
+    // console.log("--- [DEBUG SERVICE] ---");
+    // console.log("Truyền sang Model với thứ tự: id, status, adminId");
+    
+    // Gọi Model: Phải khớp với định dạng hàm ở Model
+    return await Model.updateStatus(id, status, adminId);
+  },
+  
   findAll: async () => await Model.getAll(),
   findOne: async (id) => await Model.getById(id),
   add: async (data) => await Model.create(data),

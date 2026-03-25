@@ -31,8 +31,29 @@ const Model = {
     return rows[0];
   },
 
-  update: async (id, data) => {
-    return await db.query('UPDATE payments SET ? WHERE id = ?', [data, id]);
+  // Hàm cập nhật trạng thái duyệt tiền
+  updateStatus: async (id, status, adminId) => {
+    // console.log("--- [DEBUG MODEL] ---");
+    // console.log("Giá trị nhận được:", { id, status, adminId });
+    const sql = `
+      UPDATE payments 
+      SET status = ?, 
+          approved_by = ?, 
+          approved_at = NOW() 
+      WHERE id = ?
+    `;
+    const params = [status, adminId, id];
+
+    // console.log("SQL Query:", sql.replace(/\s+/g, ' '));
+    // console.log("Params gửi xuống DB:", params);
+
+    // Kiểm tra xem có biến nào bị undefined không
+    params.forEach((p, index) => {
+        if (p === undefined) {
+            console.error(`❌ LỖI: Tham số vị trí ${index} bị UNDEFINED!`);
+        }
+    });
+    return await db.query(sql, params);
   },
 
   delete: async (id) => {
