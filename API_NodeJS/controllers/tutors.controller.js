@@ -216,12 +216,38 @@ module.exports = {
   // 8. Cập nhật CV/Video
   updateMedia: async (req, res) => {
     try {
-      const mediaData = {};
-      if (req.files?.['cv']) mediaData.cv_url = req.files['cv'][0].filename;
-      if (req.files?.['video']) mediaData.intro_video_url = req.files['video'][0].filename;
-      
-      await db.query('UPDATE tutors SET ? WHERE user_id = ?', [mediaData, req.user.id]);
-      res.json({ message: "Tải tài liệu thành công", mediaData });
-    } catch (e) { res.status(500).send(e.message); }
-  }
+        const mediaData = {};
+        const userId = req.user.id; // Đảm bảo lấy đúng id từ middleware authentic
+
+        // Kiểm tra xem Multer có trả về file không
+        if (req.files) {
+            if (req.files['cv']) {
+                mediaData.cv_url = req.files['cv'][0].filename;
+            }
+            if (req.files['video']) {
+                mediaData.intro_video_url = req.files['video'][0].filename;
+            }
+        }
+
+        if (Object.keys(mediaData).length === 0) {
+            return res.status(400).send("Không có file nào được tải lên!");
+        }
+
+        // Cập nhật Database (Sử dụng SQL tường minh để tránh lỗi syntax)
+        const fields = Object.keys(mediaData).map(key => `${key} = ?`).join(', ');
+        const values = [...Object.values(mediaData), userId];
+        const sql = `UPDATE tutors SET ${fields} WHERE user_id = ?`;
+
+        const db = require('../common/db');
+        await db.query(sql, values);
+
+        res.json({ 
+            message: "Tải tài liệu thành công", 
+            data: mediaData 
+        });
+    } catch (e) {
+        console.error("🔥 Lỗi upload CV/Video:", e.message);
+        res.status(500).send("Lỗi hệ thống: " + e.message);
+    }
+  },
 };

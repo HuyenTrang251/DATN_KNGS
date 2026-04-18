@@ -1,5 +1,4 @@
 const Service = require('../services/users.service');
-const { validate } = require('../validations/users.validation');
 
 module.exports = {
     getAll: async (req, res) => {
@@ -138,5 +137,18 @@ module.exports = {
             res.status(500).send(e.message); 
         }
     },
+
+    // API lấy số lượng badge cho Admin
+    getAdminDashboardCounts: async (req, res) => {
+        try {
+            // SỬA TẠI ĐÂY: Gọi qua Service thay vì UserModel
+            const counts = await Service.getBadgeCounts();
+            
+            res.json(counts);
+        } catch (e) {
+            console.error("🔥 Lỗi Controller getAdminDashboardCounts:", e.message);
+            res.status(500).json({ error: e.message });
+        }
+    }
 };
 

@@ -2,87 +2,52 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// --- Cấu hình chung ---
-// Định nghĩa đường dẫn. Sử dụng path.join để tương thích với mọi hệ điều hành.
-const avatarsDir = path.join(__dirname, '../uploads/avatars'); 
-// Lưu CV vào uploads/cvs (Sửa uploadsCV thành uploads/cvs cho đồng bộ)
-const cvsDir = path.join(__dirname, '../uploads/cvs'); 
+// Đường dẫn các thư mục
+const avatarsDir = path.join(__dirname, '../uploads/avatars');
+const cvsDir = path.join(__dirname, '../uploads/cvs');
+const videosDir = path.join(__dirname, '../uploads/videos');
 
-// Đảm bảo các thư mục tồn tại, nếu không thì tạo mới
-if (!fs.existsSync(avatarsDir)) fs.mkdirSync(avatarsDir, { recursive: true });
-if (!fs.existsSync(cvsDir)) fs.mkdirSync(cvsDir, { recursive: true });
-
-
-// --- Định nghĩa các Storage Engine ---
-
-// Storage cho ảnh đại diện (avatar)
-const avatarStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, avatarsDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, 'img-' + Date.now() + path.extname(file.originalname));
-  },
+// Tạo thư mục nếu chưa có
+[avatarsDir, cvsDir, videosDir].forEach(dir => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
-// Storage cho file CV
-const cvStorage = multer.diskStorage({
+// --- Dùng 1 Storage thông minh cho việc upload nhiều loại file ---
+const dynamicStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, cvsDir);
+    // Tự động chọn thư mục dựa trên tên field gửi từ FE
+    if (file.fieldname === 'avatar') {
+      cb(null, avatarsDir);
+    } else if (file.fieldname === 'cv') {
+      cb(null, cvsDir);
+    } else if (file.fieldname === 'video') {
+      cb(null, videosDir);
+    } else {
+      cb(new Error('Field không hợp lệ'), null);
+    }
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = 'cv-' + Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    
+    // Đặt tiền tố cho file để dễ nhận diện
+    if (file.fieldname === 'avatar') cb(null, `img-${uniqueSuffix}${ext}`);
+    else if (file.fieldname === 'cv') cb(null, `cv-${uniqueSuffix}${ext}`);
+    else if (file.fieldname === 'video') cb(null, `video-${uniqueSuffix}${ext}`);
   }
 });
 
-
-// --- Tạo và Export các Middleware ---
-
-// Middleware để xử lý upload một file ảnh đại diện duy nhất (trường 'img')
-const uploadAvatar = multer({
-  storage: avatarStorage,
-//   limits: { fileSize: 5 * 1024 * 1024 }, // Giới hạn kích thước file 5MB
-//   fileFilter: (req, file, cb) => {
-//     // Chỉ cho phép upload file ảnh
-//     const filetypes = /jpeg|jpg|png|gif/;
-//     const mimetype = filetypes.test(file.mimetype);
-//     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-//     if (mimetype && extname) {
-//       return cb(null, true);
-//     }
-//     cb(new Error('Lỗi: Chỉ cho phép tải lên tệp ảnh!'));
-//   }
-}).single('img');
-
-// Middleware để xử lý upload một file CV duy nhất (trường 'cv')
-const uploadCV = multer({
-  storage: cvStorage,
-//   limits: { fileSize: 10 * 1024 * 1024 }, // Giới hạn kích thước file 10MB
-//   fileFilter: (req, file, cb) => {
-//     // Chỉ cho phép upload file văn bản
-//     const filetypes = /pdf|doc|docx/;
-//     const mimetype = filetypes.test(file.mimetype);
-//     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-//     if (mimetype && extname) {
-//       return cb(null, true);
-//     }
-//     cb(new Error('Lỗi: Chỉ cho phép tải lên tệp PDF, DOC, DOCX!'));
-//   }
-}).single('cv');
-
-
-// Middleware để xử lý nhiều loại file cùng lúc (khi tạo/cập nhật profile tutor)
-const uploadTutorProfileFiles = multer({
+// Middleware xử lý nhiều field cùng lúc
+const uploadTutorMedia = multer({ 
+    storage: dynamicStorage 
 }).fields([
-    { name: 'img', maxCount: 1 }, // Tên field cho ảnh đại diện
-    { name: 'cv', maxCount: 1 }      // Tên field cho CV
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cv', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
 ]);
 
-
-// Export tất cả các middleware đã tạo
 module.exports = {
-    uploadAvatar,
-    uploadCV,
-    uploadTutorMedia: uploadTutorProfileFiles, // Gán tên cũ sang tên mới cho khớp với Route
+    uploadAvatar: multer({ storage: dynamicStorage }).single('avatar'), // Dùng chung storage cho đồng bộ
+    uploadCV: multer({ storage: dynamicStorage }).single('cv'),
+    uploadTutorMedia // Xuất cái này ra để dùng trong tutor.route.js
 };

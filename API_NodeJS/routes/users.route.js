@@ -18,4 +18,5 @@ router.post('/change-password', authentic(), Controller.changePassword);
 // Route này dùng chung cho cả Học viên, Gia sư, Admin (chỉ cần login)
 router.post('/upload-avatar', authentic(), uploadAvatar, Controller.updateAvatar);
 
+router.get('/admin/pending-counts', authentic([1]), Controller.getAdminDashboardCounts);
 module.exports = router;

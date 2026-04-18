@@ -246,12 +246,14 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Badge, Row, Col, ListGroup, Spinner } from 'react-bootstrap';
 import * as postApi from '../../../services/postApi';
+import { useAuth } from "../../../contexts/AuthContext";
 import "../admin.scss"; 
 
 const PostManagement = () => {
     const [posts, setPosts] = useState([]);
     const [filteredPosts, setFilteredPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { refreshAdminCounts } = useAuth(); 
     
     // State Modal Chi tiết bài đăng
     const [showDetail, setShowDetail] = useState(false);
@@ -336,6 +338,7 @@ const PostManagement = () => {
             alert(status === 'approved' ? "Đã duyệt bài đăng!" : "Đã từ chối bài đăng!");
             setShowDetail(false);
             loadPosts();
+            refreshAdminCounts();
         } catch (err) {
             alert("Lỗi: " + (err.response?.data?.message || "Thao tác thất bại"));
         }
@@ -484,7 +487,7 @@ const PostManagement = () => {
                                             selectedPost.tutor_type === 'student' ? 'Sinh viên' : 'Sinh viên, Giáo viên'
                                         } ({
                                             selectedPost.preferred_gender === 'male' ? 'Nam' : 
-                                            selectedPost.preferred_gender === 'female' ? 'Nữ' : 'Không yêu cầu'
+                                            selectedPost.preferred_gender === 'female' ? 'Nữ' : 'Không yêu cầu giới tính'
                                         })</ListGroup.Item>
                                     </ListGroup>
                                 </Col>

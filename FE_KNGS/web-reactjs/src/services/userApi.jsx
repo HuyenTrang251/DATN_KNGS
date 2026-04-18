@@ -11,3 +11,5 @@ export const changePassword = (data) => {
 export const updateUserStatus = (id, status) => {
   return axiosClient.put(`/users/status/${id}`, { status });
 };
+
+export const getAdminCounts = () => axiosClient.get("/users/admin/pending-counts");

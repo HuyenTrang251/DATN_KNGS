@@ -112,8 +112,29 @@ const Service = {
     return await Model.create(finalData);
   },
 
-  edit: async (id, data) => {
-    return await Model.update(id, data);
+  edit: async (id, postData) => {
+    // CHỈ LỌC RA những trường có trong cấu trúc bảng posts
+    const updateData = {
+      subject_id: Number(postData.subject_id),
+      grade: postData.grade,
+      student_quantity: Number(postData.student_quantity),
+      hours_per_session: parseFloat(postData.hours_per_session),
+      sessions_per_week: Number(postData.sessions_per_week),
+      tutor_type: postData.tutor_type,
+      teaching_mode: postData.teaching_mode,
+      tuition_fee_per_session: parseFloat(postData.tuition_fee_per_session),
+      contact_phone: postData.contact_phone,
+      preferred_gender: postData.preferred_gender,
+      address: postData.address,
+      note: postData.note
+    };
+
+    // Loại bỏ các trường undefined để tránh lỗi SQL
+    Object.keys(updateData).forEach(key => 
+      (updateData[key] === undefined || updateData[key] === null) && delete updateData[key]
+    );
+
+    return await Model.update(id, updateData);
   },
 
   remove: async (id) => {

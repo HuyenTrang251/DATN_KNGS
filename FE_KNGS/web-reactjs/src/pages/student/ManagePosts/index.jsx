@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Badge, Row, Col, Card, Modal, ListGroup, Spinner } from 'react-bootstrap';
+import { Button, Badge, Row, Col, Card, Modal, ListGroup, Spinner, Form } from 'react-bootstrap';
 import * as postApi from '../../../services/postApi';
+import { getAllSubjects } from '../../../services/subjectApi';
 
 const ManagePosts = () => {
     const [myPosts, setMyPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [subjects, setSubjects] = useState([]);
 
     // State cho Modal chi tiết bài đăng
     const [showDetail, setShowDetail] = useState(false);
     const [selectedPost, setSelectedPost] = useState(null);
 
-    // --- BỔ SUNG: State cho Modal danh sách gia sư ứng tuyển ---
+    // State cho Modal Sửa bài ---
+    const [showEdit, setShowEdit] = useState(false);
+    const [editFormData, setEditFormData] = useState({});
+
+    // State cho Modal danh sách gia sư ứng tuyển 
     const [showApps, setShowApps] = useState(false);
     const [tutorApps, setTutorApps] = useState([]);
     const [loadingApps, setLoadingApps] = useState(false);
@@ -28,11 +34,42 @@ const ManagePosts = () => {
         }
     };
 
+    const fetchSubjects = async () => {
+        try {
+            const data = await getAllSubjects();
+            setSubjects(data || []);
+        } catch (err) {
+            console.error("Lỗi lấy môn học", err);
+        }
+    };
+
     useEffect(() => {
         fetchPosts();
+        fetchSubjects();
     }, []);
 
-    // --- BỔ SUNG: Hàm lấy danh sách gia sư khi click vào số lượng ---
+    // Logic xử lý mở modal sửa 
+    const handleOpenEdit = (post) => {
+        setEditFormData({
+            ...post,
+            tuition_fee_per_session: Number(post.tuition_fee_per_session) // Ép kiểu số cho input
+        });
+        setShowEdit(true);
+    };
+
+    const handleUpdatePost = async (e) => {
+        e.preventDefault();
+        try {
+            await postApi.updatePost(editFormData.post_id, editFormData);
+            alert("Cập nhật bài đăng thành công!");
+            setShowEdit(false);
+            fetchPosts(); // Load lại danh sách
+        } catch (error) {
+            alert("Cập nhật thất bại: " + (error.response?.data?.message || "Lỗi hệ thống"));
+        }
+    };
+
+    // Hàm lấy danh sách gia sư khi click vào số lượng
     const handleViewApplications = async (postId) => {
         try {
             setLoadingApps(true);
@@ -153,9 +190,14 @@ const ManagePosts = () => {
                                         </Button>
                                         
                                         {p.status === 'pending' && (
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleAction(p.post_id, 'delete')}>
-                                                <i className="bi bi-trash"></i> Xóa
-                                            </Button>
+                                            <>
+                                                <Button variant="outline-primary" size="sm" onClick={() => handleOpenEdit(p)}>
+                                                    <i className="bi bi-pencil-square"></i> Sửa
+                                                </Button>
+                                                <Button variant="outline-danger" size="sm" onClick={() => handleAction(p.post_id, 'delete')}>
+                                                    <i className="bi bi-trash"></i> Xóa
+                                                </Button>
+                                            </>
                                         )}
 
                                         {(p.status === 'approved' || p.status === 'pending') && (
@@ -173,7 +215,7 @@ const ManagePosts = () => {
                 )}
             </Row>
 
-            {/* MODAL CHI TIẾT BÀI ĐĂNG (GIỮ NGUYÊN) */}
+            {/* MODAL CHI TIẾT BÀI ĐĂNG */}
             <Modal show={showDetail} onHide={() => setShowDetail(false)} size="lg" centered>
                 <Modal.Header closeButton className="bg-light">
                     <Modal.Title className="fw-bold fs-5">Chi tiết bài đăng #{selectedPost?.post_id}</Modal.Title>
@@ -216,7 +258,57 @@ const ManagePosts = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* --- BỔ SUNG: MODAL DANH SÁCH GIA SƯ ỨNG TUYỂN --- */}
+            {/* MODAL SỬA BÀI ĐĂNG (CHỈ KHI PENDING) */}   
+            <Modal show={showEdit} onHide={() => setShowEdit(false)} size="lg" centered>
+                <Modal.Header closeButton><Modal.Title className="fw-bold">Chỉnh sửa bài đăng</Modal.Title></Modal.Header>
+                <Modal.Body className="p-4">
+                    <Form onSubmit={handleUpdatePost}>
+                        <Row>
+                            <Col md={6} className="mb-3">
+                                <Form.Label className="small fw-bold">Môn học</Form.Label>
+                                <Form.Select value={editFormData.subject_id} onChange={e => setEditFormData({...editFormData, subject_id: e.target.value})} required>
+                                    {subjects.map(s => <option key={s.subject_id} value={s.subject_id}>{s.name}</option>)}
+                                </Form.Select>
+                            </Col>
+                            <Col md={6} className="mb-3">
+                                <Form.Label className="small fw-bold">Lớp học / Trình độ</Form.Label>
+                                <Form.Control type="text" value={editFormData.grade} onChange={e => setEditFormData({...editFormData, grade: e.target.value})} required />
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={4} className="mb-3">
+                                <Form.Label className="small fw-bold">Học phí / buổi</Form.Label>
+                                <Form.Control type="number" value={editFormData.tuition_fee_per_session} onChange={e => setEditFormData({...editFormData, tuition_fee_per_session: e.target.value})} required />
+                            </Col>
+                            <Col md={4} className="mb-3">
+                                <Form.Label className="small fw-bold">Số buổi / tuần</Form.Label>
+                                <Form.Control type="number" value={editFormData.sessions_per_week} onChange={e => setEditFormData({...editFormData, sessions_per_week: e.target.value})} />
+                            </Col>
+                            <Col md={4} className="mb-3">
+                                <Form.Label className="small fw-bold">Hình thức</Form.Label>
+                                <Form.Select value={editFormData.teaching_mode} onChange={e => setEditFormData({...editFormData, teaching_mode: e.target.value})}>
+                                    <option value="offline">Tại nhà</option>
+                                    <option value="online">Online</option>
+                                </Form.Select>
+                            </Col>
+                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label className="small fw-bold">Địa chỉ chi tiết</Form.Label>
+                            <Form.Control as="textarea" rows={2} value={editFormData.address} onChange={e => setEditFormData({...editFormData, address: e.target.value})} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label className="small fw-bold">Ghi chú</Form.Label>
+                            <Form.Control as="textarea" rows={2} value={editFormData.note} onChange={e => setEditFormData({...editFormData, note: e.target.value})} />
+                        </Form.Group>
+                        <div className="text-end">
+                            <Button variant="secondary" className="me-2" onClick={() => setShowEdit(false)}>Hủy</Button>
+                            <Button variant="primary" type="submit">Lưu thay đổi</Button>
+                        </div>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+
+            {/* MODAL DANH SÁCH GIA SƯ ỨNG TUYỂN */}
             <Modal show={showApps} onHide={() => setShowApps(false)} size="lg" centered>
                 <Modal.Header closeButton className="bg-primary text-white">
                     <Modal.Title className="fw-bold fs-5">Gia sư đang chờ phản hồi</Modal.Title>

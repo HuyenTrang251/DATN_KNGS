@@ -195,7 +195,7 @@ function Sidebar({ isOpen, menuItems }) {
             });
 
             // Sau khi upload thành công, BE trả về tên file mới
-            const newAvatarName = res.data.filename;
+            const newAvatarName = res.filename;
 
             // Cập nhật Context để Header và các trang khác thay đổi theo
             const updatedUser = { ...user, avatar: newAvatarName };

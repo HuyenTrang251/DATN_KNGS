@@ -445,7 +445,7 @@ function ListNewClassPage() {
                 </Row>
             </div>
 
-            {/* DANH SÁCH CARD LỚP HỌC (Giữ nguyên FE) */}
+            {/* DANH SÁCH CARD LỚP HỌC */}
             {posts.map((post) => (
                 <Card key={post.post_id} className="mb-3 p-3 shadow-sm border-0">
                     <Row className="align-items-center">
@@ -472,7 +472,7 @@ function ListNewClassPage() {
                             <p className="mb-2" style={{ fontSize: "0.9rem" }}>{post.note}</p>
                             <div>
                                 <span className="badge bg-success-subtle text-success me-1 border border-success-subtle">{post.teaching_mode}</span>
-                                <span className="badge bg-info-subtle text-info me-1 border border-info-subtle">{post.tutor_type}</span>
+                                <span className="badge bg-info-subtle text-info me-1 border border-info-subtle">{post.tutor_type === 'teacher' ? 'Giáo viên' : post.tutor_type === 'student' ? 'Sinh viên' : 'Giáo viên, Sinh viên'}</span>
                             </div>
                         </Col>
                         <Col md={2} className="text-center">
@@ -497,7 +497,7 @@ function ListNewClassPage() {
                 </Card>
             ))}
 
-            {/* MODAL YÊU CẦU ĐĂNG NHẬP (Giữ nguyên FE) */}
+            {/* MODAL YÊU CẦU ĐĂNG NHẬP */}
             <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title className="fw-bold">Yêu cầu đăng nhập</Modal.Title>

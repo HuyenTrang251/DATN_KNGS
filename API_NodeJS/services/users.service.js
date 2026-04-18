@@ -82,6 +82,10 @@ const UsersService = {
             WHERE u.email = ? AND u.deleted_at IS NULL`;
         const rows = await db.query(sql, [email]);
         return rows[0]; // Trả về user đầu tiên tìm thấy
+    },
+
+    getBadgeCounts: async () => {
+        return await Model.getPendingCounts();
     }
 };
 

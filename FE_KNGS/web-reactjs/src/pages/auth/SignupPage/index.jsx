@@ -106,14 +106,14 @@ function SignupPage() {
 
       // const res = await axios.post(api, body);
 
-      alert(res.data.message);
+      alert(res.message);
 
       navigate("/dang-nhap");
 
     } catch (err) {
 
       setError(
-        err.response?.data?.message || "Đăng ký thất bại"
+        err.response?.message || "Đăng ký thất bại"
       );
 
     }

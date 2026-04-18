@@ -73,7 +73,7 @@ function CreatePost() {
       await postApi.createPost(payload);
       
       alert("Đăng bài thành công! Bài viết đang chờ Admin phê duyệt.");
-      navigate('student/quan-ly-bai-dang'); 
+      navigate('/student/quan-ly-bai-dang'); 
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.response?.data || "Lỗi không xác định";
       alert("Lỗi: " + errorMsg); 

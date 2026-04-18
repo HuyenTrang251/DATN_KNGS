@@ -118,12 +118,20 @@ module.exports = {
 
   update: async (req, res) => {
     try {
+      const postId = req.params.id;
+      const postData = req.body;
 
-      await Service.edit(req.params.id, req.body);
-      res.send('Updated successfully');
-
+      console.log(`>>> Đang cập nhật bài đăng ID: ${postId}`);
+      
+      await Service.edit(postId, postData);
+      
+      res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (e) {
-      res.status(500).send(e.message);
+      console.error("🔥 Lỗi Update Post:", e.message);
+      res.status(500).json({ 
+        message: "Lỗi hệ thống khi cập nhật", 
+        error: e.message 
+      });
     }
   },
 

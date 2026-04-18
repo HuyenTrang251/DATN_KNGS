@@ -3,19 +3,20 @@ const router = express.Router();
 const Controller = require('../controllers/bookings.controller');
 const { authentic } = require('../middleware/authentic');
 
-// Student (role_id = 3)
-router.post('/invite', authentic([3]), Controller.createBooking);
-router.put('/update/:id', authentic([3]), Controller.updateBooking);
-router.delete('/:id', authentic([3]), Controller.deleteBooking);
-router.put('/cancel/:id', authentic([3]), Controller.cancelBooking);
-router.get('/my-bookings', authentic([3]), (req, res) => {
-    Model.getByStudent(req.user.student_id).then(d => res.json(d));
-});
+// ADMIN
+router.get('/', authentic([1]), Controller.adminGetAll);
+router.get('/detail/:id', authentic([1]), Controller.getDetailById); // Khớp hàm mới thêm
+router.put('/update-status/:id', authentic([1]), Controller.adminUpdateStatus);
 
-// Tutor (role_id = 2)
-router.get('/invitations', authentic([2]), (req, res) => {
-    Model.getByTutor(req.user.tutor_id).then(d => res.json(d));
-});
-router.put('/respond/:id', authentic([2]), Controller.respondBooking);
+// STUDENT
+router.post('/invite', authentic([3]), Controller.createBooking);
+router.get('/my-bookings', authentic([3]), Controller.studentGetMyBookings);
+router.put('/cancel/:id', authentic([3]), Controller.studentCancel); // Khớp hàm đã mở khóa
+router.delete('/:id', authentic([3]), Controller.deleteBooking);
+
+// TUTOR
+router.get('/invitations', authentic([2]), Controller.tutorGetInvitations);
+router.put('/respond/:id', authentic([2]), Controller.tutorRespond);
+router.post('/confirm-connection/:id', authentic([2]), Controller.tutorConfirmConnect); // Khớp hàm đã mở khóa
 
 module.exports = router;

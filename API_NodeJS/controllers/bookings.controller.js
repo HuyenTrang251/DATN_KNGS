@@ -1,103 +1,261 @@
 const Model = require('../models/bookings.model');
 
 module.exports = {
-  createBooking: async (req, res) => {
+  // --- NHÓM ADMIN ---
+  adminGetAll: async (req, res) => {
     try {
-      // Lấy ID người dùng từ token (đã qua middleware)
-      const userId = req.user.id; 
+      const data = await Model.getAllForAdmin();
+      res.json(data);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  },
+
+  getDetailById: async (req, res) => {
+    try {
+      const data = await Model.getDetailById(req.params.id);
+      if (!data) return res.status(404).json({ message: "Không tìm thấy" });
       
-      // Lấy dữ liệu từ body của yêu cầu
-      const { 
-        tutor_id, 
-        tutor_subject_level_id, 
-        hours_per_session, 
-        sessions_per_week, 
-        teaching_mode 
-      } = req.body;
-
-      // --- BƯỚC 1: LẤY STUDENT_ID ---
-      // Đặt tên biến thống nhất là 'students'
-      const students = await Model.getStudentIdByUserId(userId);
-
-      // --- BƯỚC 2: KIỂM TRA DỮ LIỆU ---
-      // Kiểm tra xem 'students' có tồn tại không và xử lý cả dạng mảng lẫn object
-      let studentId = null;
-      if (Array.isArray(students) && students.length > 0) {
-        studentId = students[0].student_id;
-      } else if (students && students.student_id) {
-        studentId = students.student_id;
-      }
-
-      // Nếu không tìm thấy studentId, báo lỗi 404
-      if (!studentId) {
-        return res.status(404).json({ 
-          error: "Không tìm thấy hồ sơ Học viên. Vui lòng cập nhật thông tin học viên trước khi mời dạy!" 
-        });
-      }
-
-      // --- BƯỚC 3: CHUẨN BỊ DỮ LIỆU ĐỂ LƯU ---
-      const data = {
-        student_id: studentId,
-        tutor_id: Number(tutor_id),
-        tutor_subject_level_id: Number(tutor_subject_level_id),
-        hours_per_session: Number(hours_per_session) || 2, // Mặc định 2 giờ nếu thiếu
-        sessions_per_week: Number(sessions_per_week) || 2, // Mặc định 2 buổi nếu thiếu
-        teaching_mode: teaching_mode || 'offline',
-        status: 'pending'
-      };
-
-      // --- BƯỚC 4: LƯU VÀO DATABASE ---
-      await Model.create(data);
-
-      return res.status(201).json({ message: "Đã gửi lời mời dạy thành công!" });
-
-    } catch (e) {
-      // In lỗi ra terminal của Backend để dev kiểm tra
-      console.error("🔥 Lỗi chi tiết tại Controller:", e);
-      
-      // Trả về lỗi cho Frontend hiện alert
-      return res.status(500).json({ 
-        error: "Gửi yêu cầu thất bại: " + (e.sqlMessage || e.message) 
+      // Console log ở Backend để kiểm tra xem có trường has_pending_payment chưa
+      console.log("✅ Dữ liệu chi tiết gửi về FE:", {
+        id: data.booking_id,
+        has_payment: data.has_pending_payment,
+        payment_id: data.payment_id
       });
+      
+      res.json(data);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
     }
   },
 
-  updateBooking: async (req, res) => {
+  adminUpdateStatus: async (req, res) => {
     try {
-      const booking = await Model.getById(req.params.id);
-      if (!booking || booking.status !== 'pending') return res.status(403).send("Không thể sửa yêu cầu đã được xử lý");
-      await Model.update(req.params.id, req.body);
-      res.json({ message: "Cập nhật thành công" });
-    } catch (e) { res.status(500).send(e.message); }
+      const { status, cancel_reason } = req.body;
+      // Gọi hàm updateStatus tường minh trong Model để tránh lỗi SQL
+      await Model.updateStatus(req.params.id, status, req.user.id, cancel_reason);
+      res.json({ message: "Cập nhật trạng thái thành công" });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  },
+
+  // --- NHÓM HỌC VIÊN ---
+  studentGetMyBookings: async (req, res) => {
+    console.log("--- [DEBUG CONTROLLER STUDENT] User từ Token:", req.user);
+    try {
+      // 1. Lấy ID từ token (Trong login bạn lưu là 'id')
+      const userId = req.user.id; 
+
+      // 2. Tìm student_id
+      const studentRes = await Model.getStudentIdByUserId(userId);
+      
+      // Kiểm tra mảng hoặc object để lấy student_id
+      let studentId = null;
+      if (Array.isArray(studentRes) && studentRes.length > 0) {
+        studentId = studentRes[0].student_id;
+      } else if (studentRes && studentRes.student_id) {
+        studentId = studentRes.student_id;
+      }
+
+      console.log("--- [DEBUG CONTROLLER STUDENT] studentId tìm thấy:", studentId);
+
+      if (!studentId) {
+        return res.status(404).json({ message: "Không tìm thấy hồ sơ học viên" });
+      }
+
+      // 3. Lấy dữ liệu đặt lịch
+      const data = await Model.getByStudent(studentId);
+      res.json(data);
+
+    } catch (e) {
+      console.error("🔥 LỖI TẠI CONTROLLER HỌC VIÊN:", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  },
+
+  createBooking: async (req, res) => {
+    try {
+      const studentRes = await Model.getStudentIdByUserId(req.user.id);
+      if (!studentRes || studentRes.length === 0) return res.status(403).send("Bạn cần có hồ sơ Học viên để thực hiện chức năng này");
+
+      const data = {
+        ...req.body,
+        student_id: studentRes[0].student_id,
+        status: 'pending'
+      };
+      await Model.create(data);
+      res.status(201).json({ message: "Gửi lời mời dạy thành công!" });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  },
+
+  studentCancel: async (req, res) => {
+    try {
+      const booking = await Model.getDetailById(req.params.id);
+      if (!booking) return res.status(404).send("Không tìm thấy yêu cầu");
+
+      if (booking.status === 'pending' || booking.status === 'approved') {
+        // Cập nhật thông qua Model (Không dùng db.query trực tiếp ở Controller)
+        await Model.update(req.params.id, { status: 'cancelled' });
+        return res.json({ message: "Đã hủy yêu cầu thành công" });
+      }
+      res.status(400).json({ error: "Không thể hủy yêu cầu ở trạng thái hiện tại" });
+    } catch (e) { res.status(500).json({ error: e.message }); }
   },
 
   deleteBooking: async (req, res) => {
     try {
-      const booking = await Model.getById(req.params.id);
-      if (!booking || booking.status !== 'pending') return res.status(403).send("Không thể xóa yêu cầu đã được xử lý");
+      const booking = await Model.getDetailById(req.params.id);
+      if (!booking || booking.status !== 'pending') return res.status(403).send("Chỉ có thể xóa yêu cầu đang chờ duyệt");
       await Model.delete(req.params.id);
-      res.json({ message: "Đã xóa yêu cầu" });
+      res.json({ message: "Đã xóa yêu cầu thành công" });
     } catch (e) { res.status(500).send(e.message); }
   },
 
-  cancelBooking: async (req, res) => {
+  // --- NHÓM GIA SƯ ---
+  tutorGetInvitations: async (req, res) => {
+    console.log("--- [DEBUG CONTROLLER] Request nhận được. User từ Token:", req.user);
     try {
-      const booking = await Model.getById(req.params.id);
-      if (booking.status === 'approved') {
-        await Model.update(req.params.id, { status: 'cancelled' });
-        return res.json({ message: "Học viên đã hủy yêu cầu mời dạy" });
+      // 1. Lấy ID người dùng từ Token (id: 29)
+      const userId = req.user.id; 
+      if (!userId) throw new Error("Token không hợp lệ hoặc thiếu ID người dùng");
+
+      // 2. Tìm tutor_id
+      const tutorRes = await Model.getTutorIdByUserId(userId);
+      console.log("--- [DEBUG CONTROLLER] Kết quả từ Model.getTutorIdByUserId:", tutorRes);
+
+      // Xử lý lấy ID linh hoạt
+      let tutorId = null;
+      if (Array.isArray(tutorRes) && tutorRes.length > 0) {
+        tutorId = tutorRes[0].tutor_id;
+      } else if (tutorRes && tutorRes.tutor_id) {
+        tutorId = tutorRes.tutor_id;
       }
-      res.status(400).send("Trạng thái hiện tại không được phép hủy");
-    } catch (e) { res.status(500).send(e.message); }
+
+      console.log("--- [DEBUG CONTROLLER] tutorId cuối cùng dùng để query:", tutorId);
+
+      if (!tutorId) {
+        return res.status(404).json({ message: "Không tìm thấy hồ sơ gia sư gắn với tài khoản này" });
+      }
+
+      // 3. Lấy dữ liệu
+      const data = await Model.getByTutor(tutorId);
+      
+      // Xử lý bảo mật SĐT (giống logic bạn muốn)
+      const formattedData = data.map(item => ({
+        ...item,
+        student_phone: item.payment_status === 'success' ? item.student_phone_raw : 'Ẩn (Chờ thanh toán)'
+      }));
+
+      res.json(formattedData);
+
+    } catch (e) {
+      console.error("🔥 LỖI TẠI CONTROLLER GIA SƯ:", e.message);
+      res.status(500).json({ error: e.message });
+    }
   },
 
-  respondBooking: async (req, res) => {
+  tutorRespond: async (req, res) => {
     try {
-      const { status } = req.body; // 'success' (đồng ý) hoặc 'rejected' (từ chối)
-      const booking = await Model.getById(req.params.id);
-      if (booking.status !== 'approved') return res.status(400).send("Yêu cầu chưa được duyệt bởi Admin");
-      await Model.update(req.params.id, { status });
-      res.json({ message: "Đã phản hồi lời mời dạy" });
-    } catch (e) { res.status(500).send(e.message); }
+      const { id } = req.params;
+      const { status } = req.body; // FE gửi lên 'agreed' hoặc 'rejected'
+
+      // 1. Kiểm tra đầu vào
+      if (!status) {
+        return res.status(400).json({ error: "Thiếu trạng thái phản hồi" });
+      }
+
+      // 2. Logic Mapping: Chuyển 'agreed' của FE thành 'connecting' của DB
+      // Giải thích: Bảng bookings của bạn dùng ENUM 'connecting' để chỉ trạng thái gia sư đồng ý và chờ nộp phí/duyệt phí.
+      let dbStatus = status;
+      if (status === 'agreed') {
+        dbStatus = 'connecting';
+      }
+
+      // 3. Kiểm tra tính hợp lệ của giá trị ENUM trước khi xuống Database
+      const validStatuses = ['rejected', 'connecting'];
+      if (!validStatuses.includes(dbStatus)) {
+        return res.status(400).json({ error: "Trạng thái phản hồi không hợp lệ" });
+      }
+
+      // 4. Kiểm tra sự tồn tại của yêu cầu đặt lịch
+      const booking = await Model.getDetailById(id);
+      if (!booking) {
+        return res.status(404).json({ error: "Không tìm thấy yêu cầu đặt lịch này" });
+      }
+
+      // 5. Kiểm tra logic nghiệp vụ: 
+      // Gia sư chỉ được phản hồi khi bài đăng đang ở trạng thái 'approved' (Admin đã duyệt bài)
+      if (booking.status !== 'approved') {
+        return res.status(400).json({ error: "Yêu cầu này đã được xử lý hoặc không còn hiệu lực" });
+      }
+
+      // 6. Cập nhật trạng thái vào Database thông qua Model
+      await Model.update(id, { status: dbStatus });
+
+      // 7. Trả về thông báo thành công tùy theo hành động
+      const successMessage = dbStatus === 'connecting' 
+        ? "Bạn đã đồng ý nhận lớp. Vui lòng tiến hành thanh toán phí để xem số điện thoại học viên."
+        : "Bạn đã từ chối lời mời dạy này.";
+
+      res.json({ message: successMessage, status: dbStatus });
+
+    } catch (e) {
+      console.error("🔥 Lỗi nghiêm trọng tại tutorRespond Controller:", e.message);
+      res.status(500).json({ error: "Lỗi hệ thống: " + e.message });
+    }
+  },
+
+  tutorConfirmConnect: async (req, res) => {
+    try {
+      const bookingId = req.params.id;
+      const { action } = req.body; // Lấy 'success' hoặc 'cancel' gửi từ Frontend
+
+      console.log(`>>> Gia sư xác nhận Booking #${bookingId} với hành động: ${action}`);
+
+      // 1. Kiểm tra yêu cầu đặt lịch có tồn tại không
+      const booking = await Model.getDetailById(bookingId);
+      if (!booking) return res.status(404).send("Yêu cầu không tồn tại");
+
+      // ================== TRƯỜNG HỢP 1: LIÊN HỆ THÀNH CÔNG ==================
+      if (action === 'success') {
+        
+        // A. Cập nhật trạng thái booking thành công
+        await Model.update(bookingId, { 
+          status: 'success', 
+          connected_at: new Date() 
+        });
+        
+        // B. Tạo lớp học mới vào bảng class_sessions
+        await Model.createClassSession({
+          student_id: booking.student_id,
+          tutor_id: booking.tutor_id,
+          booking_id: booking.booking_id,
+          status: 'ongoing' // Lớp học đang diễn ra
+        });
+
+        // C. Cộng 10 điểm uy tín cho gia sư
+        await Model.addPoints(booking.tutor_id, 10, `Kết nối thành công lịch hẹn #${booking.booking_id}`);
+
+        return res.json({ message: "Xác nhận kết nối thành công! Lớp học đã được tạo." });
+      } 
+      
+      // ================== TRƯỜNG HỢP 2: LIÊN HỆ THẤT BẠI ==================
+      else if (action === 'cancel') {
+        
+        // Cập nhật trạng thái hủy và lưu lý do mặc định
+        await Model.update(bookingId, { 
+          status: 'cancelled', 
+          cancel_reason: "Gia sư không liên hệ được học viên" 
+        });
+
+        return res.json({ message: "Đã ghi nhận liên hệ thất bại. Yêu cầu đã được hủy." });
+      } 
+      
+      // Trường hợp Frontend gửi lên action lạ
+      else {
+        return res.status(400).json({ error: "Hành động không hợp lệ" });
+      }
+
+    } catch (e) { 
+        console.error("🔥 Lỗi tại tutorConfirmConnect:", e.message);
+        res.status(500).json({ error: e.message }); 
+    }
   }
 };

@@ -128,7 +128,7 @@ function ListTutorPage() {
         }
         setSelectedTutor(tutor);
         setBookingForm({
-            tutor_subject_level_id: tutor.subject_details?.[0]?.tutor_subject_level_id || "",
+            tutor_subject_level_id: tutor.subject_details?.[0]?.id || "",
             hours_per_session: 2,
             sessions_per_week: 2,
             teaching_mode: "offline"
@@ -139,6 +139,11 @@ function ListTutorPage() {
 
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
+        // Kiểm tra nếu ID môn học chưa được chọn hoặc bị lỗi
+        if (!bookingForm.tutor_subject_level_id) {
+            alert("Vui lòng chọn môn học muốn đăng ký dạy!");
+            return;
+        }
         try {
             const payload = {
                 tutor_id: selectedTutor.tutor_id,
@@ -333,7 +338,7 @@ function ListTutorPage() {
                             >
                                 <option value="">-- Chọn môn học --</option>
                                 {selectedTutor?.subject_details?.map(s => (
-                                    <option key={s.tutor_subject_level_id} value={s.tutor_subject_level_id}>
+                                    <option key={s.id} value={s.id}>
                                         {s.subject_name} - {s.level} ({Number(s.tuition).toLocaleString()}đ)
                                     </option>
                                 ))}

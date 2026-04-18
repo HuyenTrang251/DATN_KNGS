@@ -138,7 +138,12 @@ function HeaderAdmin({ toggleSidebar }) {
                 alt="Avatar"
                 onError={(e) => { e.target.src = "/image/avatar.jpg"; }} // Fallback nếu link lỗi
               />
-              <span className="ms-2">{roleName}</span>
+              {/* <span className="ms-2">{roleName}</span> */}
+              <span className="ms-2">
+                {user?.role_id === 1 ? 'Admin' : 
+                user?.role_id === 2 ? 'Gia sư' : 
+                user?.role_id === 3 ? 'Học viên' : ''}
+              </span>
               <i className="bi bi-caret-down-fill dropdown-icon ms-1"></i>
             </button>
 

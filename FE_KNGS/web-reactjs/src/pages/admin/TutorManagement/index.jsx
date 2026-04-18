@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Table, Button, Badge, Modal, Row, Col, Form } from 'react-bootstrap';
 import * as tutorApi from "../../../services/tutorApi";
 import * as userApi from "../../../services/userApi"; 
+import { useAuth } from "../../../contexts/AuthContext";
 import "../admin.scss";
 
 const TutorManagement = () => {
     const [tutors, setTutors] = useState([]);
     const [selectedTutor, setSelectedTutor] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const { refreshAdminCounts } = useAuth(); 
 
     const IMG_URL = "http://localhost:3300/uploads/avatars/";
     const CV_URL = "http://localhost:3300/uploads/cvs/";
@@ -48,6 +50,7 @@ const TutorManagement = () => {
                 await userApi.updateUserStatus(userId, newStatus);
                 alert("Cập nhật trạng thái thành công!");
                 loadTutors(); // Refresh danh sách
+                refreshAdminCounts();
             } catch (error) {
                 alert("Lỗi thao tác: " + (error.response?.data?.message || "Không thể kết nối server"));
             }

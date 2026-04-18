@@ -41,7 +41,7 @@ module.exports = {
 
                 `INSERT INTO users
                 (role_id, full_name, email, phone, password)
-                VALUES (1, ?, ?, ?, ?)`,
+                VALUES (3, ?, ?, ?, ?)`,
                 [
                     data.full_name,
                     data.email,

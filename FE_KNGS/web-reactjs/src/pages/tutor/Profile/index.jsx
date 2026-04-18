@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import './profile.scss';
 import * as tutorApi from '../../../services/tutorApi';
 import { getAllSubjects } from '../../../services/subjectApi';
-import axiosClient from '../../../api/axiosClient'; // Dùng để gọi trực tiếp route user nếu cần
 
 const TutorProfile = () => {
   // --- STATE CHÍNH ---
@@ -28,6 +27,9 @@ const TutorProfile = () => {
   const [allSubjectsList, setAllSubjectsList] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [isInitialBirthdaySet, setIsInitialBirthdaySet] = useState(false);
+  const [isInitialGenderSet, setIsInitialGenderSet] = useState(false);
+
   const AVATAR_BASE = "http://localhost:3300/uploads/avatars/";
 
   // --- 1. LOAD DỮ LIỆU ---
@@ -52,6 +54,9 @@ const TutorProfile = () => {
           avatar: data.avatar || ''
         });
         if (data.avatar) setAvatarPreview(AVATAR_BASE + data.avatar);
+        // Đánh dấu để khóa trường nếu đã có dữ liệu trong DB
+        if (data.date_of_birth) setIsInitialBirthdaySet(true); 
+        if (data.gender) setIsInitialGenderSet(true);
 
         setTutorInfo({
           experience: data.experience || '',
@@ -98,19 +103,31 @@ const TutorProfile = () => {
   // --- 2. LOGIC UPLOAD FILE TỪNG PHẦN ---
   // Upload Media (CV & Video - Tutor Route)
   const uploadMediaFiles = async () => {
-    if (!cvFile && !videoFile) return;
+    if (!cvFile && !videoFile) {
+        alert("Vui lòng chọn file trước!");
+        return;
+    }
+
     const formData = new FormData();
-    if (cvFile) formData.append('cv', cvFile);
+    // Tên này PHẢI khớp với .fields() ở Backend
+    if (cvFile) formData.append('cv', cvFile); 
     if (videoFile) formData.append('video', videoFile);
 
     try {
-      await tutorApi.uploadTutorMedia(formData);
-      alert("Tải tài liệu (CV/Video) thành công!");
-      setCvFile(null);
-      setVideoFile(null);
-      fetchAllData(); // Load lại để cập nhật link video/cv
+        setLoading(true);
+        // Gọi API từ tutorApi.jsx
+        await tutorApi.uploadTutorMedia(formData);
+        
+        alert("Tải lên CV/Video thành công!");
+        setCvFile(null);
+        setVideoFile(null);
+        // Gọi hàm fetch để cập nhật lại giao diện nếu cần
+        if (typeof fetchAllData === 'function') fetchAllData(); 
     } catch (err) {
-      alert("Lỗi upload tài liệu");
+        console.error("Lỗi upload:", err);
+        alert("Lỗi: " + (err.response?.data || "Không thể upload tài liệu"));
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -194,14 +211,20 @@ const TutorProfile = () => {
             </div>
             <div className="form-group col-3">
                 <label>Ngày sinh</label>
-                <input type="date" value={userInfo.date_of_birth} onChange={e => setUserInfo({...userInfo, date_of_birth: e.target.value})} />
+                <input type="date" value={userInfo.date_of_birth} onChange={e => setUserInfo({...userInfo, date_of_birth: e.target.value})}
+                  readOnly={isInitialBirthdaySet} // Khóa nếu đã có dữ liệu gốc
+                  className={isInitialBirthdaySet ? "bg-light" : ""}
+                />
             </div>
           </div>
 
           <div className="row-layout mt-3">
             <div className="form-group col-3">
               <label>Giới tính</label>
-              <select value={userInfo.gender} onChange={e => setUserInfo({...userInfo, gender: e.target.value})}>
+              <select value={userInfo.gender} onChange={e => setUserInfo({...userInfo, gender: e.target.value})}
+                disabled={isInitialGenderSet} // Khóa nếu đã có dữ liệu gốc
+                className={isInitialGenderSet ? "bg-light" : ""}
+              >
                 <option value="male">Nam</option>
                 <option value="female">Nữ</option>
                 <option value="other">Khác</option>

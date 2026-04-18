@@ -148,10 +148,11 @@ import Dashboard from "./pages/admin/Dashboard";
 import StudentManagement from "./pages/admin/StudentManagement";
 import TutorManagement from "./pages/admin/TutorManagement";
 import PostManagement from "./pages/admin/PostManagement";
+import BookingManagement from "./pages/admin/BookingManagement";
 
 // Tutor
 import ManageApplications from "./pages/tutor/ManageApplications";
-import ManageBookings from "./pages/tutor/ManageBookings";
+import ManageBookingsT from "./pages/tutor/ManageBookings";
 import Profile from "./pages/tutor/Profile";
 
 // Student
@@ -160,6 +161,7 @@ import ManageBookingsS from "./pages/student/ManageBookings";
 import ManagePosts from "./pages/student/ManagePosts";
 import ConnectedClasses from "./pages/student/ConnectedClasses";
 import ProfileS from "./pages/student/Profile";
+
 
 
 // Bạn cần tạo/import thêm các component con ở đây để nó hiển thị nội dung
@@ -182,7 +184,7 @@ function AppRoutes() {
         <Route path="quan-ly-gia-su" element={<TutorManagement />} />
         <Route path="quan-ly-nhan-vien" element={<div>Trang Quản lý học viên</div>} />
         <Route path="quan-ly-bai-dang" element={<PostManagement />} />
-        <Route path="quan-ly-dat-lich" element={<div>Trang Quản lý đặt lịch</div>} />
+        <Route path="quan-ly-dat-lich" element={<BookingManagement />} />
         <Route path="quan-ly-danh-gia" element={<div>Trang Quản lý đánh giá</div>} />
         <Route path="tong-quan" element={<Dashboard />} />
       </Route>
@@ -200,7 +202,7 @@ function AppRoutes() {
       {/* 4. ROUTES CHO GIA SƯ (TUTOR) */}
       <Route path="/tutor" element={<LayoutTutor />}>
         {/* Các đường dẫn phải khớp với SidebarTutor.jsx */}
-        <Route path="thong-tin-dat-lich" element={<ManageBookings />} />
+        <Route path="thong-tin-dat-lich" element={<ManageBookingsT />} />
         <Route path="quan-ly-nhan-lop" element={<ManageApplications />} />
         <Route path="quan-ly-lop" element={<div>Quản lý đánh giá (Tutor)</div>} />
         <Route path="thong-tin-ca-nhan" element={<Profile />} />

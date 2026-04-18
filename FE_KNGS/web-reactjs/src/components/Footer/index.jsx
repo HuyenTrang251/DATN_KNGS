@@ -15,8 +15,8 @@ function Footer() {
                                 Uy tín - Chất lượng - Chuyên nghiệp
                                 </p>
                             </div>
-                            <p className="pt-3 fos">Email: htranggiasu@gmail.com</p>
-                            <p className="fos">Điện thoại: 0123 456 789</p>
+                            <p className="pt-3 fos">Email: htrang@gmail.com</p>
+                            <p className="fos">Điện thoại: 0987654321</p>
                             <p className="fos">Địa chỉ: Nguyễn Thiện Thuật - Mỹ Hào - Hưng Yên</p>
                         </div>
 
