@@ -2,8 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Button, Badge, Row, Col, Card, Modal, Spinner, ListGroup } from 'react-bootstrap';
 import * as postApi from '../../../services/postApi';
 import './manageApplications.scss';
+import { useAuth } from '../../../contexts/AuthContext';
+
+const removeAccents = (str) => {
+    if (!str) return "";
+    return str.normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .replace(/[^a-zA-Z0-9 ]/g, ''); 
+};
 
 const ManageApplications = () => {
+    const { user } = useAuth();
     const [apps, setApps] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showQR, setShowQR] = useState(false);
@@ -15,7 +25,10 @@ const ManageApplications = () => {
             setLoading(true);
             const res = await postApi.getTutorApplications();
             const data = res.data ? res.data : res;
-            setApps(Array.isArray(data) ? data : []);
+            const activeApps = Array.isArray(data) 
+                ? data.filter(item => item.status !== 'success' && item.status !== 'cancelled') 
+                : [];
+            setApps(activeApps);
         } catch (error) {
             console.error("Lỗi lấy danh sách ứng tuyển:", error);
         } finally {
@@ -38,6 +51,7 @@ const ManageApplications = () => {
     };
 
     const confirmPaid = async () => {
+        const tutorName = removeAccents(user?.name || '').toUpperCase();
         const transactionCode = `GS${selectedJob.tutor_id}P${selectedJob.post_id}T${Date.now()}`;
         try {
             await postApi.createPayment({
@@ -56,20 +70,24 @@ const ManageApplications = () => {
         }
     };
 
-    const handleConfirmClass = async (item) => {
-        if (!window.confirm("Xác nhận bạn đã liên hệ và bắt đầu dạy lớp này thành công?")) return;
+    const handleFinalizePost = async (item, action) => {
+        const confirmMsg = action === 'success' 
+            ? "Xác nhận kết nối thành công và chốt lớp dạy?" 
+            : "Xác nhận không liên hệ được học viên?";
+            
+        if (!window.confirm(confirmMsg)) return;
+
         try {
-            const payload = {
-                student_id: item.student_id,
-                tutor_id: item.tutor_id,
-                post_id: item.post_id,
-                status: 'ongoing'
-            };
-            await postApi.createClassSession(payload);
-            alert("Chúc mừng! Lớp học đã được thêm vào danh sách lớp đang dạy.");
-            fetchApps();
+            setLoading(true);
+            // Backend đã lo việc: Update Post + Insert Class_Sessions + Cộng điểm
+            await postApi.finalizePost(item.post_id, { action });
+            
+            alert(action === 'success' ? "Chúc mừng! Lớp học đã chính thức bắt đầu." : "Đã ghi nhận thất bại.");
+            fetchApps(); // Tải lại danh sách, lớp này sẽ tự biến mất vì đã filter status !== 'success'
         } catch (error) {
-            alert("Lỗi kết nối lớp: " + (error.response?.data?.message || "Hệ thống bận"));
+            alert("Lỗi: " + (error.response?.data?.message || "Không thể thực hiện thao tác"));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -116,6 +134,7 @@ const ManageApplications = () => {
                                         <div className="small mb-2">
                                             <p className="mb-1">Học phí: <b className="text-success">{Number(item.tuition_fee_per_session).toLocaleString()}đ/buổi</b></p>
                                             <p className="mb-1">Phí nhận lớp: <b className="text-danger">{Number(item.fee_receive).toLocaleString()}đ</b></p>
+                                            <p className="mb-1 text-dark">Học viên: {item.full_name}</p>
                                             <p className="mb-1 text-muted"><i className="bi bi-geo-alt-fill text-danger me-1"></i> {item.address}</p>
                                         </div>
                                         
@@ -150,9 +169,16 @@ const ManageApplications = () => {
                                             )}
 
                                             {isPaidAndApproved && (
-                                                <Button variant="primary" size="sm" className="fw-bold rounded-pill px-3 w-75" onClick={() => handleConfirmClass(item)}>
-                                                    Xác nhận kết nối
-                                                </Button>
+                                                <div className="d-flex flex-column gap-2 mt-4 align-items-end">
+                                                    <Button variant="primary" size="sm" className="fw-bold rounded-pill px-3 w-100" 
+                                                        onClick={() => handleFinalizePost(item, 'success')}>
+                                                        Xác nhận kết nối
+                                                    </Button>
+                                                    <Button variant="outline-danger" size="sm" className="fw-bold rounded-pill px-3 w-100" 
+                                                        onClick={() => handleFinalizePost(item, 'cancel')}>
+                                                        Liên hệ thất bại
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     </Col>

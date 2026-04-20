@@ -50,15 +50,20 @@ const Model = {
 
   // Hàm lấy số lượng các mục đang chờ duyệt cho Badge Sidebar
   getPendingCounts: async () => {
-      const sql = `
-      SELECT 
-        (SELECT COUNT(*) FROM tutors WHERE approval_status = 'pending' AND deleted_at IS NULL) as tutor_count,
-        (SELECT COUNT(*) FROM posts WHERE status = 'pending' AND deleted_at IS NULL) as post_count,
-        (SELECT COUNT(*) FROM bookings WHERE status = 'pending' AND deleted_at IS NULL) as booking_count,
-        (SELECT COUNT(*) FROM payments WHERE status = 'pending' AND deleted_at IS NULL) as payment_count
+    const sql = `
+        SELECT 
+            (SELECT COUNT(*) FROM tutors WHERE approval_status = 'pending' AND deleted_at IS NULL) as tutor_count,
+            (SELECT COUNT(*) FROM posts WHERE status = 'pending' AND deleted_at IS NULL) as post_count,
+            (SELECT COUNT(*) FROM bookings WHERE status = 'pending' AND deleted_at IS NULL) as booking_count,
+            
+            -- Đếm tiền chờ duyệt của BÀI ĐĂNG (Nhận lớp)
+            (SELECT COUNT(*) FROM payments WHERE status = 'pending' AND payment_type = 'receive_job' AND deleted_at IS NULL) as post_payment_count,
+            
+            -- Đếm tiền chờ duyệt của ĐẶT LỊCH
+            (SELECT COUNT(*) FROM payments WHERE status = 'pending' AND payment_type = 'receive_booking' AND deleted_at IS NULL) as booking_payment_count
     `;
-      const rows = await db.query(sql);
-      return rows[0]; 
+    const rows = await db.query(sql);
+    return rows[0]; 
   }
 };
 

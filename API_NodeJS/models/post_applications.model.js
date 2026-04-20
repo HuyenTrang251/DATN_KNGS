@@ -40,7 +40,6 @@ const Model = {
       'SELECT * FROM post_applications WHERE post_id = ? AND tutor_id = ? AND deleted_at IS NULL',
       [postId, tutorId]
     );
-    // SỬA TẠI ĐÂY: Thêm kiểm tra rows có tồn tại không trước khi đọc length
     return rows && rows.length > 0; 
   },
 
@@ -49,6 +48,12 @@ const Model = {
     const sql = 'INSERT INTO post_applications (post_id, tutor_id, status) VALUES (?, ?, ?)';
     const params = [data.post_id, data.tutor_id, data.status || 'pending'];
     return await db.query(sql, params);
+  },
+
+  getAgreedTutor: async (postId) => {
+    const sql = `SELECT tutor_id FROM post_applications WHERE post_id = ? AND status = 'agreed' LIMIT 1`;
+    const rows = await db.query(sql, [postId]);
+    return rows[0]; // Trả về { tutor_id: ... }
   }
 };
 

@@ -144,6 +144,20 @@ module.exports = {
     } catch (e) {
       res.status(500).send(e.message);
     }
-  }
+  },
 
+  finalizePost: async (req, res) => {
+    try {
+      const postId = req.params.id;
+      const { action } = req.body; // 'success' hoặc 'cancel'
+
+      // Chỉ gọi Service xử lý
+      const result = await Service.finalize(postId, action);
+      
+      res.json(result);
+    } catch (e) {
+      console.error("🔥 Lỗi finalizePost:", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  }
 };

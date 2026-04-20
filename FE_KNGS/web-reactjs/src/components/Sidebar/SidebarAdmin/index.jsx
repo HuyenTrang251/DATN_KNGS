@@ -87,12 +87,13 @@ function SidebarAdmin({ isOpen }) {
     
     // State lưu số lượng chờ duyệt
     const [counts, setCounts] = useState({
-        tutor_count: 0,
-        post_count: 0,
-        booking_count: 0,
-        payment_count: 0,
-        review_count: 0
-    });
+    tutor_count: 0,
+    post_count: 0,
+    booking_count: 0,
+    post_payment_count: 0, 
+    booking_payment_count: 0, 
+    review_count: 0
+});
 
     // 1. Gọi API lấy số lượng khi Admin đăng nhập
     const fetchCounts = async () => {
@@ -117,10 +118,24 @@ function SidebarAdmin({ isOpen }) {
 
     // 2. Hàm lấy con số tương ứng với từng Menu
     const getBadgeCount = (label) => {
-        const text = label.toLowerCase();
-        if (text.includes("gia sư")) return adminCounts.tutor_count;
-        if (text.includes("bài đăng")) return adminCounts.post_count;
-        if (text.includes("đặt lịch")) return (Number(adminCounts.booking_count) || 0) + (Number(adminCounts.payment_count) || 0);
+        if (!label || !counts) return 0;
+        const text = label.toLowerCase().trim();
+
+        // 1. Quản lý gia sư
+        if (text.includes("gia sư")) return counts.tutor_count;
+
+        // 2. Quản lý bài đăng: Cộng thêm số đơn tiền nhận lớp đang chờ
+        if (text.includes("bài đăng")) {
+            return (Number(counts.post_count) || 0) + (Number(counts.post_payment_count) || 0);
+        }
+
+        // 3. Quản lý đặt lịch: Cộng thêm số đơn tiền đặt lịch đang chờ
+        if (text.includes("đặt lịch")) {
+            return (Number(counts.booking_count) || 0) + (Number(counts.booking_payment_count) || 0);
+        }
+
+        if (text.includes("đánh giá")) return counts.review_count;
+        
         return 0;
     };
 
@@ -131,7 +146,6 @@ function SidebarAdmin({ isOpen }) {
         { icon: "bi bi-card-heading", label: "Quản lý bài đăng", path: "/admin/quan-ly-bai-dang" },
         { icon: "bi bi-file-earmark-check-fill", label: "Quản lý đặt lịch", path: "/admin/quan-ly-dat-lich" },
         { icon: "bi bi-chat-right-quote-fill", label: "Quản lý lớp đã kết nối", path: "/admin/quan-ly-lop" },
-        { icon: "bi bi-chat-square-quote-fill", label: "Quản lý đánh giá", path: "/admin/quan-ly-danh-gia" },
         { icon: "bi bi-bar-chart-line-fill", label: "Tổng quan hệ thống", path: "/admin/tong-quan" },
     ];
 

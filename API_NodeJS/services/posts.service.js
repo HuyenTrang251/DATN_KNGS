@@ -1,4 +1,7 @@
 const Model = require('../models/posts.model');
+const ClassModel = require('../models/class_sessions.model');
+const PostAppModel = require('../models/post_applications.model');
+
 
 const Service = {
   // Lấy tất cả bài đăng (đã JOIN với bảng offer)
@@ -44,7 +47,6 @@ const Service = {
     });
   },
 
-  // Các hàm cũ của bạn
   findStudentPosts: async (userId) => {
     return await Model.getByStudent(userId);
   },
@@ -113,32 +115,76 @@ const Service = {
   },
 
   edit: async (id, postData) => {
-    // CHỈ LỌC RA những trường có trong cấu trúc bảng posts
-    const updateData = {
-      subject_id: Number(postData.subject_id),
-      grade: postData.grade,
-      student_quantity: Number(postData.student_quantity),
-      hours_per_session: parseFloat(postData.hours_per_session),
-      sessions_per_week: Number(postData.sessions_per_week),
-      tutor_type: postData.tutor_type,
-      teaching_mode: postData.teaching_mode,
-      tuition_fee_per_session: parseFloat(postData.tuition_fee_per_session),
-      contact_phone: postData.contact_phone,
-      preferred_gender: postData.preferred_gender,
-      address: postData.address,
-      note: postData.note
-    };
+    const updateData = {};
 
-    // Loại bỏ các trường undefined để tránh lỗi SQL
-    Object.keys(updateData).forEach(key => 
-      (updateData[key] === undefined || updateData[key] === null) && delete updateData[key]
-    );
+    // Danh sách các trường hợp lệ trong bảng posts
+    const allowedFields = [
+        'subject_id', 'grade', 'student_quantity', 'hours_per_session', 
+        'sessions_per_week', 'tutor_type', 'teaching_mode', 
+        'tuition_fee_per_session', 'contact_phone', 'preferred_gender', 
+        'address', 'note', 'status', 'cancel_reason'
+    ];
+
+    // Chỉ thêm vào updateData nếu trường đó có trong postData gửi lên
+    allowedFields.forEach(field => {
+        if (postData[field] !== undefined) {
+            // Ép kiểu nếu là trường số
+            if (['subject_id', 'student_quantity', 'sessions_per_week'].includes(field)) {
+                updateData[field] = Number(postData[field]);
+            } else if (['hours_per_session', 'tuition_fee_per_session'].includes(field)) {
+                updateData[field] = parseFloat(postData[field]);
+            } else {
+                updateData[field] = postData[field];
+            }
+        }
+    });
+
+    if (Object.keys(updateData).length === 0) {
+        throw new Error("Không có dữ liệu để cập nhật");
+    }
 
     return await Model.update(id, updateData);
   },
 
   remove: async (id) => {
     return await Model.delete(id);
+  },
+
+  finalize: async (postId, action) => {
+    const post = await Model.getById(postId);
+    if (!post) throw new Error("Bài đăng không tồn tại");
+
+    if (action === 'success') {
+      // 1. Tìm xem gia sư nào đã được 'agreed' cho bài này
+      const agreedTutor = await PostAppModel.getAgreedTutor(postId);
+      
+      if (!agreedTutor) {
+        throw new Error("Không tìm thấy gia sư đã được đồng ý cho lớp này để khởi tạo.");
+      }
+
+      // 2. Cập nhật trạng thái bài đăng
+      await Model.update(postId, { 
+        status: 'success', 
+        connected_at: new Date() 
+      });
+
+      // 3. Tạo lớp học chính thức (Truyền student_id từ post và tutor_id từ post_applications)
+      await ClassModel.createFromPost({
+        student_id: post.student_id,
+        tutor_id: agreedTutor.tutor_id,
+        post_id: postId
+      });
+
+      return { message: "Kết nối lớp và tạo hồ sơ giảng dạy thành công!" };
+    } 
+    
+    else if (action === 'cancel') {
+      await Model.update(postId, { 
+        status: 'cancelled', 
+        cancel_reason: "Gia sư không liên hệ được học viên" 
+      });
+      return { message: "Đã hủy yêu cầu." };
+    }
   }
 };
 

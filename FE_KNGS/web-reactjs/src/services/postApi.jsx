@@ -33,7 +33,7 @@ export const getAllPayments = () => axiosClient.get("/payments");
 export const approvePayment = (id, data) => axiosClient.put(`/payments/${id}`, data);
 
 // --- NHÓM API LỚP HỌC (CLASS SESSIONS) ---
-export const createClassSession = (data) => axiosClient.post("/class-sessions", data);
+export const finalizePost = (id, data) => axiosClient.post(`/posts/finalize/${id}`, data);
 
 // --- NHÓM USER & SUBJECT ---
 export const getMe = () => axiosClient.get("/auth/me");

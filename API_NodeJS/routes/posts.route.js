@@ -19,5 +19,6 @@ router.post('/', authentic(), Controller.create);
 router.put('/:id', authentic(), Controller.update);
 
 router.delete('/:id', authentic(), Controller.delete);
+router.post('/finalize/:id', authentic(), Controller.finalizePost);
 
 module.exports = router;

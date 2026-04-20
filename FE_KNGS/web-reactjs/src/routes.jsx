@@ -149,18 +149,21 @@ import StudentManagement from "./pages/admin/StudentManagement";
 import TutorManagement from "./pages/admin/TutorManagement";
 import PostManagement from "./pages/admin/PostManagement";
 import BookingManagement from "./pages/admin/BookingManagement";
+import ClassManagement from "./pages/admin/ClassManagement";
 
 // Tutor
 import ManageApplications from "./pages/tutor/ManageApplications";
 import ManageBookingsT from "./pages/tutor/ManageBookings";
+import ConnectedClassesT from "./pages/tutor/ConnectedClasses";
 import Profile from "./pages/tutor/Profile";
 
 // Student
 import CreatePost from "./pages/student/CreatePost";
 import ManageBookingsS from "./pages/student/ManageBookings";
 import ManagePosts from "./pages/student/ManagePosts";
-import ConnectedClasses from "./pages/student/ConnectedClasses";
+import ConnectedClassesS from "./pages/student/ConnectedClasses";
 import ProfileS from "./pages/student/Profile";
+
 
 
 
@@ -182,10 +185,10 @@ function AppRoutes() {
         {/* Các đường dẫn phải khớp với SidebarAdmin.jsx */}
         <Route path="quan-ly-hoc-vien" element={<StudentManagement />} />
         <Route path="quan-ly-gia-su" element={<TutorManagement />} />
-        <Route path="quan-ly-nhan-vien" element={<div>Trang Quản lý học viên</div>} />
+        <Route path="quan-ly-nhan-vien" element={<div>Trang Quản lý nhân viên</div>} />
         <Route path="quan-ly-bai-dang" element={<PostManagement />} />
         <Route path="quan-ly-dat-lich" element={<BookingManagement />} />
-        <Route path="quan-ly-danh-gia" element={<div>Trang Quản lý đánh giá</div>} />
+        <Route path="quan-ly-lop" element={<ClassManagement />} />
         <Route path="tong-quan" element={<Dashboard />} />
       </Route>
 
@@ -195,7 +198,7 @@ function AppRoutes() {
         <Route path="dang-bai" element={<CreatePost />} />
         <Route path="quan-ly-bai-dang" element={<ManagePosts />} />
         <Route path="quan-ly-dat-lich" element={<ManageBookingsS />} />
-        <Route path="quan-ly-lop" element={<ConnectedClasses />} />
+        <Route path="quan-ly-lop" element={<ConnectedClassesS />} />
         <Route path="thong-tin-ca-nhan" element={<ProfileS />} />
       </Route>
 
@@ -204,7 +207,7 @@ function AppRoutes() {
         {/* Các đường dẫn phải khớp với SidebarTutor.jsx */}
         <Route path="thong-tin-dat-lich" element={<ManageBookingsT />} />
         <Route path="quan-ly-nhan-lop" element={<ManageApplications />} />
-        <Route path="quan-ly-lop" element={<div>Quản lý đánh giá (Tutor)</div>} />
+        <Route path="quan-ly-lop" element={< ConnectedClassesT />} />
         <Route path="thong-tin-ca-nhan" element={<Profile />} />
       </Route>
 

@@ -23,9 +23,9 @@ const Model = {
          AND pay.status = 'pending' 
          AND pay.payment_type = 'receive_job') AS pending_payments
       FROM posts p
-      JOIN subjects s ON p.subject_id = s.subject_id
-      JOIN students st ON p.student_id = st.student_id
-      JOIN users u ON st.user_id = u.user_id
+      LEFT JOIN subjects s ON p.subject_id = s.subject_id
+      LEFT JOIN students st ON p.student_id = st.student_id
+      LEFT JOIN users u ON st.user_id = u.user_id
       LEFT JOIN offer o ON p.post_id = o.offer_id
       WHERE p.deleted_at IS NULL
       ORDER BY pending_payments DESC, p.created_at DESC;
@@ -101,7 +101,7 @@ const Model = {
       SELECT 
         p.*, sub.name AS subject_name, o.fee_receive, o.support,
         pa.status AS apply_status, pa.tutor_id,
-        u.phone, u.address,
+        u.phone, u.address, u.full_name,
         pay.status AS payment_status, pay.transaction_code -- Lấy thêm trạng thái tiền
       FROM post_applications pa
       JOIN tutors t ON pa.tutor_id = t.tutor_id
