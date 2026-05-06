@@ -51,22 +51,34 @@ const ManageApplications = () => {
     };
 
     const confirmPaid = async () => {
-        const tutorName = removeAccents(user?.name || '').toUpperCase();
-        const transactionCode = `GS${selectedJob.tutor_id}P${selectedJob.post_id}T${Date.now()}`;
         try {
-            await postApi.createPayment({
+            setLoading(true);
+
+            // 1. Chuẩn bị mô tả
+            const desc = `Nop phi lop ${selectedJob.post_id}`.substring(0, 25);
+
+            // 2. Gọi API và gán vào biến 'res'
+            const res = await postApi.payOS ({
                 tutor_id: selectedJob.tutor_id,
                 post_id: selectedJob.post_id,
+                booking_id: null,
                 payment_type: 'receive_job',
-                amount: selectedJob.fee_receive,
-                transaction_code: transactionCode,
-                status: 'pending' // Khi nhấn xác nhận, status payment là pending
+                amount: Math.round(selectedJob.fee_receive),
+                description: desc
             });
-            alert("Đã gửi thông báo thanh toán. Vui lòng chờ Admin xác nhận!");
-            setShowQR(false);
-            fetchApps();
+
+            // 3. Kiểm tra và chuyển hướng
+            if (res && res.checkoutUrl) {
+                window.location.href = res.checkoutUrl;
+            } else {
+                alert("Lỗi: Không thể lấy link thanh toán.");
+            }
+            
         } catch (e) {
-            alert("Lỗi: " + (e.response?.data?.message || "Không thể gửi thanh toán"));
+            const errorMsg = e.response?.data?.message || "Không thể gửi yêu cầu thanh toán";
+            alert("Lỗi: " + errorMsg);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -241,7 +253,7 @@ const ManageApplications = () => {
             </Modal>
 
             {/* QR Payment Modal */}
-            <Modal show={showQR} onHide={() => setShowQR(false)} centered>
+            {/* <Modal show={showQR} onHide={() => setShowQR(false)} centered>
                 <Modal.Header closeButton className="bg-light">
                     <Modal.Title className="fw-bold fs-6">Thanh toán phí nhận lớp</Modal.Title>
                 </Modal.Header>
@@ -264,6 +276,29 @@ const ManageApplications = () => {
                     
                     <Button variant="primary" className="w-100 fw-bold py-2 mt-2 shadow-sm" onClick={confirmPaid}>
                         XÁC NHẬN ĐÃ THANH TOÁN XONG
+                    </Button>
+                </Modal.Body>
+            </Modal> */}
+
+            <Modal show={showQR} onHide={() => setShowQR(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Thanh toán phí</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center p-4">
+                    <p>Bạn đang thực hiện thanh toán phí nhận lớp:</p>
+                    <h4 className="text-danger fw-bold">{Number(selectedJob?.fee_receive).toLocaleString()}đ</h4>
+                    
+                    <div className="alert alert-warning small">
+                        Hệ thống sẽ chuyển bạn đến trang thanh toán an toàn của PayOS. 
+                        Sau khi thanh toán thành công, số điện thoại sẽ tự động hiển thị.
+                    </div>
+                    
+                    <Button 
+                        variant="primary" 
+                        className="w-100 fw-bold py-3" 
+                        onClick={confirmPaid} // Hàm này gọi API create-payos-link và chuyển hướng
+                    >
+                        ĐI ĐẾN TRANG THANH TOÁN
                     </Button>
                 </Modal.Body>
             </Modal>

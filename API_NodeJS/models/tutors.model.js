@@ -89,7 +89,8 @@ const Model = {
   getAllDetailed: async () => {
     const sql = `
       SELECT u.user_id, u.full_name, u.email, u.phone, u.avatar, u.status as user_status,
-             t.tutor_id, t.experience, t.education, t.cv_url, t.intro_video_url, t.approval_status, t.is_verified,
+             t.tutor_id, t.experience, t.education, t.cv_url, t.intro_video_url, t.approval_status, t.accumulated_points, t.is_verified,
+             (SELECT id FROM payments WHERE tutor_id = t.tutor_id AND payment_type = 'verify_profile' AND status = 'pending' LIMIT 1) as verify_payment_id,
              (SELECT GROUP_CONCAT(address SEPARATOR '||') FROM tutor_teaching_locations WHERE tutor_id = t.tutor_id) as locations,
              (SELECT GROUP_CONCAT(CONCAT_WS('#', s.name, tsl.level, tsl.tuition) SEPARATOR '||') 
               FROM tutor_subject_level tsl JOIN subjects s ON tsl.subject_id = s.subject_id WHERE tsl.tutor_id = t.tutor_id) as subjects,
@@ -112,6 +113,28 @@ const Model = {
       FROM tutors t JOIN users u ON t.user_id = u.user_id
       WHERE t.approval_status = 'approved' AND u.status = 'active' AND t.deleted_at IS NULL`;
     return await db.query(sql);
+  },
+
+  getPointHistoryByTutorId: async (tutorId) => {
+    const sql = `
+        SELECT * FROM point_history 
+        WHERE tutor_id = ? 
+        ORDER BY created_at DESC
+    `;
+    return await db.query(sql, [tutorId]);
+  },
+
+  getBasicTutorInfo: async (userId) => {
+    const sql = 'SELECT tutor_id FROM tutors WHERE user_id = ? AND deleted_at IS NULL';
+    const rows = await db.query(sql, [userId]);
+    return rows[0];
+  },
+
+  updateVerifyStatus: async (tutorId, isVerified) => {
+    return await db.query(
+      'UPDATE tutors SET is_verified = ?, approval_status = "approved" WHERE tutor_id = ?', 
+      [isVerified, tutorId]
+    );
   }
 };
 

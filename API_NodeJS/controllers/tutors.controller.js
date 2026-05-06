@@ -250,4 +250,19 @@ module.exports = {
         res.status(500).send("Lỗi hệ thống: " + e.message);
     }
   },
+
+  getPointHistory: async (req, res) => {
+    try {
+      // Lấy ID người dùng từ token (middleware authentic)
+      const userId = req.user.id; 
+
+      // Gọi Service xử lý
+      const data = await Service.getTutorPointHistory(userId);
+
+      res.json(data);
+    } catch (e) {
+      console.error("🔥 Lỗi getPointHistory:", e.message);
+      res.status(500).send(e.message);
+    }
+  }
 };

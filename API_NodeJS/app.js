@@ -106,6 +106,9 @@ app.use((err, req, res, next) => {
     });
 });
 
+// KÍCH HOẠT CRON JOB
+require('./jobs/pointCron'); 
+
 // --- 8. KHỞI CHẠY SERVER ---
 // console.log("PORT ENV:", process.env.PORT);
 const PORT = process.env.PORT || 3300;

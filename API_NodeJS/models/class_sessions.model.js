@@ -104,7 +104,32 @@ const Model = {
       VALUES (?, ?, ?, 'ongoing')
     `;
     return await db.query(sql, [data.student_id, data.tutor_id, data.post_id]);
-  }
+  },
+
+  // Tìm ID Học viên hoặc Gia sư dựa trên UserID
+  findProfileIdByUser: async (userId, roleId) => {
+    let sql, idField;
+    if (roleId == 2) {
+      sql = 'SELECT tutor_id FROM tutors WHERE user_id = ?';
+      idField = 'tutor_id';
+    } else {
+      sql = 'SELECT student_id FROM students WHERE user_id = ?';
+      idField = 'student_id';
+    }
+    const rows = await db.query(sql, [userId]);
+    return rows.length > 0 ? rows[0][idField] : null;
+  },
+
+  // Lấy dữ liệu thô của 1 session (dùng cho logic xử lý)
+  getRawById: async (id, connection = null) => {
+    const sql = 'SELECT * FROM class_sessions WHERE class_session_id = ?';
+    const executor = connection || db;
+    const rows = await executor.query(sql, [id]);
+    return rows[0];
+  },
+
+  // Quản lý kết nối (Hàm dùng cho Transaction)
+  getConnection: () => db.getConnection()
 };
 
 module.exports = Model;

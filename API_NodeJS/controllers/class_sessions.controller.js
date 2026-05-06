@@ -8,15 +8,10 @@ module.exports = {
       const userId = req.user.id; 
       const roleId = req.user.role_id;
 
-      let profileId;
-      if (roleId == 2) {
-        const rows = await db.query('SELECT tutor_id FROM tutors WHERE user_id = ?', [userId]);
-        if (!rows || rows.length === 0) return res.status(404).send("Hồ sơ gia sư không tồn tại");
-        profileId = rows[0].tutor_id;
-      } else {
-        const rows = await db.query('SELECT student_id FROM students WHERE user_id = ?', [userId]);
-        if (!rows || rows.length === 0) return res.status(404).send("Hồ sơ học viên không tồn tại");
-        profileId = rows[0].student_id;
+      const profileId = await Model.findProfileIdByUser(userId, roleId);
+      
+      if (!profileId) {
+        return res.status(404).json({ message: "Không tìm thấy hồ sơ người dùng" });
       }
 
       // Gọi model với 3 tham số: role, id bảng phụ, id user từ token
@@ -31,7 +26,6 @@ module.exports = {
   // Admin lấy hết
   adminGetAll: async (req, res) => {
     try {
-      // SỬA TÊN HÀM TẠI ĐÂY: Gọi đúng adminGetAllDetailed
       const data = await Model.adminGetAllDetailed(); 
       res.json(data);
     } catch (e) {
@@ -42,45 +36,36 @@ module.exports = {
 
   // Học viên xác nhận hoàn thành để cộng điểm cho gia sư
   confirmComplete: async (req, res) => {
-    const conn = await db.getConnection(); // Lấy kết nối để làm Transaction
+    const conn = await Model.getConnection(); // Lấy kết nối để làm Transaction
     try {
       await conn.beginTransaction();
       const sessionId = req.params.id;
 
-      // 1. Lấy thông tin lớp học để biết Tutor là ai
-      const [sessions] = await conn.execute(
-        'SELECT * FROM class_sessions WHERE class_session_id = ?', 
-        [sessionId]
-      );
-      const session = sessions[0];
+      // 1. Lấy dữ liệu lớp
+      const session = await Model.getRawById(sessionId, conn);
       if (!session) throw new Error("Không tìm thấy lớp học");
 
-      // 2. Cập nhật trạng thái lớp sang 'success'
-      await conn.execute(
-        'UPDATE class_sessions SET status = "success" WHERE class_session_id = ?', 
-        [sessionId]
+      // 2. Cập nhật trạng thái lớp thành công (success)
+      await Model.updateStatus(sessionId, "success", null, conn);
+
+      // 3. Gọi Model xử lý ĐIỂM + LỊCH SỬ (2 trong 1)
+      // Hàm này đã bao gồm lệnh INSERT vào point_history mà bạn nhắc tới
+      await TutorModel.adjustPoints(
+        session.tutor_id, 
+        10, 
+        `Học viên xác nhận hoàn thành lớp #${sessionId}`, 
+        conn
       );
 
-      // 3. Cộng 10 điểm cho gia sư
-      await conn.execute(
-        'UPDATE tutors SET accumulated_points = accumulated_points + 10 WHERE tutor_id = ?', 
-        [session.tutor_id]
-      );
+      await conn.commit();
+      res.json({ success: true, message: "Xác nhận thành công và đã cộng điểm uy tín!" });
 
-      // 4. Lưu vào bảng point_history
-      await conn.execute(
-        'INSERT INTO point_history (tutor_id, amount, reason) VALUES (?, ?, ?)', 
-        [session.tutor_id, 10, `Học viên xác nhận hoàn thành lớp #${sessionId}`]
-      );
-
-      await conn.commit(); // Hoàn tất mọi việc
-      res.json({ message: "Xác nhận thành công! Gia sư đã được cộng 10 điểm uy tín." });
     } catch (e) {
-      await conn.rollback(); // Nếu 1 trong các bước trên lỗi, hủy hết để tránh sai dữ liệu
+      await conn.rollback();
       console.error("🔥 Lỗi confirmComplete:", e.message);
       res.status(500).json({ error: e.message });
     } finally {
-      conn.release(); // Giải phóng kết nối
+      conn.release();
     }
   },
 
@@ -88,6 +73,14 @@ module.exports = {
     try {
       const { id } = req.params;
       const { status, cancel_reason } = req.body;
+
+      // Logic trừ điểm khi hủy (Vẫn gọi Model xử lý)
+      if (status === 'cancelled') {
+          const session = await Model.getRawById(id);
+          if (session) {
+              await TutorModel.adjustPoints(session.tutor_id, -5, `Hủy lớp #${id}: ${cancel_reason}`);
+          }
+      }
 
       // Gọi hàm updateStatus trong Model
       await Model.updateStatus(id, status, cancel_reason);

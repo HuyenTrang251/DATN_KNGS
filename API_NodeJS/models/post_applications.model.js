@@ -54,6 +54,13 @@ const Model = {
     const sql = `SELECT tutor_id FROM post_applications WHERE post_id = ? AND status = 'agreed' LIMIT 1`;
     const rows = await db.query(sql, [postId]);
     return rows[0]; // Trả về { tutor_id: ... }
+  },
+
+  updateStatusByTutor: async (postId, tutorId, status) => {
+    return await db.query(
+      'UPDATE post_applications SET status = ? WHERE post_id = ? AND tutor_id = ?',
+      [status, postId, tutorId]
+    );
   }
 };
 

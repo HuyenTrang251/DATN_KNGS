@@ -22,6 +22,19 @@ const Model = {
     return await db.query(sql, params);
   },
 
+  // Tìm payment theo mã đơn hàng PayOS (orderCode)
+  findByTransactionCode: async (code) => {
+    const sql = `SELECT * FROM payments WHERE transaction_code = ? AND status = 'pending'`;
+    const rows = await db.query(sql, [code]);
+    return rows[0];
+  },
+
+  // Cập nhật trạng thái thành công
+  updateToSuccess: async (id) => {
+    const sql = `UPDATE payments SET status = 'success', updated_at = NOW() WHERE id = ?`;
+    return await db.query(sql, [id]);
+  },
+
   getAll: async () => {
     return await db.query('SELECT * FROM payments WHERE deleted_at IS NULL');
   },

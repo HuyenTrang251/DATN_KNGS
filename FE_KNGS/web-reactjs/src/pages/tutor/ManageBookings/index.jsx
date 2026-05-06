@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Modal, ListGroup, Spinner } from 'react-bootstrap';
 import { useAuth } from '../../../contexts/AuthContext';
 import * as bookingApi from '../../../services/bookingApi';
-import * as postApi from '../../../services/postApi'; // Dùng hàm createPayment
+import * as postApi from '../../../services/postApi'; // Dùng hàm payOS
 
 const removeAccents = (str) => {
   return str.normalize('NFD')
@@ -59,36 +59,36 @@ const TutorBookingManagement = () => {
 
     // 3. Xác nhận đã chuyển khoản
     const handleConfirmPaid = async () => {
-        // Chuẩn bị các thành phần nội dung
-        const bookingId = selected.booking_id;
-        const typeLabel = "PHI NHAN LOP"; // Hoặc lấy từ payment_type
-        const tutorName = removeAccents(user?.name || '').toUpperCase();
-        
-        // Nội dung cuối cùng: BK1 - PHI NHAN LOP - HOANG MINH DUC
-        const transactionCode = `BK${bookingId} - ${typeLabel} - ${tutorName} - ${Date.now()}`;
-        
         try {
-            // 2. Chuẩn bị dữ liệu khớp với Validation của Backend
-            const payload = {
+            setLoading(true); // Nên bật loading để tránh user nhấn nhiều lần
+            
+            // 1. Chuẩn bị thông tin mô tả (PayOS yêu cầu tối đa 25 ký tự)
+            const desc = `Phi dat lich BK${selected.booking_id}`.substring(0, 25);
+
+            // 2. Gán kết quả vào biến 'res'
+            // Lưu ý: Vì axiosClient đã có Interceptor nên res chính là data { checkoutUrl: '...' }
+            const res = await postApi.payOS ({
                 tutor_id: Number(selected.tutor_id),
                 booking_id: Number(selected.booking_id),
                 post_id: null, 
                 payment_type: 'receive_booking',
-                amount: String(Math.round(selected.tuition * 0.3)), 
-                transaction_code: transactionCode,
-                status: 'pending'
-            };
-
-            await postApi.createPayment(payload);
+                amount: Math.round(selected.tuition * 0.3), // Để kiểu số
+                description: desc
+            });
             
-            alert("Đã gửi xác nhận thanh toán! Vui lòng chờ Admin duyệt.");
-            setShowQR(false);
-            loadData();
+            // 3. Kiểm tra và chuyển hướng sang PayOS
+            if (res && res.checkoutUrl) {
+                window.location.href = res.checkoutUrl;
+            } else {
+                alert("Lỗi: Không nhận được link thanh toán từ hệ thống.");
+            }
+
         } catch (e) {
-            // Hiển thị lỗi chi tiết từ Backend trả về (ví dụ: "post_id is required")
-            const errorMsg = e.response?.data || "Lỗi không xác định";
-            alert("Lỗi gửi xác nhận: " + errorMsg);
-            console.error("Chi tiết lỗi 400:", e.response?.data);
+            const errorMsg = e.response?.data?.message || e.message || "Lỗi hệ thống";
+            alert("Lỗi thanh toán: " + errorMsg);
+            console.error("Payment Error:", e);
+        } finally {
+            setLoading(false);
         }
     };
 

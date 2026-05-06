@@ -57,6 +57,21 @@ const TutorManagement = () => {
         }
     };
 
+    const handleRejectVerify = async (userId) => {
+        const reason = prompt("Nhập nội dung yêu cầu bổ sung (Ví dụ: Thiếu bằng đại học, CV mờ...):");
+        if (!reason) return;
+        
+        try {
+            // Gọi API tạo thông báo (Bạn đã có bảng notifications)
+            await axiosClient.post("/notifications", {
+                user_id: userId,
+                title: "Yêu cầu bổ sung hồ sơ Tích xanh",
+                content: `Hồ sơ của bạn chưa đủ điều kiện: ${reason}. Vui lòng cập nhật lại.`
+            });
+            alert("Đã gửi yêu cầu bổ sung cho gia sư.");
+        } catch (e) { alert("Lỗi gửi thông báo"); }
+    };
+
     // Helper: Tách chuỗi từ API thành mảng
     const parseList = (str) => str ? str.split('||') : [];
 
@@ -157,6 +172,30 @@ const TutorManagement = () => {
                                 <h5 className="fw-bold">{selectedTutor.full_name}</h5>
                                 {selectedTutor.is_verified === 1 && <Badge bg="info" className="mb-2 fs-6">Đã xác minh <i className="bi bi-patch-check-fill"></i></Badge>}
                                 <hr/>
+                                <p className="modal-detail-content">
+                                    <strong>Điểm uy tín:</strong> 
+                                    <Badge bg="light" text="primary" className="border">
+                                        {selectedTutor.accumulated_points} điểm
+                                    </Badge>
+                                </p>
+                                <div className="d-grid gap-2 mt-3">
+                                    {selectedTutor.verify_payment_id ? (
+                                        <>
+                                            <Button variant="info" className="text-white fw-bold" 
+                                                onClick={() => handleVerifyBlueTick(selectedTutor.tutor_id)}>
+                                                <i className="bi bi-patch-check-fill me-2"></i> DUYỆT CẤP TÍCH XANH
+                                            </Button>
+                                            
+                                            <Button variant="outline-warning" size="sm" className="fw-bold"
+                                                onClick={() => handleRejectVerify(selectedTutor.user_id)}>
+                                                YÊU CẦU BỔ SUNG HỒ SƠ
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        ""
+                                        // <small className="text-muted italic">Gia sư chưa gửi yêu cầu cấp tích xanh.</small>
+                                    )}
+                                </div>
                                 <div className="text-start">
                                     <Form.Label className="fs-6 fw-bold text-dark ">Duyệt hồ sơ hệ thống:</Form.Label>
                                     <Form.Select 
@@ -169,6 +208,7 @@ const TutorManagement = () => {
                                         <option value="rejected">Từ chối (Rejected)</option>
                                     </Form.Select>
                                 </div>
+                            
                                 {/* Section Media hiển thị nhanh */}
                                 <div className="text-start mt-3">
                                     <Form.Label className="fs-6 fw-bold border-bottom pb-1">Tài liệu đính kèm:</Form.Label>

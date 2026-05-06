@@ -58,5 +58,6 @@ router.post('/upload-media', authentic([2]), uploadTutorMedia, Controller.update
 router.get('/', authentic([1]), Controller.getAllAdmin);
 router.put('/approve-status/:id', authentic([1]), Controller.approveStatus);
 router.put('/verify/:id', authentic([1]), Controller.verifyTutor);
+router.get('/point-history', authentic([2]), Controller.getPointHistory);
 
 module.exports = router;

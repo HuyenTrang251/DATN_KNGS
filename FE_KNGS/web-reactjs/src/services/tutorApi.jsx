@@ -48,6 +48,8 @@ export const verifyTutorBlueTick = (tutorId) => {
   return axiosClient.put(`/tutors/verify/${tutorId}`);
 };
 
+export const getPointHistory = () => axiosClient.get("/tutors/point-history");
+
 /**
  * Admin: Khóa tài khoản gia sư
  * @param {number} userId 
