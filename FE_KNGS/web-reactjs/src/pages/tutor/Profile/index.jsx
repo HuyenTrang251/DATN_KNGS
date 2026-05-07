@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import './profile.scss';
 import * as tutorApi from '../../../services/tutorApi';
-import { payOS } from '../../../services/postApi'; // Dùng hàm payOS
+import { createPaymentLink } from '../../../services/postApi';
 import { getAllSubjects } from '../../../services/subjectApi';
 
 const TutorProfile = () => {
@@ -11,7 +11,7 @@ const TutorProfile = () => {
     full_name: '', email: '', phone: '', gender: 'male', date_of_birth: '', home_address: '', avatar: ''
   });
   const [tutorInfo, setTutorInfo] = useState({
-    experience: '', education: '', teaching_mode: 'all', intro_video_url: '', 
+    tutor_id: null, experience: '', education: '', teaching_mode: 'all', intro_video_url: '', 
     approval_status: '', is_verified: 0, accumulated_points: 0, cv_url: ''
   });
 
@@ -63,6 +63,7 @@ const TutorProfile = () => {
         if (data.gender) setIsInitialGenderSet(true);
 
         setTutorInfo({
+          tutor_id: data.tutor_id || null,
           experience: data.experience || '',
           education: data.education || '',
           teaching_mode: data.teaching_mode || 'all',
@@ -186,24 +187,25 @@ const TutorProfile = () => {
     }
   };
 
-  const handlePayVerify = async () => {
+    const handlePayVerify = async (provider) => {
     try {
-        setLoading(true); // Nên có loading để tránh user click nhiều lần
+      setLoading(true);
 
-        // 1. Gán kết quả trả về vào biến 'res'
-        // Lưu ý: Vì axiosClient đã có Interceptor nên res chính là data { checkoutUrl: '...' }
-        const res = await payOS ({
-            tutor_id: tutorInfo.tutor_id,
-            payment_type: 'verify_profile',
-            amount: 200000, // Để kiểu số cho chuẩn
-            description: "Phi duyet Tich xanh", // Bổ sung mô tả (bắt buộc cho PayOS)
-            // transaction_code và status: nên để Backend tự sinh để đảm bảo tính duy nhất
-        });
+      const res = await createPaymentLink({
+        tutor_id: tutorInfo.tutor_id,
+        post_id: null,
+        booking_id: null,
+        payment_type: 'verify_profile',
+        amount: 200000,
+        description: 'Phi duyet Tich xanh',
+        provider,
+      });
 
-        // 2. Kiểm tra và chuyển hướng
-        if (res && res.checkoutUrl) {
-            // Chuyển hướng sang trang thanh toán của PayOS
-            window.location.href = res.checkoutUrl;
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+      const checkoutUrl = provider === 'momo' && isMobile ? res?.deeplink || res?.checkoutUrl : res?.checkoutUrl;
+
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
         } else {
             alert("Lỗi: Không nhận được link thanh toán từ server.");
         }
@@ -237,7 +239,7 @@ const TutorProfile = () => {
       }
 
       // 4. Xác nhận cuối cùng
-      const confirmMsg = "Xác nhận đăng ký Tích xanh:\n- Phí duyệt hồ sơ: 200.000đ (Không hoàn trả).\n- Thời gian duyệt: 1-3 ngày làm việc.\n\nBạn nhấn OK để hiện mã QR thanh toán.";
+        const confirmMsg = "Xác nhận đăng ký Tích xanh:\n- Phí duyệt hồ sơ: 200.000đ (Không hoàn trả).\n- Thời gian duyệt: 1-3 ngày làm việc.\n\nBạn nhấn OK để chọn hình thức thanh toán.";
       if (window.confirm(confirmMsg)) {
           setShowVerifyQR(true); 
       }
@@ -430,11 +432,23 @@ const TutorProfile = () => {
       </div>
 
       <Modal show={showVerifyQR} onHide={() => setShowVerifyQR(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="fw-bold fs-5">Thanh toán phí duyệt Tích xanh</Modal.Title>
+        </Modal.Header>
         <Modal.Body className="text-center p-4">
-            <h6 className="fw-bold">THANH TOÁN PHÍ DUYỆT TÍCH XANH</h6>
+          <h6 className="fw-bold">THANH TOÁN PHÍ DUYỆT TÍCH XANH</h6>
             <h3 className="text-danger fw-bold">200.000đ</h3>
-            <img src={`https://img.vietqr.io/image/VCB-1022641936-compact.png?amount=200000&addInfo=VERIFY%20TUTOR%20${tutorInfo.tutor_id}`} width="250" />
-            <Button variant="primary" className="w-100 mt-3 fw-bold" onClick={handlePayVerify}>XÁC NHẬN ĐÃ CHUYỂN KHOẢN</Button>
+          <div className="alert alert-info small mt-3 mb-4 text-start">
+            Chọn một hình thức thanh toán. Sau khi giao dịch thành công, hệ thống sẽ tự xác nhận và cập nhật trạng thái Tích xanh cho hồ sơ gia sư.
+          </div>
+          <div className="d-grid gap-2">
+            <Button variant="primary" className="w-100 fw-bold py-3" onClick={() => handlePayVerify('payos')}>
+              THANH TOÁN QUA PAYOS
+            </Button>
+            <Button variant="outline-dark" className="w-100 fw-bold py-3" onClick={() => handlePayVerify('momo')}>
+              THANH TOÁN QUA VÍ MOMO
+            </Button>
+          </div>
         </Modal.Body>
     </Modal>
   </>

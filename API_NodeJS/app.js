@@ -3,7 +3,6 @@
  * KIẾN TRÚC: MODEL - SERVICE - CONTROLLER - ROUTE
  */
 
-require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -11,6 +10,8 @@ const logger = require('morgan');
 const cors = require('cors');
 const createError = require('http-errors');
 const fs = require('fs');
+
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 

@@ -24,7 +24,7 @@ const Model = {
 
   // Tìm payment theo mã đơn hàng PayOS (orderCode)
   findByTransactionCode: async (code) => {
-    const sql = `SELECT * FROM payments WHERE transaction_code = ? AND status = 'pending'`;
+    const sql = `SELECT * FROM payments WHERE transaction_code = ? AND deleted_at IS NULL`;
     const rows = await db.query(sql, [code]);
     return rows[0];
   },

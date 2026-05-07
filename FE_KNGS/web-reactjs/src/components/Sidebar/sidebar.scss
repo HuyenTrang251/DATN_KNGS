@@ -25,6 +25,18 @@
   }
 
   .display-layout {
+    .sidebar-user-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-verified-icon {
+      color: #0ea5e9;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
     .avatar-upload-container {
       position: relative;
       width: 130px;

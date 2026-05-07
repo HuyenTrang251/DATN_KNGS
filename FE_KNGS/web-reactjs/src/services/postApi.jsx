@@ -28,7 +28,11 @@ export const updateApplicationStatus = (appId, data) =>
 export const getTutorApplications = () => axiosClient.get("/posts/my-applications");
 
 // --- NHÓM API THANH TOÁN (PAYMENTS) ---
-export const payOS = (data) => axiosClient.post("/payments/create-payos-link", data);
+export const createPaymentLink = (data) => axiosClient.post("/payments/create-link", data);
+export const payOS = (data) => createPaymentLink({ ...data, provider: "payos" });
+export const createMomoPayment = (data) => createPaymentLink({ ...data, provider: "momo" });
+export const confirmPayOSReturn = (orderCode) => axiosClient.get(`/payments/payos-return?orderCode=${orderCode}`);
+export const confirmMomoReturn = (orderId) => axiosClient.get(`/payments/momo-return?orderId=${encodeURIComponent(orderId)}`);
 export const getAllPayments = () => axiosClient.get("/payments");
 export const approvePayment = (id, data) => axiosClient.put(`/payments/${id}`, data);
 

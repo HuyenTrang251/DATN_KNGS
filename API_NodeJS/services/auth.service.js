@@ -20,7 +20,16 @@ module.exports = {
     findById: async (id) => {
 
         const [rows] = await db.execute(
-            "SELECT user_id, full_name, email, role_id, avatar FROM users WHERE user_id = ?",
+            `SELECT 
+                u.user_id,
+                u.full_name,
+                u.email,
+                u.role_id,
+                u.avatar,
+                COALESCE(t.is_verified, 0) AS is_verified
+             FROM users u
+             LEFT JOIN tutors t ON t.user_id = u.user_id AND t.deleted_at IS NULL
+             WHERE u.user_id = ? AND u.deleted_at IS NULL`,
             [id]
         );
 

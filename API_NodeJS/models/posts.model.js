@@ -99,6 +99,7 @@ const Model = {
   getTutorApplications: async (userId) => {
     const sql = `
       SELECT 
+        pa.post_application_id,
         p.*, sub.name AS subject_name, o.fee_receive, o.support,
         pa.status AS apply_status, pa.tutor_id,
         u.phone, u.address, u.full_name,
@@ -110,7 +111,15 @@ const Model = {
       JOIN students s ON p.student_id = s.student_id
       JOIN users u ON s.user_id = u.user_id
       LEFT JOIN offer o ON p.post_id = o.offer_id
-      LEFT JOIN payments pay ON pay.post_id = p.post_id AND pay.tutor_id = t.tutor_id -- Join lấy trạng thái thanh toán
+      LEFT JOIN payments pay ON pay.id = (
+        SELECT p2.id
+        FROM payments p2
+        WHERE p2.post_id = p.post_id
+          AND p2.tutor_id = t.tutor_id
+          AND p2.deleted_at IS NULL
+        ORDER BY p2.id DESC
+        LIMIT 1
+      )
       WHERE t.user_id = ? AND pa.deleted_at IS NULL
     `;
     return await db.query(sql, [userId]);

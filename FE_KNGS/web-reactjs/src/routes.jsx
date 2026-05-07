@@ -142,6 +142,8 @@ import ListTutorPage from "./pages/home/ListTutorPage";
 import ListNewClassPage from "./pages/home/ListNewClassPage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
+import PaymentCancel from "./pages/payment/PaymentCancel";
 
 // Admin
 import Dashboard from "./pages/admin/Dashboard";
@@ -214,6 +216,8 @@ function AppRoutes() {
       {/* 5. AUTH ROUTES */}
       <Route path="dang-nhap" element={<LoginPage />} />
       <Route path="dang-ki" element={<SignupPage />} />
+      <Route path="payment-success" element={<PaymentSuccess />} />
+      <Route path="payment-cancel" element={<PaymentCancel />} />
 
     </Routes>
   );

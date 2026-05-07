@@ -122,7 +122,15 @@ const Model = {
       LEFT JOIN users u_s ON s.user_id = u_s.user_id
       LEFT JOIN tutor_subject_level tsl ON b.tutor_subject_level_id = tsl.tutor_subject_level_id
       LEFT JOIN subjects sj ON tsl.subject_id = sj.subject_id
-      LEFT JOIN payments pay ON b.booking_id = pay.booking_id AND pay.payment_type = 'receive_booking'
+      LEFT JOIN payments pay ON pay.id = (
+        SELECT p2.id
+        FROM payments p2
+        WHERE p2.booking_id = b.booking_id
+          AND p2.payment_type = 'receive_booking'
+          AND p2.deleted_at IS NULL
+        ORDER BY p2.id DESC
+        LIMIT 1
+      )
       WHERE b.tutor_id = ? AND b.status != 'pending' AND b.deleted_at IS NULL
     `;
     const rows = await db.query(sql, [tutorId]);

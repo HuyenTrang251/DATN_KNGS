@@ -140,7 +140,7 @@
 
 // export default Sidebar;
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -153,6 +153,29 @@ function Sidebar({ isOpen, menuItems }) {
     const { user, setUser } = useAuth(); // Lấy setUser để cập nhật ảnh mới toàn cục
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false);
+
+    useEffect(() => {
+        const syncCurrentUser = async () => {
+            if (!user?.id) return;
+
+            try {
+                const profile = await axiosClient.get("/auth/me");
+                const normalizedUser = {
+                    ...user,
+                    ...profile,
+                    id: profile.user_id || user.id,
+                    name: profile.full_name || user.full_name || user.name,
+                };
+
+                setUser(normalizedUser);
+                localStorage.setItem("user", JSON.stringify(normalizedUser));
+            } catch (error) {
+                console.error("Khong the dong bo thong tin user cho sidebar:", error);
+            }
+        };
+
+        syncCurrentUser();
+    }, [setUser, user?.id]);
 
     // --- LOGIC XỬ LÝ ẢNH HIỂN THỊ ---
     const avatarUrl = useMemo(() => {
@@ -251,9 +274,14 @@ function Sidebar({ isOpen, menuItems }) {
                 {/* Thông tin User */}
                 {isOpen && (
                     <>
-                        <h5 className="text-center px-1 fw-bold mt-3 mb-0 text-truncate w-100">
-                            {user?.name || "Người dùng"} 
-                        </h5>
+                        <div className="sidebar-user-name-row mt-3 mb-0 w-100 justify-content-center">
+                            <h5 className="text-center px-1 fw-bold mb-0 text-truncate">
+                                {user?.full_name || user?.name || "Người dùng"}
+                            </h5>
+                            {user?.role_id === 2 && Number(user?.is_verified) === 1 && (
+                                <i className="bi bi-patch-check-fill sidebar-verified-icon" title="Gia sư đã được duyệt Tích xanh"></i>
+                            )}
+                        </div>
                         <small className="text-muted mb-3">
                             {user?.role_id === 1 ? "Quản trị viên" : user?.role_id === 2 ? "Gia sư" : "Học viên"}
                         </small>
