@@ -105,3 +105,212 @@
     flex-direction: column;
     align-items: center;
 }
+
+.profile-container {
+  .profile-form {
+    min-width: 0;
+  }
+
+  .grid-layout-3 {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .profile-container {
+    width: 100%;
+    max-width: none;
+    margin: 20px auto 40px;
+    padding: 0 12px;
+
+    .profile-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 0 2px;
+
+      h3 {
+        font-size: 2rem;
+        margin-bottom: 0;
+      }
+
+      .status-group {
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 10px;
+
+        .status-badge {
+          font-size: 14px;
+          padding: 10px 14px;
+        }
+
+        .btn {
+          width: 100%;
+          margin-left: 0 !important;
+        }
+      }
+    }
+
+    .section-card {
+      padding: 20px;
+      border-radius: 16px;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+    }
+
+    .row-layout {
+      gap: 12px;
+
+      .col-3,
+      .col-6 {
+        width: calc(50% - 6px);
+      }
+
+      .flex-1,
+      .flex-2 {
+        flex: 1 1 100%;
+      }
+    }
+
+    .form-group {
+      label {
+        font-size: 15px;
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 16px;
+        min-height: 48px;
+      }
+    }
+
+    .dynamic-input-row {
+      flex-wrap: wrap;
+      align-items: stretch;
+
+      input,
+      select,
+      .w-40,
+      .w-30 {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 0;
+      }
+
+      .btn-x {
+        width: 36px;
+        height: 36px;
+        margin-left: auto;
+      }
+    }
+
+    .btn-add-line {
+      font-size: 16px;
+      padding: 12px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 18px;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .profile-container {
+    padding: 0 8px;
+
+    .profile-header {
+      h3 {
+        font-size: 1.25rem;
+        line-height: 1.3;
+      }
+
+      .status-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+
+        .status-badge {
+          font-size: 12px;
+          line-height: 1.45;
+          padding: 10px 12px;
+          border-radius: 18px;
+        }
+
+        .btn {
+          grid-column: 1 / -1;
+        }
+      }
+    }
+
+    .section-card {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+    }
+
+    .row-layout {
+      .col-3,
+      .col-6 {
+        width: 100%;
+      }
+    }
+
+    .form-group {
+      label {
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 15px;
+        min-height: 44px;
+        padding: 10px 12px;
+      }
+    }
+
+    .dynamic-input-row {
+      gap: 10px;
+
+      input,
+      select,
+      .w-40,
+      .w-30 {
+        flex-basis: 100%;
+      }
+
+      .btn-x {
+        width: 100%;
+        border-radius: 10px;
+        height: 40px;
+      }
+    }
+
+    .grid-layout-3 .dynamic-input-row {
+      input,
+      select {
+        flex-basis: 100%;
+      }
+    }
+
+    .actions-bar {
+      margin-bottom: 32px;
+    }
+
+    .btn-submit {
+      font-size: 16px;
+      border-radius: 20px;
+    }
+  }
+}

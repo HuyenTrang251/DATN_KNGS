@@ -8,7 +8,7 @@ const Model = {
              u_s.full_name AS student_name, u_s.phone AS student_phone, u_s.address AS student_address,
              u_t.full_name AS tutor_name, u_t.phone AS tutor_phone,
              sj.name AS subject_name, tsl.level, tsl.tuition,
-             pay.status AS payment_status, pay.id AS payment_id,
+             pay.status AS payment_status, pay.id AS payment_id, pay.updated_at AS payment_updated_at,
              -- Đánh dấu nếu có thanh toán đang chờ duyệt
              (SELECT COUNT(*) FROM payments WHERE booking_id = b.booking_id AND status = 'pending') AS has_pending_payment
       FROM bookings b
@@ -31,7 +31,13 @@ const Model = {
              u_s.full_name AS student_name, u_s.phone AS student_phone, u_s.address AS student_address, u_s.email AS student_email,
              u_t.full_name AS tutor_name, u_t.phone AS tutor_phone, u_t.email AS tutor_email,
              sj.name AS subject_name, tsl.level, tsl.tuition,
-             pay.status AS payment_status, pay.id AS payment_id, pay.transaction_code,
+             pay.status AS payment_status, pay.id AS payment_id, pay.transaction_code, pay.updated_at AS payment_updated_at,
+             CASE
+               WHEN pay.status = 'success'
+                AND TIMESTAMPDIFF(DAY, pay.updated_at, NOW()) <= 5
+                AND b.status = 'cancelled' THEN 1
+               ELSE 0
+             END AS refund_eligible,
              -- BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ HIỆN NÚT Ở FRONTEND
              (SELECT COUNT(*) FROM payments WHERE pay.booking_id = b.booking_id AND pay.status = 'pending') AS has_pending_payment
       FROM bookings b

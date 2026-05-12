@@ -1,22 +1,53 @@
+const db = require('../common/db');
 const Model = require('../models/reviews.model');
 
 module.exports = {
   create: async (req, res) => {
-    const { class_session_id } = req.body;
-    const reviewer_id = req.user.id;
+    try {
+      const { class_session_id, rating, comment } = req.body;
+      const reviewer_id = req.user.id;
 
-    // Tìm kiếm KHÔNG lọc deleted_at (tìm cả bản ghi đã xóa mềm)
-    const [existingRecord] = await db.query(
-        'SELECT review_id, deleted_at FROM reviews WHERE class_session_id = ? AND reviewer_id = ?',
+      const existingRows = await db.query(
+        'SELECT review_id, deleted_at FROM reviews WHERE class_session_id = ? AND reviewer_id = ? LIMIT 1',
         [class_session_id, reviewer_id]
-    );
+      );
+      const existingRecord = existingRows[0];
 
-    if (existingRecord) {
+      if (existingRecord) {
         if (existingRecord.deleted_at) {
-            return res.status(403).json({ message: "Bạn đã xóa đánh giá trước đó và không thể thực hiện lại." });
-        } else {
-            return res.status(400).json({ message: "Bạn đã đánh giá lớp học này rồi. Vui lòng dùng chức năng sửa." });
+          return res.status(403).json({ message: "Bạn đã xóa đánh giá trước đó và không thể thực hiện lại." });
         }
+
+        return res.status(400).json({ message: "Bạn đã đánh giá lớp học này rồi. Vui lòng dùng chức năng sửa." });
+      }
+
+      const sessionParties = await Model.getSessionParties(class_session_id);
+      if (!sessionParties) {
+        return res.status(404).json({ message: 'Không tìm thấy lớp học để đánh giá' });
+      }
+
+      let reviewed_user_id = null;
+      if (Number(reviewer_id) === Number(sessionParties.student_user_id)) {
+        reviewed_user_id = sessionParties.tutor_user_id;
+      } else if (Number(reviewer_id) === Number(sessionParties.tutor_user_id)) {
+        reviewed_user_id = sessionParties.student_user_id;
+      }
+
+      if (!reviewed_user_id) {
+        return res.status(403).json({ message: 'Bạn không thuộc lớp học này nên không thể đánh giá' });
+      }
+
+      await Model.create({
+        class_session_id,
+        reviewer_id,
+        reviewed_user_id,
+        rating,
+        comment,
+      });
+
+      res.status(201).json({ success: true, message: 'Đăng đánh giá thành công' });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
     }
   },
 

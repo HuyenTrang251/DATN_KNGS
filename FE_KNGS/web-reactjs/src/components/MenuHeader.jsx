@@ -1,4 +1,4 @@
-import { Link, useNavigate} from "react-router-dom";
+import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -8,7 +8,6 @@ import { useAuth } from "../contexts/AuthContext";
 function MenuHeader()
 {
     const { user } = useAuth(); // Lấy thông tin user từ context toàn cục
-    const navigate = useNavigate();
 
     // const handleGoBack = () => {
     //     const previousPage = sessionStorage.getItem('previousPage');
@@ -186,9 +185,9 @@ function MenuHeader()
                     </>
                 ) : (
                     // NẾU ĐÃ ĐĂNG NHẬP -> HIỆN NÚT VÀO TRANG CÁ NHÂN (DASHBOARD)
-                    <li className="nav-item ps-lg-5">
+                    <li className="nav-item ps-lg-5 account-nav-item">
                         <Link 
-                            className="nav-link active fw-bold text-primary" 
+                            className="nav-link active fw-bold text-primary account-nav-link" 
                             to={user.role_id === 1 ? "/admin" : user.role_id === 2 ? "/tutor" : "/student"}
                         >
                             <i className="bi bi-person-circle me-1"></i>

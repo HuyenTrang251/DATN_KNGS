@@ -31,10 +31,14 @@ export const getTutorApplications = () => axiosClient.get("/posts/my-application
 export const createPaymentLink = (data) => axiosClient.post("/payments/create-link", data);
 export const payOS = (data) => createPaymentLink({ ...data, provider: "payos" });
 export const createMomoPayment = (data) => createPaymentLink({ ...data, provider: "momo" });
+export const createZaloPayPayment = (data) => createPaymentLink({ ...data, provider: "zalopay" });
 export const confirmPayOSReturn = (orderCode) => axiosClient.get(`/payments/payos-return?orderCode=${orderCode}`);
 export const confirmMomoReturn = (orderId) => axiosClient.get(`/payments/momo-return?orderId=${encodeURIComponent(orderId)}`);
+export const confirmZaloPayReturn = (appTransId) => axiosClient.get(`/payments/zalopay-return?appTransId=${encodeURIComponent(appTransId)}`);
 export const getAllPayments = () => axiosClient.get("/payments");
 export const approvePayment = (id, data) => axiosClient.put(`/payments/${id}`, data);
+export const updatePaymentStatus = (id, data) => axiosClient.put(`/payments/${id}`, data);
+export const refundPayment = (id, data) => axiosClient.post(`/payments/${id}/refund`, data);
 
 // --- NHÓM API LỚP HỌC (CLASS SESSIONS) ---
 export const finalizePost = (id, data) => axiosClient.post(`/posts/finalize/${id}`, data);

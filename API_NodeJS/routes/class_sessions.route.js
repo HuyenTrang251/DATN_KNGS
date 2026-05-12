@@ -15,7 +15,7 @@ router.post('/:id/confirm-complete', authentic([3]), Controller.confirmComplete)
 // 4. Các route CRUD cơ bản
 // router.get('/:id', Controller.getById);
 // router.post('/', Controller.create);
-router.put('/:id', Controller.update);
+router.put('/:id', authentic(), Controller.update);
 // router.delete('/:id', Controller.delete);
 
 module.exports = router;

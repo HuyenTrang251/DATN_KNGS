@@ -54,13 +54,14 @@ const Model = {
         SELECT 
             (SELECT COUNT(*) FROM tutors WHERE approval_status = 'pending' AND deleted_at IS NULL) as tutor_count,
             (SELECT COUNT(*) FROM posts WHERE status = 'pending' AND deleted_at IS NULL) as post_count,
-            (SELECT COUNT(*) FROM bookings WHERE status = 'pending' AND deleted_at IS NULL) as booking_count,
-            
-            -- Đếm tiền chờ duyệt của BÀI ĐĂNG (Nhận lớp)
-            (SELECT COUNT(*) FROM payments WHERE status = 'pending' AND payment_type = 'receive_job' AND deleted_at IS NULL) as post_payment_count,
-            
-            -- Đếm tiền chờ duyệt của ĐẶT LỊCH
-            (SELECT COUNT(*) FROM payments WHERE status = 'pending' AND payment_type = 'receive_booking' AND deleted_at IS NULL) as booking_payment_count
+            (SELECT COUNT(DISTINCT p.tutor_id) 
+             FROM payments p
+             JOIN tutors t ON t.tutor_id = p.tutor_id
+             WHERE p.status = 'success'
+               AND p.payment_type = 'verify_profile'
+               AND p.deleted_at IS NULL
+               AND t.is_verified = 0
+               AND t.deleted_at IS NULL) as verify_request_count
     `;
     const rows = await db.query(sql);
     return rows[0]; 

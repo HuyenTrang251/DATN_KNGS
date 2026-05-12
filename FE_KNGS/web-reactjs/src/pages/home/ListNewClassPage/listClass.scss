@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .class-content{
     .form-class{
         width: 220px;
@@ -23,7 +25,7 @@
     // transition: background-color 0.3s ease;
   
     &:hover {
-      background-color: darken(#10B1ff, 10%);
+        background-color: color.adjust(#10B1ff, $lightness: -10%);
     }
   
     &:disabled {
@@ -33,3 +35,134 @@
       border: 1px solid #cccccc; 
     }
   }
+
+.new-class-page {
+  .new-class-toolbar {
+    gap: 16px;
+  }
+
+  .new-class-filters {
+    padding: 18px !important;
+  }
+
+  .new-class-card {
+    border-radius: 18px;
+  }
+
+  .new-class-avatar {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .new-class-title {
+    font-size: 1.5rem;
+    line-height: 1.35;
+  }
+
+  .new-class-address,
+  .new-class-note {
+    font-size: 1rem !important;
+  }
+
+  .new-class-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .new-class-page {
+    .new-class-toolbar {
+      flex-wrap: wrap;
+      align-items: flex-start !important;
+    }
+
+    .new-class-toolbar > * {
+      width: 100%;
+    }
+
+    .new-class-card {
+      padding: 20px !important;
+    }
+
+    .new-class-profile-column {
+      text-align: left !important;
+    }
+
+    .new-class-profile-column > div {
+      flex-direction: row !important;
+      justify-content: flex-start;
+      align-items: center !important;
+      gap: 12px;
+    }
+
+    .new-class-title {
+      font-size: 1.25rem;
+      margin-bottom: 10px !important;
+    }
+
+    .new-class-content-column {
+      border-bottom: 1px solid #eef2f7;
+      padding-bottom: 16px;
+      margin-bottom: 4px;
+    }
+
+    .new-class-metrics-column,
+    .new-class-fee-column {
+      text-align: left !important;
+    }
+
+    .new-class-fee-column {
+      border-left: 1px solid #eef2f7;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .class-content {
+    .form-class,
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .text-class {
+    font-size: 18px;
+  }
+
+  .new-class-page {
+    .new-class-filters {
+      padding: 14px !important;
+    }
+
+    .new-class-card {
+      padding: 16px !important;
+    }
+
+    .new-class-profile-column > div {
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center;
+    }
+
+    .new-class-title {
+      font-size: 1.1rem;
+    }
+
+    .new-class-address,
+    .new-class-note {
+      font-size: 0.95rem !important;
+    }
+
+    .new-class-badges {
+      gap: 6px;
+    }
+
+    .new-class-fee-column {
+      border-left: 0;
+      border-top: 1px solid #eef2f7;
+      padding-top: 12px;
+    }
+  }
+}

@@ -30,6 +30,11 @@ function ListTutorPage() {
 
     const methods = ["online", "offline", "all"];
     const audiences = ["student", "teacher", "all"];
+    const audienceLabels = {
+        student: "Sinh viên",
+        teacher: "Giáo viên",
+        all: "Giáo viên, sinh viên"
+    };
 
     // --- State Modals ---
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -46,6 +51,37 @@ function ListTutorPage() {
     });
 
     const BASE_URL = "http://localhost:3300";
+
+    const normalizeText = (value) => String(value || "").trim().toLowerCase();
+
+    const normalizeAddressText = (value) => normalizeText(value).replace(/thành phố\s|tỉnh\s/gi, "");
+
+    const matchesAddress = (item) => {
+        const addressPool = [item?.home_address, ...(item?.locations || [])]
+            .filter(Boolean)
+            .map(normalizeAddressText);
+
+        if (selectedTinh && !addressPool.some((address) => address.includes(normalizeAddressText(selectedTinh)))) {
+            return false;
+        }
+
+        if (selectedHuyen && !addressPool.some((address) => address.includes(normalizeText(selectedHuyen)))) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const getTutorAudience = (item) => {
+        if (item?.audience) return normalizeText(item.audience);
+
+        const education = normalizeText(item?.education);
+        if (education.includes("sinh viên") || education.includes("sinh vien")) {
+            return "student";
+        }
+
+        return "teacher";
+    };
 
     // ================== 1. LOAD DỮ LIỆU BAN ĐẦU ==================
     useEffect(() => {
@@ -96,17 +132,37 @@ function ListTutorPage() {
 
     // ================== 2. XỬ LÝ LOGIC TÌM KIẾM ==================
     const handleSearch = () => {
-        let results = [...tutors];
+        const selectedSubjectName = subjects.find((subject) => String(subject.subject_id) === String(selectedSubject))?.name;
 
-        if (selectedTinh) {
-            results = results.filter(t => t.home_address?.includes(selectedTinh));
-        }
-        if (selectedSubject) {
-            results = results.filter(t => 
-                t.subject_details?.some(s => s.subject_name.toLowerCase().includes(selectedSubject.toLowerCase()))
-            );
-        }
-        // Thêm logic lọc theo hình thức hoặc đối tượng nếu cần ở đây...
+        const results = tutors.filter((item) => {
+            if (!matchesAddress(item)) {
+                return false;
+            }
+
+            if (selectedSubjectName) {
+                const hasSubject = (item?.subject_details || []).some((subject) =>
+                    normalizeText(subject.subject_name) === normalizeText(selectedSubjectName)
+                );
+
+                if (!hasSubject) {
+                    return false;
+                }
+            }
+
+            if (selectedMethod && selectedMethod !== "all") {
+                if (normalizeText(item?.teaching_mode) !== normalizeText(selectedMethod)) {
+                    return false;
+                }
+            }
+
+            if (selectedAudience && selectedAudience !== "all") {
+                if (getTutorAudience(item) !== normalizeText(selectedAudience)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
 
         setFilteredTutors(results);
     };
@@ -137,6 +193,15 @@ function ListTutorPage() {
         setShowBookingModal(true);
     };
 
+    const handleBookingNumberChange = (field, value) => {
+        const digitsOnly = String(value || "").replace(/\D/g, "").slice(0, 2);
+
+        setBookingForm((prev) => ({
+            ...prev,
+            [field]: digitsOnly
+        }));
+    };
+
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
         // Kiểm tra nếu ID môn học chưa được chọn hoặc bị lỗi
@@ -144,6 +209,12 @@ function ListTutorPage() {
             alert("Vui lòng chọn môn học muốn đăng ký dạy!");
             return;
         }
+
+        if (!bookingForm.hours_per_session || !bookingForm.sessions_per_week) {
+            alert("Vui lòng nhập số giờ/buổi và số buổi/tuần từ 1 đến 99.");
+            return;
+        }
+
         try {
             const payload = {
                 tutor_id: selectedTutor.tutor_id,
@@ -188,7 +259,7 @@ function ListTutorPage() {
 
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="fw-bold">DANH SÁCH GIA SƯ</h5>
-                <span className="text-muted">Có {tutors.length} kết quả</span>
+                <span className="text-muted">Có {filteredTutors.length} kết quả</span>
             </div>
 
             {/* BỘ LỌC - ĐÃ CĂN GIỮA VÀ ĐỀU NHAU */}
@@ -247,12 +318,12 @@ function ListTutorPage() {
                             onChange={(e) => setSelectedAudience(e.target.value)}
                         >
                             <option value="">-- Đối tượng --</option>
-                            {audiences.map((a) => <option key={a} value={a}>{a}</option>)}
+                            {audiences.map((a) => <option key={a} value={a}>{audienceLabels[a]}</option>)}
                         </Form.Select>
                     </Col>
 
-                    <Col xs={12} sm={12} md={1} className="d-flex justify-content-center" onClick={handleSearch}>
-                        <Button variant="primary" size="sm" className="w-100 fw-bold">Áp dụng</Button>
+                    <Col xs={12} sm={12} md={1} className="d-flex justify-content-center">
+                        <Button variant="primary" size="sm" className="w-100 fw-bold" onClick={handleSearch}>Áp dụng</Button>
                     </Col>
                 </Row>
             </div>
@@ -348,13 +419,25 @@ function ListTutorPage() {
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label className="small fw-bold">Số giờ/buổi</Form.Label>
-                                    <Form.Control type="number" step="0.5" value={bookingForm.hours_per_session} onChange={(e) => setBookingForm({...bookingForm, hours_per_session: e.target.value})} />
+                                    <Form.Control
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={2}
+                                        value={bookingForm.hours_per_session}
+                                        onChange={(e) => handleBookingNumberChange('hours_per_session', e.target.value)}
+                                    />
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label className="small fw-bold">Số buổi/tuần</Form.Label>
-                                    <Form.Control type="number" value={bookingForm.sessions_per_week} onChange={(e) => setBookingForm({...bookingForm, sessions_per_week: e.target.value})} />
+                                    <Form.Control
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={2}
+                                        value={bookingForm.sessions_per_week}
+                                        onChange={(e) => handleBookingNumberChange('sessions_per_week', e.target.value)}
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>

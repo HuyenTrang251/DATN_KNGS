@@ -55,12 +55,13 @@ const ManageApplications = () => {
       });
 
       const isMobile = /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-      const checkoutUrl = provider === "momo" && isMobile ? res?.deeplink || res?.checkoutUrl : res?.checkoutUrl;
+      const paymentProvider = res?.provider || provider;
+      const checkoutUrl = paymentProvider === "momo" && isMobile ? res?.deeplink || res?.checkoutUrl : res?.checkoutUrl;
 
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
-        alert("Loi: Khong the lay link thanh toan.");
+        alert(`Loi: Khong the lay link thanh toan cho ma giao dich ${res?.transactionCode || "cu"}.`);
       }
     } catch (error) {
       const errorMsg = error.response?.data?.message || "Khong the gui yeu cau thanh toan";
@@ -80,11 +81,12 @@ const ManageApplications = () => {
 
     try {
       setLoading(true);
-      await postApi.finalizePost(item.post_id, { action });
+      const result = await postApi.finalizePost(item.post_id, { action });
       alert(
-        action === "success"
+        result?.message ||
+        (action === "success"
           ? "Chúc mừng! Lớp học đã chính thức bắt đầu."
-          : "Đã ghi nhận liên hệ thất bại."
+          : "Đã ghi nhận liên hệ thất bại.")
       );
       fetchApps();
     } catch (error) {
@@ -96,8 +98,8 @@ const ManageApplications = () => {
 
   const translateGender = (gender) => {
     if (gender === "male") return "Nam";
-    if (gender === "female") return "Nu";
-    return "Khong yeu cau";
+    if (gender === "female") return "Nữ";
+    return "Không yêu cầu";
   };
 
   const getStatusInfo = (item) => {
@@ -106,7 +108,7 @@ const ManageApplications = () => {
 
     if (item.apply_status === "agreed") {
       if (!item.payment_status) return { text: "Đã đồng ý - Cần đóng phí", bg: "info" };
-      if (item.payment_status === "pending") return { text: "Chưa hoàn tất - Có thể thanh toán lại", bg: "warning" };
+      if (item.payment_status === "pending") return { text: "Tiếp tục thanh toán mã cũ", bg: "warning" };
       if (item.payment_status === "success") return { text: "Thanh toán thành công", bg: "success" };
       if (item.payment_status === "refunded") return { text: "Đã hoàn phí", bg: "dark" };
     }
@@ -123,7 +125,7 @@ const ManageApplications = () => {
   }
 
   return (
-    <div className="container mt-4 pb-5">
+    <div className="container mt-4 pb-5 manage-apps-page">
       <h4 className="fw-bold text-primary mb-4 text-uppercase">Lớp học đã nhận</h4>
       <Row>
         {apps.length > 0 ? (
@@ -143,16 +145,16 @@ const ManageApplications = () => {
                       </h6>
                       <div className="small mb-2">
                         <p className="mb-1">
-                          Hoc phi:{" "}
+                          Học phí:{" "}
                           <b className="text-success">
-                            {Number(item.tuition_fee_per_session).toLocaleString()}d/buoi
+                            {Number(item.tuition_fee_per_session).toLocaleString()}đ/buổi
                           </b>
                         </p>
                         <p className="mb-1">
-                          Phi nhan lop:{" "}
-                          <b className="text-danger">{Number(item.fee_receive).toLocaleString()}d</b>
+                          Phí nhận lớp:{" "}
+                          <b className="text-danger">{Number(item.fee_receive).toLocaleString()}đ</b>
                         </p>
-                        <p className="mb-1 text-dark">Hoc vien: {item.full_name}</p>
+                        <p className="mb-1 text-dark">Học viên: {item.full_name}</p>
                         <p className="mb-1 text-muted">
                           <i className="bi bi-geo-alt-fill text-danger me-1"></i> {item.address}
                         </p>
@@ -161,10 +163,10 @@ const ManageApplications = () => {
                       {isSuccessPayment ? (
                         <div className="mt-2 p-2 bg-light rounded border border-success small">
                           <p className="mb-1 text-success fw-bold">
-                            <i className="bi bi-person-check-fill me-1"></i> Da mo khoa lien he:
+                            <i className="bi bi-person-check-fill me-1"></i> Đã mở khóa liên hệ:
                           </p>
                           <p className="mb-0">
-                            <b>SDT Phu huynh:</b>{" "}
+                            <b>SĐT Phụ huynh:</b>{" "}
                             <span className="fs-6 fw-bold text-primary">{item.phone}</span>
                           </p>
                         </div>
@@ -172,8 +174,8 @@ const ManageApplications = () => {
                         <p className="text-muted fst-italic small mt-2">
                           <i className="bi bi-lock-fill me-1"></i>
                           {item.apply_status === "pending"
-                            ? "Thong tin SDT se hien sau khi hoc vien dong y."
-                            : "SDT bi an cho den khi he thong xac nhan thanh toan thanh cong."}
+                            ? "Thông tin SĐT sẽ hiện sau khi học viên đồng ý."
+                            : "SĐT bị ẩn cho đến khi hệ thống xác nhận thanh toán thành công."}
                         </p>
                       )}
                     </Col>
@@ -185,36 +187,36 @@ const ManageApplications = () => {
                         </Badge>
                       </div>
 
-                      <div className="d-flex flex-column gap-2 mt-4 align-items-end">
+                      <div className="application-card-actions d-flex flex-column gap-2 mt-4 align-items-end">
                         <Button
                           variant="outline-primary"
                           size="sm"
-                          className="fw-bold px-3 rounded-pill w-75"
+                          className="fw-bold px-3 rounded-pill w-75 application-action-button"
                           onClick={() => handleViewDetail(item)}
                         >
-                          <i className="bi bi-eye"></i> Chi tiet
+                          <i className="bi bi-eye"></i> Chi tiết
                         </Button>
 
                         {showPayButton && (
                           <Button
                             variant={item.payment_status === "pending" ? "warning" : "success"}
                             size="sm"
-                            className="fw-bold rounded-pill px-3 w-75"
+                            className="fw-bold rounded-pill px-3 w-75 application-action-button"
                             onClick={() => handlePay(item)}
                           >
-                            {item.payment_status === "pending" ? "Thanh toan lai" : "Thanh toan phi"}
+                            {item.payment_status === "pending" ? "Tiếp tục thanh toán" : "Thanh toán phí"}
                           </Button>
                         )}
 
                         {isSuccessPayment && (
-                          <div className="d-flex flex-column gap-2 mt-4 align-items-end">
+                          <div className="d-flex flex-column gap-2 mt-4 align-items-end application-result-actions">
                             <Button
                               variant="primary"
                               size="sm"
                               className="fw-bold rounded-pill px-3 w-100"
                               onClick={() => handleFinalizePost(item, "success")}
                             >
-                              Xac nhan ket noi
+                              Xác nhận kết nối
                             </Button>
                             <Button
                               variant="outline-danger"
@@ -222,7 +224,7 @@ const ManageApplications = () => {
                               className="fw-bold rounded-pill px-3 w-100"
                               onClick={() => handleFinalizePost(item, "cancel")}
                             >
-                              Lien he that bai
+                              Liên hệ thất bại  
                             </Button>
                           </div>
                         )}
@@ -248,7 +250,7 @@ const ManageApplications = () => {
           {selectedJob && (
             <Row>
               <Col md={6}>
-                <h6 className="fw-bold border-bottom pb-2 mb-3 text-dark">Yeu cau lop hoc</h6>
+                <h6 className="fw-bold border-bottom pb-2 mb-3 text-dark">Yêu cầu lớp học</h6>
                 <ListGroup variant="flush" className="small">
                   <ListGroup.Item><b>Môn học:</b> {selectedJob.subject_name}</ListGroup.Item>
                   <ListGroup.Item><b>Trình độ:</b> {selectedJob.grade}</ListGroup.Item>
@@ -272,14 +274,14 @@ const ManageApplications = () => {
               <Col md={12} className="mt-3">
                 <h6 className="fw-bold border-bottom pb-2 mb-2 text-dark">Ghi chú từ học viên</h6>
                 <div className="p-3 bg-light rounded border small fst-italic">
-                  "{selectedJob.note || "Khong co ghi chu them."}"
+                  "{selectedJob.note || "Không có ghi chú thêm."}"
                 </div>
               </Col>
             </Row>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDetail(false)}>Đồng</Button>
+          <Button variant="secondary" onClick={() => setShowDetail(false)}>Đóng</Button>
           {selectedJob?.apply_status === "agreed" && !selectedJob?.payment_status && (
             <Button
               variant="success"
@@ -311,8 +313,11 @@ const ManageApplications = () => {
             <Button variant="primary" className="w-100 fw-bold py-3" onClick={() => handleCheckout("payos")}>
               THANH TOÁN QUA PAYOS
             </Button>
+            <Button variant="success" className="w-100 fw-bold py-3" onClick={() => handleCheckout("zalopay")}>
+              THANH TOÁN QUA ZALOPAY
+            </Button>
             <Button variant="outline-dark" className="w-100 fw-bold py-3" onClick={() => handleCheckout("momo")}>
-              THANH TOÁN QUA VI MOMO
+              THANH TOÁN QUA VÍ MOMO
             </Button>
           </div>
         </Modal.Body>

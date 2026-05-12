@@ -1,4 +1,15 @@
 const Model = require('../models/bookings.model');
+const PaymentModel = require('../models/payments.model');
+
+const REFUND_REVIEW_WINDOW_DAYS = 5;
+
+const isWithinRefundWindow = (payment) => {
+  if (!payment?.updated_at) return false;
+
+  const paymentTime = new Date(payment.updated_at).getTime();
+  const deadline = paymentTime + REFUND_REVIEW_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  return Date.now() <= deadline;
+};
 
 module.exports = {
   // --- NHÓM ADMIN ---
@@ -75,10 +86,23 @@ module.exports = {
       const studentRes = await Model.getStudentIdByUserId(req.user.id);
       if (!studentRes || studentRes.length === 0) return res.status(403).send("Bạn cần có hồ sơ Học viên để thực hiện chức năng này");
 
+      const hoursPerSession = Number(req.body.hours_per_session);
+      const sessionsPerWeek = Number(req.body.sessions_per_week);
+
+      if (!Number.isInteger(hoursPerSession) || hoursPerSession < 1 || hoursPerSession > 99) {
+        return res.status(400).json({ error: "Số giờ mỗi buổi phải là số nguyên từ 1 đến 99" });
+      }
+
+      if (!Number.isInteger(sessionsPerWeek) || sessionsPerWeek < 1 || sessionsPerWeek > 99) {
+        return res.status(400).json({ error: "Số buổi mỗi tuần phải là số nguyên từ 1 đến 99" });
+      }
+
       const data = {
         ...req.body,
         student_id: studentRes[0].student_id,
-        status: 'pending'
+        hours_per_session: hoursPerSession,
+        sessions_per_week: sessionsPerWeek,
+        status: 'approved'
       };
       await Model.create(data);
       res.status(201).json({ message: "Gửi lời mời dạy thành công!" });
@@ -230,22 +254,29 @@ module.exports = {
           status: 'ongoing' // Lớp học đang diễn ra
         });
 
-        // C. Cộng 10 điểm uy tín cho gia sư
-        await Model.addPoints(booking.tutor_id, 10, `Kết nối thành công lịch hẹn #${booking.booking_id}`);
-
         return res.json({ message: "Xác nhận kết nối thành công! Lớp học đã được tạo." });
       } 
       
       // ================== TRƯỜNG HỢP 2: LIÊN HỆ THẤT BẠI ==================
       else if (action === 'cancel') {
+        const payment = await PaymentModel.getLatestSuccessByBooking(booking.booking_id);
+        const refundEligible = isWithinRefundWindow(payment);
+        const cancelReason = refundEligible
+          ? "Gia sư không liên hệ được học viên. Thanh toán vẫn trong 5 ngày, admin xem xét hoàn tiền."
+          : "Gia sư không liên hệ được học viên. Đã quá 5 ngày từ lúc thanh toán thành công, không hoàn tiền.";
         
         // Cập nhật trạng thái hủy và lưu lý do mặc định
         await Model.update(bookingId, { 
           status: 'cancelled', 
-          cancel_reason: "Gia sư không liên hệ được học viên" 
+          cancel_reason: cancelReason 
         });
 
-        return res.json({ message: "Đã ghi nhận liên hệ thất bại. Yêu cầu đã được hủy." });
+        return res.json({
+          message: refundEligible
+            ? "Đã ghi nhận liên hệ thất bại. Yêu cầu đã được hủy và admin sẽ xem xét hoàn tiền."
+            : "Đã ghi nhận liên hệ thất bại. Yêu cầu đã được hủy và không đủ điều kiện hoàn tiền vì đã quá 5 ngày từ lúc thanh toán thành công.",
+          refundEligible
+        });
       } 
       
       // Trường hợp Frontend gửi lên action lạ

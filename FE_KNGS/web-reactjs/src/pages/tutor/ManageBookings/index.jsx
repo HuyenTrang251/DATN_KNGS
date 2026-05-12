@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Badge, Button, Modal, ListGroup, Spinner } from "react-bootstrap";
 import * as bookingApi from "../../../services/bookingApi";
 import * as postApi from "../../../services/postApi";
+import "./manageBookings.scss";
 
 const TutorBookingManagement = () => {
   const [invitations, setInvitations] = useState([]);
@@ -32,16 +33,16 @@ const TutorBookingManagement = () => {
   const handleRespond = async (id, status) => {
     const msg =
       status === "agreed"
-        ? "Ban dong y nhan lop nay va se tien hanh nop phi?"
-        : "Ban muon tu choi loi moi nay?";
+        ? "Bạn đồng ý nhận lớp này và sẽ tiến hành nộp phí?"
+        : "Bạn muốn từ chối lời mời này?";
     if (!window.confirm(msg)) return;
 
     try {
       await bookingApi.respondToInvitation(id, { status });
-      alert("Da gui phan hoi thanh cong!");
+      alert("Đã gửi phản hồi thành công!");
       loadData();
     } catch (error) {
-      alert("Thao tac that bai");
+      alert("Thao tác thất bại");
     }
   };
 
@@ -53,7 +54,7 @@ const TutorBookingManagement = () => {
   const handleCheckout = async (provider) => {
     try {
       setLoading(true);
-      const desc = `Phi dat lich BK${selected.booking_id}`.substring(0, 25);
+      const desc = `Phí đặt lịch BK${selected.booking_id}`.substring(0, 25);
       const res = await postApi.createPaymentLink({
         tutor_id: Number(selected.tutor_id),
         booking_id: Number(selected.booking_id),
@@ -65,16 +66,17 @@ const TutorBookingManagement = () => {
       });
 
       const isMobile = /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-      const checkoutUrl = provider === "momo" && isMobile ? res?.deeplink || res?.checkoutUrl : res?.checkoutUrl;
+      const paymentProvider = res?.provider || provider;
+      const checkoutUrl = paymentProvider === "momo" && isMobile ? res?.deeplink || res?.checkoutUrl : res?.checkoutUrl;
 
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
-        alert("Loi: Khong nhan duoc link thanh toan tu he thong.");
+        alert(`Lỗi: Không nhận được link thanh toán cho mã giao dịch ${res?.transactionCode || "cũ"}.`);
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || "Loi he thong";
-      alert("Loi thanh toan: " + errorMsg);
+      const errorMsg = error.response?.data?.message || error.message || "Lỗi hệ thống";
+      alert("Lỗi thanh toán: " + errorMsg);
       console.error("Payment error:", error);
     } finally {
       setLoading(false);
@@ -84,21 +86,22 @@ const TutorBookingManagement = () => {
   const handleFinalizeBooking = async (id, action) => {
     const confirmMsg =
       action === "success"
-        ? "Xac nhan ban da lien he thanh cong va chot lop day?"
-        : "Xac nhan ban khong the lien he duoc hoc vien nay?";
+        ? "Xác nhận bạn đã liên hệ thành công và chốt lớp dạy?"
+        : "Xác nhận bạn không thể liên hệ được học viên này?";
 
     if (!window.confirm(confirmMsg)) return;
 
     try {
-      await bookingApi.confirmConnectionSuccess(id, { action });
+      const result = await bookingApi.confirmConnectionSuccess(id, { action });
       alert(
-        action === "success"
-          ? "Chuc mung! Lop hoc da duoc tao thanh cong."
-          : "Da ghi nhan lien he that bai."
+        result?.message ||
+        (action === "success"
+          ? "Chúc mừng! Lớp học đã được tạo thành công."
+          : "Đã ghi nhận liên hệ thất bại.")
       );
       loadData();
     } catch (error) {
-      alert("Loi thao tac: " + (error.response?.data?.message || error.message));
+      alert("Lỗi thao tác: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -111,7 +114,7 @@ const TutorBookingManagement = () => {
         return <Badge bg="primary">ĐÃ ĐỒNG Ý - HÃY THANH TOÁN</Badge>;
       }
       if (item.payment_status === "pending") {
-        return <Badge bg="warning" text="dark">CHƯA HOÀN TẤT - CÓ THỂ THANH TOÁN LẠI</Badge>;
+        return <Badge bg="warning" text="dark">CHƯA HOÀN TẤT - TIẾP TỤC THANH TOÁN MÃ CŨ</Badge>;
       }
       if (item.payment_status === "success") {
         return <Badge bg="success">THANH TOÁN THÀNH CÔNG - HÃY GỌI ĐIỆN</Badge>;
@@ -131,7 +134,7 @@ const TutorBookingManagement = () => {
   }
 
   return (
-    <Container className="mt-4 pb-5">
+    <Container className="mt-4 pb-5 manage-bookings-page">
       <h4 className="fw-bold text-primary mb-4 text-uppercase">Danh sách lời mời dạy</h4>
       <Row>
         {invitations.length > 0 ? (
@@ -143,7 +146,7 @@ const TutorBookingManagement = () => {
               <Col md={6} key={item.booking_id} className="mb-4">
                 <Card className="h-100 border-0 shadow-sm border-start border-4 border-info">
                   <Card.Body>
-                    <div className="d-flex justify-content-between mb-3">
+                    <div className="booking-card-header mb-3">
                       <h6 className="fw-bold text-dark mb-0">
                         {item.subject_name} - {item.level}
                       </h6>
@@ -179,7 +182,7 @@ const TutorBookingManagement = () => {
                       )}
                     </div>
 
-                    <div className="d-flex gap-2">
+                    <div className="booking-card-actions">
                       <Button
                         variant="outline-primary"
                         size="sm"
@@ -306,6 +309,9 @@ const TutorBookingManagement = () => {
           <div className="d-grid gap-2">
             <Button variant="primary" className="w-100 fw-bold py-3 shadow-sm" onClick={() => handleCheckout("payos")}>
               THANH TOÁN QUA PAYOS
+            </Button>
+            <Button variant="success" className="w-100 fw-bold py-3 shadow-sm" onClick={() => handleCheckout("zalopay")}>
+              THANH TOÁN QUA ZALOPAY
             </Button>
             <Button variant="outline-dark" className="w-100 fw-bold py-3 shadow-sm" onClick={() => handleCheckout("momo")}>
               THANH TOÁN QUA VI MOMO

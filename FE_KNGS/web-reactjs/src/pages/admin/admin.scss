@@ -75,3 +75,51 @@ $admin-main-color: #0c024c;
     }
   }
 }
+
+@media (max-width: 991.98px) {
+  .admin-management-wrapper {
+    padding: 16px 0 8px;
+    margin-top: 0;
+
+    .page-title {
+      font-size: 1.35rem;
+    }
+
+    .custom-table {
+      min-width: 760px;
+    }
+  }
+
+  .admin-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .admin-modal-actions > * {
+    flex: 1 1 calc(50% - 12px);
+  }
+
+  .payment-review-banner {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
+  .payment-review-banner .btn,
+  .compact-delete-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .admin-management-wrapper {
+    .page-title {
+      font-size: 1.15rem;
+    }
+  }
+
+  .admin-modal-actions > * {
+    flex-basis: 100%;
+  }
+}

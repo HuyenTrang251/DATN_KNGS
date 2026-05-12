@@ -5,10 +5,18 @@ const Model = {
     const sql = `
       SELECT 
         pa.post_application_id, pa.post_id, pa.tutor_id, pa.status as apply_status, pa.created_at,
+        p.status AS post_status,
         u.full_name, u.avatar, u.phone AS tutor_phone, u.address AS tutor_address,
         t.education, t.experience,
-        pay.status AS payment_status, pay.id AS payment_id, pay.transaction_code, pay.amount
+        pay.status AS payment_status, pay.id AS payment_id, pay.transaction_code, pay.amount, pay.updated_at AS payment_updated_at,
+        CASE
+          WHEN pay.status = 'success'
+           AND TIMESTAMPDIFF(DAY, pay.updated_at, NOW()) <= 5
+           AND p.status = 'cancelled' THEN 1
+          ELSE 0
+        END AS refund_eligible
       FROM post_applications pa
+      JOIN posts p ON p.post_id = pa.post_id
       JOIN tutors t ON pa.tutor_id = t.tutor_id
       JOIN users u ON t.user_id = u.user_id
       LEFT JOIN payments pay ON pay.post_id = pa.post_id 

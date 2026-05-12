@@ -10,6 +10,7 @@ const PostAppModel = require("../models/post_applications.model");
 const PAYMENT_PROVIDERS = {
   PAYOS: "payos",
   MOMO: "momo",
+  ZALOPAY: "zalopay",
 };
 
 const payos =
@@ -37,9 +38,17 @@ const buildRedirectPath = (paymentType) => {
 };
 
 const normalizeProvider = (provider) => {
-  return String(provider || PAYMENT_PROVIDERS.PAYOS).toLowerCase() === PAYMENT_PROVIDERS.MOMO
-    ? PAYMENT_PROVIDERS.MOMO
-    : PAYMENT_PROVIDERS.PAYOS;
+  const normalizedProvider = String(provider || PAYMENT_PROVIDERS.PAYOS).toLowerCase();
+
+  if (normalizedProvider === PAYMENT_PROVIDERS.MOMO) {
+    return PAYMENT_PROVIDERS.MOMO;
+  }
+
+  if (normalizedProvider === PAYMENT_PROVIDERS.ZALOPAY) {
+    return PAYMENT_PROVIDERS.ZALOPAY;
+  }
+
+  return PAYMENT_PROVIDERS.PAYOS;
 };
 
 const requireFrontendUrl = () => {
@@ -66,6 +75,20 @@ const buildUrl = (baseUrl, pathname, query = {}) => {
   });
 
   return url.toString();
+};
+
+const getProviderFromTransactionCode = (transactionCode) => {
+  const normalizedCode = String(transactionCode || "").toUpperCase();
+
+  if (normalizedCode.startsWith("MOMO_")) {
+    return PAYMENT_PROVIDERS.MOMO;
+  }
+
+  if (/^\d{6}_ZLP/.test(normalizedCode)) {
+    return PAYMENT_PROVIDERS.ZALOPAY;
+  }
+
+  return PAYMENT_PROVIDERS.PAYOS;
 };
 
 const sendJsonRequest = ({ endpoint, path, payload }) => {
@@ -114,6 +137,60 @@ const sendJsonRequest = ({ endpoint, path, payload }) => {
   });
 };
 
+const sendFormRequest = ({ endpoint, path, payload }) => {
+  return new Promise((resolve, reject) => {
+    const url = new URL(endpoint);
+    const requestBody = new URLSearchParams();
+
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        requestBody.append(key, String(value));
+      }
+    });
+
+    const bodyString = requestBody.toString();
+
+    const req = https.request(
+      {
+        hostname: url.hostname,
+        port: url.port || 443,
+        path,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": Buffer.byteLength(bodyString),
+        },
+      },
+      (res) => {
+        let rawData = "";
+
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => {
+          rawData += chunk;
+        });
+
+        res.on("end", () => {
+          try {
+            const parsed = rawData ? JSON.parse(rawData) : {};
+
+            if (res.statusCode >= 400) {
+              return reject(new Error(parsed.return_message || parsed.message || `Gateway request failed with status ${res.statusCode}`));
+            }
+
+            return resolve(parsed);
+          } catch (error) {
+            return reject(error);
+          }
+        });
+      }
+    );
+
+    req.on("error", reject);
+    req.write(bodyString);
+    req.end();
+  });
+};
+
 const createPayOSPaymentLink = async ({ normalizedAmount, normalizedDescription, paymentType, frontendUrl }) => {
   if (!payos) {
     throw new Error("PayOS chua duoc cau hinh day du");
@@ -146,6 +223,24 @@ const createPayOSPaymentLink = async ({ normalizedAmount, normalizedDescription,
   };
 };
 
+const getExistingPayOSPaymentLink = async (transactionCode) => {
+  if (!payos) {
+    throw new Error("PayOS chua duoc cau hinh day du");
+  }
+
+  const orderCode = Number(transactionCode);
+  if (!Number.isFinite(orderCode)) {
+    throw new Error("Ma giao dich PayOS khong hop le");
+  }
+
+  const paymentLink = await payos.paymentRequests.get(orderCode);
+  return {
+    provider: PAYMENT_PROVIDERS.PAYOS,
+    transactionCode: String(orderCode),
+    checkoutUrl: paymentLink?.id ? `https://pay.payos.vn/web/${paymentLink.id}` : null,
+  };
+};
+
 const getMomoConfig = () => {
   const config = {
     partnerCode: process.env.MOMO_PARTNER_CODE,
@@ -159,6 +254,134 @@ const getMomoConfig = () => {
   }
 
   return config;
+};
+
+const getVietnamDatePrefix = () => {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "2-digit",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const parts = formatter.formatToParts(new Date()).reduce((acc, part) => {
+    if (part.type !== "literal") {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+
+  return `${parts.year}${parts.month}${parts.day}`;
+};
+
+const getZaloPayConfig = () => {
+  const config = {
+    appId: process.env.ZALOPAY_APP_ID,
+    key1: process.env.ZALOPAY_KEY1,
+    key2: process.env.ZALOPAY_KEY2,
+    endpoint: process.env.ZALOPAY_ENDPOINT || "https://sb-openapi.zalopay.vn",
+  };
+
+  if (!config.appId || !config.key1 || !config.key2) {
+    throw new Error("ZaloPay chua duoc cau hinh day du");
+  }
+
+  return config;
+};
+
+const createZaloPayPaymentLink = async ({ normalizedAmount, normalizedDescription, paymentType, frontendUrl, backendUrl, tutorId }) => {
+  const { appId, key1, endpoint } = getZaloPayConfig();
+  const appTime = Date.now();
+  const appTransId = `${getVietnamDatePrefix()}_ZLP${String(appTime).slice(-8)}`;
+  const redirectPath = buildRedirectPath(paymentType);
+  const redirectUrl = buildUrl(frontendUrl, "/payment-success", {
+    provider: PAYMENT_PROVIDERS.ZALOPAY,
+    appTransId,
+    redirect: redirectPath,
+  });
+  const callbackUrl = buildUrl(backendUrl, "/api/payments/zalopay-callback");
+  const embedData = JSON.stringify({
+    redirecturl: redirectUrl,
+    payment_type: paymentType,
+  });
+  const item = JSON.stringify([]);
+  const macInput = [appId, appTransId, String(tutorId || "tutor"), normalizedAmount, appTime, embedData, item].join("|");
+  const mac = crypto.createHmac("sha256", key1).update(macInput).digest("hex");
+
+  const paymentLink = await sendFormRequest({
+    endpoint,
+    path: "/v2/create",
+    payload: {
+      app_id: appId,
+      app_user: String(tutorId || "tutor"),
+      app_time: appTime,
+      amount: normalizedAmount,
+      app_trans_id: appTransId,
+      embed_data: embedData,
+      item,
+      description: normalizedDescription,
+      callback_url: callbackUrl,
+      mac,
+    },
+  });
+
+  if (Number(paymentLink.return_code) !== 1) {
+    throw new Error(paymentLink.sub_return_message || paymentLink.return_message || "ZaloPay khong tao duoc lien ket thanh toan");
+  }
+
+  return {
+    provider: PAYMENT_PROVIDERS.ZALOPAY,
+    transactionCode: appTransId,
+    checkoutUrl: paymentLink.order_url,
+    deeplink: paymentLink.order_url || null,
+    qrCodeUrl: paymentLink.qr_code || null,
+  };
+};
+
+const queryZaloPayPayment = async (appTransId) => {
+  const { appId, key1, endpoint } = getZaloPayConfig();
+  const macInput = `${appId}|${appTransId}|${key1}`;
+  const mac = crypto.createHmac("sha256", key1).update(macInput).digest("hex");
+
+  return sendFormRequest({
+    endpoint,
+    path: "/v2/query",
+    payload: {
+      app_id: appId,
+      app_trans_id: appTransId,
+      mac,
+    },
+  });
+};
+
+const createPaymentLinkByProvider = async ({ provider, normalizedAmount, normalizedDescription, paymentType, frontendUrl, backendUrl, tutorId }) => {
+  if (provider === PAYMENT_PROVIDERS.MOMO) {
+    return createMomoPaymentLink({
+      normalizedAmount,
+      normalizedDescription,
+      paymentType,
+      frontendUrl,
+      backendUrl,
+    });
+  }
+
+  if (provider === PAYMENT_PROVIDERS.ZALOPAY) {
+    return createZaloPayPaymentLink({
+      normalizedAmount,
+      normalizedDescription,
+      paymentType,
+      frontendUrl,
+      backendUrl,
+      tutorId,
+    });
+  }
+
+  return createPayOSPaymentLink({
+    normalizedAmount,
+    normalizedDescription,
+    paymentType,
+    frontendUrl,
+  });
 };
 
 const createMomoPaymentLink = async ({ normalizedAmount, normalizedDescription, paymentType, frontendUrl, backendUrl }) => {
@@ -222,6 +445,39 @@ const createMomoPaymentLink = async ({ normalizedAmount, normalizedDescription, 
   };
 };
 
+const getExistingPaymentLink = async ({ payment, normalizedAmount, normalizedDescription, paymentType, frontendUrl, backendUrl }) => {
+  const provider = getProviderFromTransactionCode(payment.transaction_code);
+
+  if (provider === PAYMENT_PROVIDERS.MOMO) {
+    const refreshedLink = await createMomoPaymentLink({
+      normalizedAmount,
+      normalizedDescription,
+      paymentType,
+      frontendUrl,
+      backendUrl,
+    });
+
+    await PaymentModel.updatePendingTransaction(payment.id, refreshedLink.transactionCode, normalizedAmount);
+    return refreshedLink;
+  }
+
+  if (provider === PAYMENT_PROVIDERS.ZALOPAY) {
+    const refreshedLink = await createZaloPayPaymentLink({
+      normalizedAmount,
+      normalizedDescription,
+      paymentType,
+      frontendUrl,
+      backendUrl,
+      tutorId: payment.tutor_id,
+    });
+
+    await PaymentModel.updatePendingTransaction(payment.id, refreshedLink.transactionCode, normalizedAmount);
+    return refreshedLink;
+  }
+
+  return getExistingPayOSPaymentLink(payment.transaction_code);
+};
+
 const queryMomoPayment = async (orderId) => {
   const { partnerCode, accessKey, secretKey, endpoint } = getMomoConfig();
   const requestId = `QUERY_${Date.now()}`;
@@ -263,7 +519,6 @@ const applySuccessfulPayment = async (payment) => {
       }
       break;
     case "verify_profile":
-      await TutorModel.updateVerifyStatus(payment.tutor_id, 1);
       break;
   }
 
@@ -282,38 +537,62 @@ module.exports = {
       const normalizedAmount = Number(amount);
       const normalizedDescription = String(description || "Thanh toan hoc phi").substring(0, 25);
       const selectedProvider = normalizeProvider(provider);
+      const requiresTargetReference = payment_type !== "verify_profile";
 
       if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
         return res.status(400).json({ message: "So tien thanh toan khong hop le" });
       }
 
+      if (!tutor_id || !payment_type || (requiresTargetReference && !post_id && !booking_id)) {
+        return res.status(400).json({ message: "Thieu thong tin de tao giao dich" });
+      }
+
       const frontendUrl = requireFrontendUrl();
       const backendUrl = getBackendBaseUrl(req);
-      const paymentLink =
-        selectedProvider === PAYMENT_PROVIDERS.MOMO
-          ? await createMomoPaymentLink({
-              normalizedAmount,
-              normalizedDescription,
-              paymentType: payment_type,
-              frontendUrl,
-              backendUrl,
-            })
-          : await createPayOSPaymentLink({
-              normalizedAmount,
-              normalizedDescription,
-              paymentType: payment_type,
-              frontendUrl,
-            });
-
-      await PaymentModel.create({
-        tutor_id,
-        post_id: post_id || null,
-        booking_id: booking_id || null,
+      const reusablePayment = await PaymentModel.findReusablePending({
+        tutor_id: Number(tutor_id),
+        post_id: post_id ? Number(post_id) : null,
+        booking_id: booking_id ? Number(booking_id) : null,
         payment_type,
-        amount: normalizedAmount,
-        transaction_code: paymentLink.transactionCode,
-        status: "pending",
       });
+      const reusableProvider = reusablePayment
+        ? getProviderFromTransactionCode(reusablePayment.transaction_code)
+        : null;
+
+      const paymentLink = reusablePayment && reusableProvider === selectedProvider
+        ? await getExistingPaymentLink({
+            payment: reusablePayment,
+            normalizedAmount,
+            normalizedDescription,
+            paymentType: payment_type,
+            frontendUrl,
+            backendUrl,
+          })
+        : await createPaymentLinkByProvider({
+            provider: selectedProvider,
+            normalizedAmount,
+            normalizedDescription,
+            paymentType: payment_type,
+            frontendUrl,
+            backendUrl,
+            tutorId: tutor_id,
+          });
+
+      if (reusablePayment && reusableProvider !== selectedProvider) {
+        await PaymentModel.updatePendingTransaction(reusablePayment.id, paymentLink.transactionCode, normalizedAmount);
+      }
+
+      if (!reusablePayment) {
+        await PaymentModel.create({
+          tutor_id,
+          post_id: post_id || null,
+          booking_id: booking_id || null,
+          payment_type,
+          amount: normalizedAmount,
+          transaction_code: paymentLink.transactionCode,
+          status: "pending",
+        });
+      }
 
       return res.json({
         provider: paymentLink.provider,
@@ -321,6 +600,7 @@ module.exports = {
         deeplink: paymentLink.deeplink || null,
         qrCodeUrl: paymentLink.qrCodeUrl || null,
         transactionCode: paymentLink.transactionCode,
+        reused: Boolean(reusablePayment),
       });
     } catch (error) {
       console.error("Payment Create Link Error:", error);
@@ -408,6 +688,43 @@ module.exports = {
     }
   },
 
+  confirmZaloPayReturn: async (req, res) => {
+    try {
+      const appTransId = String(req.query.appTransId || "").trim();
+
+      if (!appTransId) {
+        return res.status(400).json({ message: "appTransId khong hop le" });
+      }
+
+      const paymentInfo = await queryZaloPayPayment(appTransId);
+
+      if (Number(paymentInfo.return_code) !== 1) {
+        return res.status(400).json({
+          message: paymentInfo.sub_return_message || paymentInfo.return_message || "Giao dich chua thanh cong tren ZaloPay",
+          status: paymentInfo.return_code,
+        });
+      }
+
+      const result = await finalizeSuccessfulPayment(appTransId);
+
+      if (!result.updated) {
+        return res.status(404).json({ message: "Khong tim thay giao dich trong he thong" });
+      }
+
+      return res.json({
+        success: true,
+        status: "PAID",
+        provider: PAYMENT_PROVIDERS.ZALOPAY,
+        payment_type: result.payment.payment_type,
+      });
+    } catch (error) {
+      console.error("ZaloPay Confirm Return Error:", error);
+      return res.status(500).json({
+        message: error.message || "Khong the xac nhan thanh toan ZaloPay",
+      });
+    }
+  },
+
   handleWebhook: async (req, res) => {
     try {
       const { code, data } = req.body;
@@ -437,6 +754,36 @@ module.exports = {
     } catch (error) {
       console.error("MoMo IPN Error:", error.message);
       return res.status(500).json({ error: "MoMo IPN handler failed" });
+    }
+  },
+
+  handleZaloPayCallback: async (req, res) => {
+    try {
+      const callbackData = req.body || {};
+      const dataStr = String(callbackData.data || "");
+      const requestMac = String(callbackData.mac || "");
+
+      if (!dataStr || !requestMac) {
+        return res.json({ return_code: -1, return_message: "missing data" });
+      }
+
+      const { key2 } = getZaloPayConfig();
+      const expectedMac = crypto.createHmac("sha256", key2).update(dataStr).digest("hex");
+
+      if (expectedMac !== requestMac) {
+        return res.json({ return_code: -1, return_message: "mac not equal" });
+      }
+
+      const payload = JSON.parse(dataStr);
+      if (payload?.app_trans_id) {
+        await finalizeSuccessfulPayment(String(payload.app_trans_id));
+        console.log(`>>> Xu ly thanh cong giao dich ZaloPay: ${payload.app_trans_id}`);
+      }
+
+      return res.json({ return_code: 1, return_message: "success" });
+    } catch (error) {
+      console.error("ZaloPay Callback Error:", error.message);
+      return res.json({ return_code: 0, return_message: error.message || "callback failed" });
     }
   },
 };

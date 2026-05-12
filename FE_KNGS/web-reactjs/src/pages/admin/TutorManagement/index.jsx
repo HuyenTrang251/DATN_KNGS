@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Button, Badge, Modal, Row, Col, Form } from 'react-bootstrap';
 import * as tutorApi from "../../../services/tutorApi";
 import * as userApi from "../../../services/userApi"; 
+import axiosClient from "../../../api/axiosClient";
 import { useAuth } from "../../../contexts/AuthContext";
 import "../admin.scss";
 
@@ -54,6 +55,20 @@ const TutorManagement = () => {
             } catch (error) {
                 alert("Lỗi thao tác: " + (error.response?.data?.message || "Không thể kết nối server"));
             }
+        }
+    };
+
+    const handleVerifyBlueTick = async (tutorId) => {
+        if (!window.confirm("Xác nhận cấp tích xanh cho gia sư này?")) return;
+
+        try {
+            await tutorApi.verifyTutorBlueTick(tutorId);
+            alert("Đã cấp tích xanh cho gia sư.");
+            loadTutors();
+            refreshAdminCounts();
+            setShowModal(false);
+        } catch (error) {
+            alert("Lỗi: " + (error.response?.data || error.response?.data?.message || error.message));
         }
     };
 
@@ -179,7 +194,7 @@ const TutorManagement = () => {
                                     </Badge>
                                 </p>
                                 <div className="d-grid gap-2 mt-3">
-                                    {selectedTutor.verify_payment_id ? (
+                                    {selectedTutor.verify_payment_id && Number(selectedTutor.is_verified) !== 1 ? (
                                         <>
                                             <Button variant="info" className="text-white fw-bold" 
                                                 onClick={() => handleVerifyBlueTick(selectedTutor.tutor_id)}>

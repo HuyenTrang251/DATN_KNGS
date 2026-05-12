@@ -3,26 +3,13 @@
   top: 70px;
   left: 0;
   width: 235px;
-  height: 100vh;
+  height: calc(100vh - 70px);
   padding: 20px;
   background-color: #f1f8fb;
   box-shadow: 1px 1px 10px rgba(100, 150, 236, 0.825);
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, padding 0.3s ease, transform 0.3s ease;
   z-index: 1000;
-
-  &.closed {
-    width: 80px; // Tăng nhẹ một chút để đủ chỗ cho vòng tròn ảnh nhỏ
-    padding: 10px;
-
-    .nav-text, h5, small {
-      display: none;
-    }
-
-    .avatar-upload-container {
-        width: 45px;
-        height: 45px;
-    }
-  }
+  overflow-y: auto;
 
   .display-layout {
     .sidebar-user-name-row {
@@ -126,5 +113,74 @@
         .nav-img { color: #fff; }
       }
     }
+  }
+}
+
+@media (min-width: 992px) {
+  .sidebar.closed {
+    width: 80px;
+    padding: 10px;
+
+    .nav-text,
+    h5,
+    small {
+      display: none;
+    }
+
+    .avatar-upload-container {
+      width: 45px;
+      height: 45px;
+    }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .sidebar {
+    width: min(82vw, 320px);
+    max-width: 320px;
+    padding: 16px;
+    transform: translateX(0);
+    z-index: 1020;
+    box-shadow: 8px 0 28px rgba(15, 23, 42, 0.18);
+
+    .display-layout {
+      margin-bottom: 8px;
+
+      .avatar-upload-container {
+        width: 96px;
+        height: 96px;
+      }
+    }
+
+    .nav-options {
+      padding: 16px 0 24px;
+    }
+  }
+
+  .sidebar.closed {
+    width: min(82vw, 320px);
+    padding: 16px;
+    transform: translateX(-115%);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .sidebar {
+    width: min(88vw, 300px);
+    padding: 14px;
+
+    .nav-options {
+      gap: 6px;
+
+      .nav-option {
+        gap: 12px;
+        padding: 12px;
+      }
+    }
+  }
+
+  .sidebar.closed {
+    width: min(88vw, 300px);
+    padding: 14px;
   }
 }

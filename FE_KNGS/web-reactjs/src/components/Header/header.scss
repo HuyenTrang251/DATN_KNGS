@@ -20,12 +20,141 @@
     margin-right: 10px;
     border-radius: 15px;
 }
+
+.headercss .container {
+    display: flex;
+    align-items: center;
+}
+
+.header-profile-shortcut {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    margin-right: 12px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background-color: #0c024c;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.header-profile-shortcut:hover {
+    color: #fff;
+    background-color: #1f0b8a;
+}
+
+.header-profile-shortcut span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.navbar-collapse {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.navbar-nav {
+    align-items: center;
+    gap: 4px;
+}
+
 .navbar-nav .nav-link {
     color: #0c024c !important;
     font-weight: 550;
-    font-size: 17px;
+    font-size: 16px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 .navbar-nav .nav-link.active {
     background-color: #fec52e;
     border-radius: 5px;
+}
+
+.account-nav-link {
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 1199.98px) {
+    .header-profile-shortcut {
+        display: inline-flex;
+        order: 3;
+        margin-left: 12px;
+        margin-right: 0;
+    }
+
+    .navbar-brand {
+        order: 1;
+    }
+
+    .nav-link {
+        font-size: 8px;
+    }
+
+    .navbar-collapse {
+        order: 2;
+    }
+
+    .account-nav-item {
+        display: none;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .headercss .container {
+        gap: 10px;
+    }
+
+    .navbar-nav {
+        align-items: stretch;
+        gap: 0;
+    }
+
+    .header-profile-shortcut {
+        order: 2;
+        margin-left: auto;
+    }
+
+    .navbar-toggler {
+        order: 3;
+    }
+
+    .navbar-collapse {
+        order: 4;
+        flex-basis: 100%;
+    }
+
+    .header-profile-shortcut {
+        font-size: 13px;
+        padding: 7px 10px;
+        margin-right: 0;
+        max-width: 170px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    .navbar-brand img {
+        height: 34px;
+        margin-right: 8px;
+    }
+
+    .header-profile-shortcut {
+        font-size: 12px;
+        padding: 6px 9px;
+        margin-left: auto;
+        max-width: 132px;
+    }
 }

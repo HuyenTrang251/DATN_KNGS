@@ -29,10 +29,70 @@ const Model = {
     return rows[0];
   },
 
+  findReusablePending: async ({ tutor_id, post_id, booking_id, payment_type }) => {
+    const sql = `
+      SELECT *
+      FROM payments
+      WHERE tutor_id = ?
+        AND payment_type = ?
+        AND status = 'pending'
+        AND deleted_at IS NULL
+        AND (
+          (post_id = ? AND ? IS NOT NULL)
+          OR (booking_id = ? AND ? IS NOT NULL)
+          OR (post_id IS NULL AND booking_id IS NULL AND ? IS NULL AND ? IS NULL)
+        )
+      ORDER BY id DESC
+      LIMIT 1
+    `;
+    const rows = await db.query(sql, [
+      tutor_id,
+      payment_type,
+      post_id || null,
+      post_id || null,
+      booking_id || null,
+      booking_id || null,
+      post_id || null,
+      booking_id || null,
+    ]);
+    return rows[0];
+  },
+
   // Cập nhật trạng thái thành công
   updateToSuccess: async (id) => {
     const sql = `UPDATE payments SET status = 'success', updated_at = NOW() WHERE id = ?`;
     return await db.query(sql, [id]);
+  },
+
+  getLatestSuccessByBooking: async (bookingId) => {
+    const sql = `
+      SELECT *
+      FROM payments
+      WHERE booking_id = ?
+        AND payment_type = 'receive_booking'
+        AND status = 'success'
+        AND deleted_at IS NULL
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 1
+    `;
+    const rows = await db.query(sql, [bookingId]);
+    return rows[0];
+  },
+
+  getLatestSuccessByPost: async (postId, tutorId) => {
+    const sql = `
+      SELECT *
+      FROM payments
+      WHERE post_id = ?
+        AND tutor_id = ?
+        AND payment_type = 'receive_job'
+        AND status = 'success'
+        AND deleted_at IS NULL
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 1
+    `;
+    const rows = await db.query(sql, [postId, tutorId]);
+    return rows[0];
   },
 
   getAll: async () => {
@@ -42,6 +102,17 @@ const Model = {
   getById: async (id) => {
     const rows = await db.query('SELECT * FROM payments WHERE id = ? AND deleted_at IS NULL', [id]);
     return rows[0];
+  },
+
+  updatePendingTransaction: async (id, transactionCode, amount) => {
+    const sql = `
+      UPDATE payments
+      SET transaction_code = ?,
+          amount = ?,
+          updated_at = NOW()
+      WHERE id = ? AND status = 'pending' AND deleted_at IS NULL
+    `;
+    return await db.query(sql, [transactionCode, amount, id]);
   },
 
   // Hàm cập nhật trạng thái duyệt tiền

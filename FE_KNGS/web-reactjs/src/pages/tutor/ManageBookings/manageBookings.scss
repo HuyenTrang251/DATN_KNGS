@@ -115,6 +115,25 @@
   }
 }
 
+.manage-bookings-page {
+  .booking-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .booking-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    > .btn {
+      min-width: 0;
+    }
+  }
+}
+
 // Responsive cho Mobile
 @media (max-width: 768px) {
   .manage-bookings-container {
@@ -123,6 +142,29 @@
 
     .tutor-table {
       min-width: 600px; // Cho phép scroll ngang trên màn hình nhỏ
+    }
+  }
+
+  .manage-bookings-page {
+    .booking-card-header {
+      flex-direction: column;
+    }
+
+    .booking-card-header .badge {
+      align-self: flex-start;
+    }
+
+    .booking-card-actions > .btn {
+      flex: 1 1 calc(50% - 8px);
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .manage-bookings-page {
+    .booking-card-actions > .btn {
+      flex-basis: 100%;
+      width: 100%;
     }
   }
 }

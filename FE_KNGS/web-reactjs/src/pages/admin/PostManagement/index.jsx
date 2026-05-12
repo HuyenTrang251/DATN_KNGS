@@ -249,6 +249,28 @@ import * as postApi from '../../../services/postApi';
 import { useAuth } from "../../../contexts/AuthContext";
 import "../admin.scss"; 
 
+const getPaymentProvider = (transactionCode = '') => {
+    const normalizedCode = String(transactionCode).toUpperCase();
+    if (normalizedCode.startsWith('MOMO_')) return 'momo';
+    if (/^\d{6}_ZLP/.test(normalizedCode)) return 'zalopay';
+    return 'payos';
+};
+
+const getPaymentProviderLabel = (provider = 'payos') => {
+    if (provider === 'momo') return 'MoMo';
+    if (provider === 'zalopay') return 'ZaloPay';
+    return 'PayOS';
+};
+
+const createRefundForm = () => ({
+    paymentId: null,
+    postId: null,
+    provider: 'payos',
+    toBin: '',
+    toAccountNumber: '',
+    description: ''
+});
+
 const PostManagement = () => {
     const [posts, setPosts] = useState([]);
     const [filteredPosts, setFilteredPosts] = useState([]);
@@ -264,6 +286,9 @@ const PostManagement = () => {
     const [showTutorApps, setShowTutorApps] = useState(false);
     const [tutorAppsList, setTutorAppsList] = useState([]);
     const [loadingApps, setLoadingApps] = useState(false);
+    const [showRefundModal, setShowRefundModal] = useState(false);
+    const [refundForm, setRefundForm] = useState(createRefundForm());
+    const [submittingRefund, setSubmittingRefund] = useState(false);
 
     // State Form Duyệt bài
     const [approveForm, setApproveForm] = useState({ 
@@ -344,14 +369,55 @@ const PostManagement = () => {
         }
     };
 
-    const handleApprovePayment = async (paymentId, postId) => {
-        if (!window.confirm("Xác nhận đã nhận đủ tiền và duyệt thanh toán cho gia sư này?")) return;
+    const openRefundModal = (app) => {
+        setRefundForm({
+            paymentId: app.payment_id,
+            postId: app.post_id,
+            provider: getPaymentProvider(app.transaction_code),
+            toBin: '',
+            toAccountNumber: '',
+            description: `Hoan phi post #${app.post_id}`
+        });
+        setShowRefundModal(true);
+    };
+
+    const closeRefundModal = () => {
+        if (submittingRefund) return;
+        setShowRefundModal(false);
+        setRefundForm(createRefundForm());
+    };
+
+    const handleRefundInputChange = (event) => {
+        const { name, value } = event.target;
+        setRefundForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitRefund = async () => {
+        if (refundForm.provider !== 'payos') {
+            alert(`${getPaymentProviderLabel(refundForm.provider)} hiện chưa hỗ trợ hoàn tiền tự động trong hệ thống này. Hãy yêu cầu gia sư gửi mã QR hoặc tài khoản để admin hoàn thủ công.`);
+            return;
+        }
+
+        if (!refundForm.toBin.trim() || !refundForm.toAccountNumber.trim()) {
+            alert('Cần nhập mã ngân hàng và số tài khoản nhận hoàn tiền.');
+            return;
+        }
+
         try {
-            await postApi.approvePayment(paymentId, { status: 'success' });
-            alert("Đã duyệt thanh toán thành công!");
-            handleOpenTutorApps(postId); // Reload lại danh sách gia sư trong modal
+            setSubmittingRefund(true);
+            const response = await postApi.refundPayment(refundForm.paymentId, {
+                toBin: refundForm.toBin.trim(),
+                toAccountNumber: refundForm.toAccountNumber.trim(),
+                description: refundForm.description.trim()
+            });
+            alert(response?.message || response?.data?.message || 'Đã tạo lệnh hoàn tiền thành công!');
+            closeRefundModal();
+            await handleOpenTutorApps(refundForm.postId);
+            loadPosts();
         } catch (error) {
-            alert("Lỗi khi duyệt: " + error.message);
+            alert('Lỗi khi hoàn tiền: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setSubmittingRefund(false);
         }
     };
 
@@ -584,26 +650,38 @@ const PostManagement = () => {
                                                 </Badge>
                                             </div>
 
-                                            {/* TRẠNG THÁI THANH TOÁN (Chỉ hiện khi Học viên đã Đồng ý) */}
+                                            {/* TRẠNG THÁI THANH TOÁN (Tự động xác nhận sau khi cổng thanh toán báo thành công) */}
                                             {app.apply_status === 'agreed' && (
                                                 <div className="mt-3 pt-2 border-top">
                                                     <small className="text-muted d-block mb-1">Trạng thái thanh toán:</small>
+                                                    <small className="text-muted d-block mb-2">
+                                                        Cổng: <b>{getPaymentProviderLabel(getPaymentProvider(app.transaction_code))}</b>
+                                                        {app.transaction_code ? ` - Mã GD: ${app.transaction_code}` : ''}
+                                                    </small>
                                                     {!app.payment_status ? (
                                                         <Badge bg="secondary">CHƯA NỘP PHÍ</Badge>
                                                     ) : app.payment_status === 'pending' ? (
-                                                        <>
-                                                            <Badge bg="info" className="mb-2">CHỜ DUYỆT TIỀN</Badge>
-                                                            <Button 
-                                                                variant="success" 
-                                                                size="sm" 
-                                                                className="w-100 fw-bold mt-1"
-                                                                onClick={() => handleApprovePayment(app.payment_id, app.post_id)}
-                                                            >
-                                                                DUYỆT TIỀN NGAY
-                                                            </Button>
-                                                        </>
+                                                        <Badge bg="warning" text="dark">ĐANG CHỜ CỔNG THANH TOÁN XÁC NHẬN</Badge>
+                                                    ) : app.payment_status === 'refunded' ? (
+                                                        <Badge bg="dark">ĐÃ HOÀN TIỀN</Badge>
                                                     ) : (
-                                                        <Badge bg="success">ĐÃ HOÀN TẤT PHÍ</Badge>
+                                                        <>
+                                                            <Badge bg="success">ĐÃ HOÀN TẤT PHÍ</Badge>
+                                                            {selectedPost?.status === 'cancelled' && (
+                                                                app.refund_eligible ? (
+                                                                    <Button 
+                                                                        variant="warning" 
+                                                                        size="sm" 
+                                                                        className="w-100 fw-bold mt-2"
+                                                                        onClick={() => openRefundModal(app)}
+                                                                    >
+                                                                        XỬ LÝ HOÀN TIỀN
+                                                                    </Button>
+                                                                ) : (
+                                                                    <small className="d-block text-muted mt-2">Đã quá 5 ngày hoặc giao dịch không còn đủ điều kiện hoàn tiền.</small>
+                                                                )
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                             )}
@@ -618,6 +696,46 @@ const PostManagement = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowTutorApps(false)}>Đóng</Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showRefundModal} onHide={closeRefundModal} centered>
+                <Modal.Header closeButton className="bg-light">
+                    <Modal.Title className="fw-bold">Hoàn tiền giao dịch nhận lớp</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {refundForm.provider !== 'payos' ? (
+                        <div className="small text-muted d-flex flex-column gap-2">
+                            <div><b>{getPaymentProviderLabel(refundForm.provider)} hiện chưa có luồng auto-refund trong codebase này.</b></div>
+                            <div>Admin cần nhận mã QR hoặc thông tin tài khoản từ gia sư rồi hoàn thủ công ngoài hệ thống.</div>
+                        </div>
+                    ) : (
+                        <Form className="d-flex flex-column gap-3">
+                            <div className="small text-muted">
+                                Hệ thống sẽ tạo lệnh chi qua PayOS payout để trả lại phí nhận lớp cho gia sư.
+                            </div>
+                            <Form.Group>
+                                <Form.Label className="small fw-bold">Mã ngân hàng nhận tiền</Form.Label>
+                                <Form.Control name="toBin" value={refundForm.toBin} onChange={handleRefundInputChange} placeholder="Ví dụ: 970422" />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label className="small fw-bold">Số tài khoản nhận tiền</Form.Label>
+                                <Form.Control name="toAccountNumber" value={refundForm.toAccountNumber} onChange={handleRefundInputChange} placeholder="Nhập số tài khoản của gia sư" />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label className="small fw-bold">Mô tả lệnh chi</Form.Label>
+                                <Form.Control name="description" value={refundForm.description} onChange={handleRefundInputChange} maxLength={50} />
+                            </Form.Group>
+                        </Form>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeRefundModal}>Đóng</Button>
+                    {refundForm.provider === 'payos' && (
+                        <Button variant="warning" className="fw-bold" onClick={handleSubmitRefund} disabled={submittingRefund}>
+                            {submittingRefund ? 'ĐANG GỬI LỆNH CHI...' : 'TẠO LỆNH CHI HOÀN TIỀN'}
+                        </Button>
+                    )}
                 </Modal.Footer>
             </Modal>
         </div>

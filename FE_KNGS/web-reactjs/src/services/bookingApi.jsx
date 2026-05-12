@@ -18,7 +18,7 @@ export const getMyBookings = () => axiosClient.get("/bookings/my-bookings");
 export const deleteBooking = (id) => axiosClient.delete(`/bookings/${id}`);
 
 /**
- * Hủy yêu cầu mời dạy (Khi admin đã duyệt nhưng gia sư chưa phản hồi)
+ * Hủy yêu cầu mời dạy khi gia sư chưa nhận lớp
  */
 export const cancelBooking = (id) => axiosClient.put(`/bookings/cancel/${id}`);
 
@@ -38,7 +38,7 @@ export const respondToInvitation = (id, data) => axiosClient.put(`/bookings/resp
 
 /**
  * Gia sư xác nhận đã liên hệ thành công (Chốt lớp)
- * Sau khi Admin duyệt tiền, trạng thái sẽ là 'connecting', gia sư gọi điện xong thì bấm nút này
+ * Sau khi cổng thanh toán xác nhận thành công, trạng thái sẽ là 'connecting'
  */
 export const confirmConnectionSuccess = (id, data) => {
   return axiosClient.post(`/bookings/confirm-connection/${id}`, data);
@@ -57,17 +57,22 @@ export const adminGetBookings = () => axiosClient.get("/bookings");
 export const adminGetBookingDetail = (id) => axiosClient.get(`/bookings/detail/${id}`);
 
 /**
- * Admin: Duyệt/Từ chối yêu cầu đặt lịch ban đầu (pending -> approved/rejected)
+ * Admin: Cập nhật trạng thái đặt lịch khi cần can thiệp thủ công
  */
 export const adminUpdateBookingStatus = (id, data) => axiosClient.put(`/bookings/update-status/${id}`, data);
+
+/**
+ * Admin: Cập nhật trạng thái thanh toán cho booking (ví dụ xác nhận hoàn tiền)
+ */
+export const adminUpdatePaymentStatus = (paymentId, data) => axiosClient.put(`/payments/${paymentId}`, data);
+
+/**
+ * Admin: Hoàn tiền thật qua cổng hỗ trợ payout
+ */
+export const adminRefundPayment = (paymentId, data) => axiosClient.post(`/payments/${paymentId}/refund`, data);
 
 /**
  * Admin: Xóa bỏ một lịch hẹn không hợp lệ
  */
 export const adminDeleteBooking = (id) => axiosClient.delete(`/bookings/${id}`);
 
-/**
- * Admin: Duyệt thanh toán phí kết nối cho Booking
- * (Hàm này gọi sang group payments nhưng phục vụ luồng booking)
- */
-export const adminApprovePayment = (paymentId, data) => axiosClient.put(`/payments/${paymentId}`, data);

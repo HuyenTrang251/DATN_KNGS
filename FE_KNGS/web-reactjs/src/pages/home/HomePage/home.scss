@@ -8,22 +8,72 @@
     background-repeat: no-repeat;
     margin-top: 70px;
 }
-.header-content h1 {
-    font-size: 3rem;
-    margin-bottom: 20px;
+
+.hero-copy {
+  max-width: min(640px, 62vw);
+  color: #fff;
 }
-.header-content p {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
+
+.hero-title {
+  color: white;
+  font-size: clamp(2.8rem, 3.6vw, 4rem);
+  line-height: 1.15;
+  margin-bottom: 24px;
+  font-weight: 500;
 }
-.header-content .btn {
-    margin: 0 10px;
-    padding: 10px 20px;
-    font-size: 1rem;
+
+.hero-subtitle {
+  color: white;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.35;
+  margin-bottom: 20px;
+  margin-left: 120px;
+}
+
+.hero-description {
+  color: white;
+  font-size: clamp(1.2rem, 1.65vw, 1.55rem);
+  line-height: 1.4;
+  margin-bottom: 36px;
+  margin-left: 170px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-left: 100px;
+}
+
+.hero-action-button {
+  font-weight: 500;
+  padding: 12px 20px;
+  background-color: #ff8b00;
+  border: none;
+  font-size: 1rem;
+  min-width: 240px;
+}
+
+.introduction-banner {
+  background-image: url('/image/gioithieu.png');
+  background-size: cover;
+  background-position: center;
+  height: 400px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.introduction-banner-button {
+  margin-left: -230px;
+  margin-top: 58px;
+  padding: 10px 15px;
+  font-weight: 500;
+  background-color: #ff8b00;
+  border: none;
 }
 
 .mainContent1{
-    width: 1300px;
+  width: min(1300px, calc(100% - 32px));
     margin: 0px auto;
 }
 
@@ -181,7 +231,7 @@ $star-color: #ffcc00;
 
   .card {
     padding: 1rem;
-    width: 400px;
+    width: min(400px, 100%);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
@@ -243,7 +293,7 @@ $star-color: #ffcc00;
 
   .card {
     padding: 1rem;
-    width: 400px;
+    width: min(400px, 100%);
     border-radius: 10px;
     box-shadow: 0 -5px 3px 0 #10B1ff;
 
@@ -290,5 +340,154 @@ $star-color: #ffcc00;
         }
       }
     }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .header-content {
+    height: auto;
+    min-height: 480px;
+    padding: 120px 36px 72px;
+  }
+
+  .hero-copy {
+    max-width: min(460px, 52vw);
+  }
+
+  .hero-title {
+    font-size: clamp(2.1rem, 4vw, 2.8rem);
+    margin-bottom: 16px;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+    margin-bottom: 14px;
+    margin-left: 48px;
+  }
+
+  .hero-description {
+    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    margin-bottom: 24px;
+    margin-left: 88px;
+    max-width: 320px;
+  }
+
+  .hero-actions {
+    gap: 12px;
+    margin-left: 32px;
+  }
+
+  .hero-action-button {
+    min-width: 210px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+  }
+
+  .introduction-banner {
+    height: 340px;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 24px;
+  }
+
+  .introduction-banner-button {
+    margin: 0;
+  }
+
+  .sectionLogin {
+    .containerLogin {
+      padding: 32px 16px;
+      height: auto;
+      min-height: 100vh;
+    }
+  }
+
+  .sectionSignUp {
+    .containerSignUp {
+      padding: 32px 16px;
+      height: auto;
+      min-height: 100vh;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .header-content {
+    min-height: 420px;
+    padding: 110px 20px 60px;
+    text-align: center;
+  }
+
+  .hero-copy {
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
+    margin-bottom: 16px;
+  }
+
+  .hero-subtitle,
+  .hero-description,
+  .hero-actions {
+    margin-left: 0;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .hero-description {
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    max-width: none;
+  }
+
+  .hero-actions {
+    display: grid;
+    gap: 12px;
+  }
+
+  .hero-action-button {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .mainContent1 {
+    width: calc(100% - 24px);
+  }
+
+  .section2 {
+    .commen {
+      margin: 0;
+      padding: 16px;
+    }
+  }
+
+  .sectionLogin {
+    .card {
+      .form-Login {
+        input,
+        button.btnDN {
+          width: 100%;
+        }
+
+        button.btnDN {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+
+  .introduction-banner {
+    height: 280px;
+    padding: 16px;
+  }
+
+  .introduction-banner-button {
+    width: 100%;
   }
 }

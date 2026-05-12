@@ -202,7 +202,8 @@ const TutorProfile = () => {
       });
 
       const isMobile = /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-      const checkoutUrl = provider === 'momo' && isMobile ? res?.deeplink || res?.checkoutUrl : res?.checkoutUrl;
+  const paymentProvider = res?.provider || provider;
+  const checkoutUrl = paymentProvider === 'momo' && isMobile ? res?.deeplink || res?.checkoutUrl : res?.checkoutUrl;
 
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
@@ -444,6 +445,9 @@ const TutorProfile = () => {
           <div className="d-grid gap-2">
             <Button variant="primary" className="w-100 fw-bold py-3" onClick={() => handlePayVerify('payos')}>
               THANH TOÁN QUA PAYOS
+            </Button>
+            <Button variant="success" className="w-100 fw-bold py-3" onClick={() => handlePayVerify('zalopay')}>
+              THANH TOÁN QUA ZALOPAY
             </Button>
             <Button variant="outline-dark" className="w-100 fw-bold py-3" onClick={() => handlePayVerify('momo')}>
               THANH TOÁN QUA VÍ MOMO

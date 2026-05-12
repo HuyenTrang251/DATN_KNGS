@@ -1,5 +1,6 @@
 const Model = require('../models/class_sessions.model');
 const db = require('../common/db');
+const TutorModel = require('../services/tutors.service');
 
 module.exports = {
   // Gia sư hoặc Học viên lấy danh sách lớp đang dạy/đang học
@@ -44,6 +45,7 @@ module.exports = {
       // 1. Lấy dữ liệu lớp
       const session = await Model.getRawById(sessionId, conn);
       if (!session) throw new Error("Không tìm thấy lớp học");
+      if (session.status !== 'completed') throw new Error("Gia sư chưa gửi yêu cầu hoàn thành lớp");
 
       // 2. Cập nhật trạng thái lớp thành công (success)
       await Model.updateStatus(sessionId, "success", null, conn);
@@ -73,13 +75,29 @@ module.exports = {
     try {
       const { id } = req.params;
       const { status, cancel_reason } = req.body;
+      const session = await Model.getRawById(id);
+
+      if (!session) {
+        return res.status(404).json({ error: "Không tìm thấy lớp học" });
+      }
+
+      if (status === 'completed') {
+        if (req.user?.role_id !== 2) {
+          return res.status(403).json({ error: "Chỉ gia sư mới có thể gửi yêu cầu hoàn thành lớp" });
+        }
+
+        if (session.status !== 'ongoing') {
+          return res.status(400).json({ error: "Chỉ lớp đang diễn ra mới có thể báo hoàn thành" });
+        }
+      }
 
       // Logic trừ điểm khi hủy (Vẫn gọi Model xử lý)
       if (status === 'cancelled') {
-          const session = await Model.getRawById(id);
-          if (session) {
-              await TutorModel.adjustPoints(session.tutor_id, -5, `Hủy lớp #${id}: ${cancel_reason}`);
+          if (session.status === 'cancelled') {
+              return res.status(400).json({ error: "Lớp học này đã bị hủy trước đó" });
           }
+
+          await TutorModel.adjustPoints(session.tutor_id, -5, `Hủy lớp #${id}: ${cancel_reason || 'Không có lý do'}`);
       }
 
       // Gọi hàm updateStatus trong Model

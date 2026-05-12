@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Badge, Button, Modal, ListGroup, Spinner, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Button, Modal, ListGroup, Spinner } from 'react-bootstrap';
 import * as bookingApi from '../../../services/bookingApi';
-import { getAllSubjects } from '../../../services/subjectApi';
 
 const ManageBookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -9,15 +8,12 @@ const ManageBookings = () => {
     
     // States cho Modal
     const [showDetail, setShowDetail] = useState(false);
-    const [showEdit, setShowEdit] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
-    const [subjects, setSubjects] = useState([]);
 
     const AVATAR_BASE = "http://localhost:3300/uploads/avatars/";
 
     useEffect(() => {
         fetchData();
-        loadSubjects();
     }, []);
 
     const fetchData = async () => {
@@ -32,11 +28,6 @@ const ManageBookings = () => {
         }
     };
 
-    const loadSubjects = async () => {
-        const res = await getAllSubjects();
-        setSubjects(res || []);
-    };
-
     // --- LOGIC XỬ LÝ HÀNH ĐỘNG ---
 
     // 1. Xóa yêu cầu (Chỉ khi Pending)
@@ -49,9 +40,9 @@ const ManageBookings = () => {
         } catch (e) { alert("Không thể xóa yêu cầu này."); }
     };
 
-    // 2. Hủy yêu cầu (Khi đã Approved nhưng chưa có phản hồi từ Gia sư)
+    // 2. Hủy yêu cầu khi đã gửi tới gia sư nhưng chưa có phản hồi
     const handleCancel = async (id) => {
-        if (!window.confirm("Hủy yêu cầu mời dạy này? (Yêu cầu đã được Admin duyệt)")) return;
+        if (!window.confirm("Hủy yêu cầu mời dạy này?")) return;
         try {
             await bookingApi.cancelBooking(id);
             alert("Đã hủy yêu cầu!");
@@ -59,25 +50,10 @@ const ManageBookings = () => {
         } catch (e) { alert("Lỗi khi hủy."); }
     };
 
-    // 3. Mở form sửa
-    const handleOpenEdit = (booking) => {
-        setSelectedBooking({ ...booking });
-        setShowEdit(true);
-    };
-
-    const handleUpdate = async () => {
-        try {
-            await bookingApi.updateBooking(selectedBooking.booking_id, selectedBooking);
-            alert("Cập nhật thành công!");
-            setShowEdit(false);
-            fetchData();
-        } catch (e) { alert("Lỗi cập nhật."); }
-    };
-
     // Helper render trạng thái
     const renderStatus = (status) => {
         const map = {
-            pending: { bg: 'warning', text: 'CHỜ ADMIN DUYỆT' },
+            pending: { bg: 'warning', text: 'MỚI TẠO' },
             approved: { bg: 'info', text: 'CHỜ GIA SƯ TRẢ LỜI' },
             connecting: { bg: 'primary', text: 'ĐANG KẾT NỐI' },
             success: { bg: 'success', text: 'KẾT NỐI THÀNH CÔNG' },
@@ -91,7 +67,7 @@ const ManageBookings = () => {
     if (loading) return <div className="text-center mt-5"><Spinner animation="border" variant="primary" /></div>;
 
     return (
-        <Container className="mt-4 pb-5">
+        <Container className="mt-4 pb-5 manage-student-bookings-page">
             <h4 className="fw-bold text-primary mb-4 text-uppercase">Lịch sử mời gia sư dạy</h4>
             
             <Row>
@@ -99,7 +75,7 @@ const ManageBookings = () => {
                     <Col md={6} key={b.booking_id} className="mb-4">
                         <Card className="h-100 border-0 shadow-sm overflow-hidden border-top border-4 border-primary">
                             <Card.Body>
-                                <div className="d-flex align-items-center mb-3">
+                                <div className="booking-overview mb-3">
                                     <img 
                                         src={b.tutor_avatar ? AVATAR_BASE + b.tutor_avatar : "/image/avatar.jpg"} 
                                         alt="avt" className="rounded-circle border me-3"
@@ -114,7 +90,7 @@ const ManageBookings = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-light p-3 rounded mb-3 small">
+                                <div className="booking-summary-box bg-light p-3 rounded mb-3 small">
                                     <Row>
                                         <Col xs={6}><b>Học phí:</b> <span className="text-danger">{Number(b.tuition).toLocaleString()}đ/buổi</span></Col>
                                         <Col xs={6}><b>Thời lượng:</b> {Number(b.hours_per_session)}h/buổi</Col>
@@ -122,20 +98,17 @@ const ManageBookings = () => {
                                     </Row>
                                 </div>
 
-                                <div className="d-flex gap-2">
+                                <div className="booking-card-actions">
                                     <Button variant="outline-primary" size="sm" className="flex-grow-1" onClick={() => { setSelectedBooking(b); setShowDetail(true); }}>
                                         <i className="bi bi-eye"></i> Chi tiết
                                     </Button>
 
-                                    {/* NÚT SỬA/XÓA: Chỉ hiện khi Admin chưa động vào (Pending) */}
+                                    {/* NÚT XÓA: Chỉ giữ cho bản ghi cũ còn ở trạng thái pending */}
                                     {b.status === 'pending' && (
-                                        <>
-                                            <Button variant="outline-warning" size="sm" onClick={() => handleOpenEdit(b)}><i className="bi bi-pencil"></i></Button>
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDelete(b.booking_id)}><i className="bi bi-trash"></i></Button>
-                                        </>
+                                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(b.booking_id)}><i className="bi bi-trash"></i></Button>
                                     )}
 
-                                    {/* NÚT HỦY: Khi Admin đã duyệt nhưng gia sư chưa đồng ý */}
+                                    {/* NÚT HỦY: Khi lời mời đã gửi tới gia sư nhưng gia sư chưa đồng ý */}
                                     {b.status === 'approved' && (
                                         <Button variant="outline-secondary" size="sm" onClick={() => handleCancel(b.booking_id)}>Hủy yêu cầu</Button>
                                     )}
@@ -165,38 +138,6 @@ const ManageBookings = () => {
                         </ListGroup>
                     )}
                 </Modal.Body>
-            </Modal>
-
-            {/* MODAL SỬA THÔNG TIN (CHỈ CHO PHÉP KHI PENDING) */}
-            <Modal show={showEdit} onHide={() => setShowEdit(false)} size="lg" centered>
-                <Modal.Header closeButton><Modal.Title className="fw-bold">Chỉnh sửa yêu cầu mời dạy</Modal.Title></Modal.Header>
-                <Modal.Body>
-                    {selectedBooking && (
-                        <Form>
-                            <Row>
-                                <Col md={6} className="mb-3">
-                                    <Form.Label className="small fw-bold">Số buổi / tuần</Form.Label>
-                                    <Form.Control type="number" value={selectedBooking.sessions_per_week} onChange={e => setSelectedBooking({...selectedBooking, sessions_per_week: e.target.value})} />
-                                </Col>
-                                <Col md={6} className="mb-3">
-                                    <Form.Label className="small fw-bold">Số giờ / buổi</Form.Label>
-                                    <Form.Control type="number" step="0.5" value={selectedBooking.hours_per_session} onChange={e => setSelectedBooking({...selectedBooking, hours_per_session: e.target.value})} />
-                                </Col>
-                                <Col md={12}>
-                                    <Form.Label className="small fw-bold">Hình thức học</Form.Label>
-                                    <Form.Select value={selectedBooking.teaching_mode} onChange={e => setSelectedBooking({...selectedBooking, teaching_mode: e.target.value})}>
-                                        <option value="offline">Tại nhà (Offline)</option>
-                                        <option value="online">Trực tuyến (Online)</option>
-                                    </Form.Select>
-                                </Col>
-                            </Row>
-                        </Form>
-                    )}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowEdit(false)}>Đóng</Button>
-                    <Button variant="primary" onClick={handleUpdate}>Lưu thay đổi</Button>
-                </Modal.Footer>
             </Modal>
         </Container>
     );

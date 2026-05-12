@@ -1,6 +1,17 @@
 const Model = require('../models/posts.model');
 const ClassModel = require('../models/class_sessions.model');
 const PostAppModel = require('../models/post_applications.model');
+const PaymentModel = require('../models/payments.model');
+
+const REFUND_REVIEW_WINDOW_DAYS = 5;
+
+const isWithinRefundWindow = (payment) => {
+  if (!payment?.updated_at) return false;
+
+  const paymentTime = new Date(payment.updated_at).getTime();
+  const deadline = paymentTime + REFUND_REVIEW_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  return Date.now() <= deadline;
+};
 
 
 const Service = {
@@ -179,11 +190,25 @@ const Service = {
     } 
     
     else if (action === 'cancel') {
+      const agreedTutor = await PostAppModel.getAgreedTutor(postId);
+      const payment = agreedTutor
+        ? await PaymentModel.getLatestSuccessByPost(postId, agreedTutor.tutor_id)
+        : null;
+      const refundEligible = isWithinRefundWindow(payment);
+      const cancelReason = refundEligible
+        ? "Gia sư không liên hệ được học viên. Thanh toán vẫn trong 5 ngày, admin xem xét hoàn tiền."
+        : "Gia sư không liên hệ được học viên. Đã quá 5 ngày từ lúc thanh toán thành công, không hoàn tiền.";
+
       await Model.update(postId, { 
         status: 'cancelled', 
-        cancel_reason: "Gia sư không liên hệ được học viên" 
+        cancel_reason: cancelReason 
       });
-      return { message: "Đã hủy yêu cầu." };
+      return {
+        message: refundEligible
+          ? "Đã hủy yêu cầu. Admin sẽ xem xét hoàn tiền cho giao dịch này."
+          : "Đã hủy yêu cầu. Giao dịch không đủ điều kiện hoàn tiền vì đã quá 5 ngày từ lúc thanh toán thành công.",
+        refundEligible
+      };
     }
   }
 };

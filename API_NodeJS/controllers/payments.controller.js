@@ -2,6 +2,25 @@ const Service = require('../services/payments.service');
 const { validate } = require('../validations/payments.validation');
 
 module.exports = {
+  refund: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const adminId = req.user.id;
+      const result = await Service.refundPayment(id, adminId, req.body);
+
+      res.json({
+        success: true,
+        message: result.payoutId
+          ? `Đã tạo lệnh chi PayOS ${result.payoutId} để hoàn tiền.`
+          : 'Đã gửi yêu cầu hoàn tiền thành công',
+        data: result,
+      });
+    } catch (e) {
+      console.error('🔥 Lỗi Refund Controller:', e.message);
+      res.status(500).json({ error: e.message });
+    }
+  },
+
   update: async (req, res) => {
     try {
       const { id } = req.params; 
@@ -19,7 +38,8 @@ module.exports = {
 
       await Service.approvePayment(id, status, adminId);
       
-      res.json({ success: true, message: 'Duyệt thanh toán thành công' });
+      const message = status === 'refunded' ? 'Xác nhận hoàn tiền thành công' : 'Duyệt thanh toán thành công';
+      res.json({ success: true, message });
     } catch (e) {
         console.error("🔥 Lỗi Controller:", e.message);
         res.status(500).json({ error: e.message });

@@ -128,7 +128,7 @@
 
 // export default AppRoutes;
 
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Layouts
 import LayoutDefault from "./layouts/LayoutDefault";
@@ -185,6 +185,7 @@ function AppRoutes() {
       {/* 2. ROUTES CHO ADMIN */}
       <Route path="/admin" element={<LayoutAdmin />}>
         {/* Các đường dẫn phải khớp với SidebarAdmin.jsx */}
+        <Route index element={<Navigate to="tong-quan" replace />} />
         <Route path="quan-ly-hoc-vien" element={<StudentManagement />} />
         <Route path="quan-ly-gia-su" element={<TutorManagement />} />
         <Route path="quan-ly-nhan-vien" element={<div>Trang Quản lý nhân viên</div>} />
@@ -197,6 +198,7 @@ function AppRoutes() {
       {/* 3. ROUTES CHO HỌC VIÊN (STUDENT) */}
       <Route path="/student" element={<LayoutStudent />}>
         {/* Các đường dẫn phải khớp với SidebarStudent.jsx */}
+        <Route index element={<Navigate to="quan-ly-bai-dang" replace />} />
         <Route path="dang-bai" element={<CreatePost />} />
         <Route path="quan-ly-bai-dang" element={<ManagePosts />} />
         <Route path="quan-ly-dat-lich" element={<ManageBookingsS />} />
@@ -207,6 +209,7 @@ function AppRoutes() {
       {/* 4. ROUTES CHO GIA SƯ (TUTOR) */}
       <Route path="/tutor" element={<LayoutTutor />}>
         {/* Các đường dẫn phải khớp với SidebarTutor.jsx */}
+        <Route index element={<Navigate to="quan-ly-nhan-lop" replace />} />
         <Route path="thong-tin-dat-lich" element={<ManageBookingsT />} />
         <Route path="quan-ly-nhan-lop" element={<ManageApplications />} />
         <Route path="quan-ly-lop" element={< ConnectedClassesT />} />

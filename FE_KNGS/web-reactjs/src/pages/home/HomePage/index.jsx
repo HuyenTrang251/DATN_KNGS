@@ -10,19 +10,23 @@ function HomePage() {
     return(
         <>
             <div className="header-content">
-                <h1 style={{color: 'white', fontSize: '40px'}}>Gia Sư Online – Dạy Kèm Trực Tuyến</h1>
-                <p style={{color: 'white', marginLeft: '120px', fontSize: '25px'}}>
-                    Gia sư HTrang - Nơi gửi gắm niềm tin
-                </p>
-                <p style={{color: 'white', marginLeft: '170px', fontSize: '20px'}}>
-                    Uy tín - Chất lượng - Chuyên nghiệp
-                </p>
-                <Link className="btn text-white" style={{marginLeft: '100px',fontWeight: '500', padding: '10px 15px', backgroundColor: '#ff8B00'}} to="/dang-ki">
-                    Đăng ký học thử miễn phí
-                </Link>
-                <Link className="btn text-white" style={{marginLeft: '30px', fontWeight: '500', padding: '10px 15px', backgroundColor: '#ff8B00'}} to="/dang-ki">
-                    Đăng Ký Làm Gia Sư
-                </Link>
+                <div className="hero-copy">
+                    <h1 className="hero-title">Gia Sư Online – Dạy Kèm Trực Tuyến</h1>
+                    <p className="hero-subtitle">
+                        Gia sư HTrang - Nơi gửi gắm niềm tin
+                    </p>
+                    <p className="hero-description">
+                        Uy tín - Chất lượng - Chuyên nghiệp
+                    </p>
+                    <div className="hero-actions">
+                        <Link className="btn text-white hero-action-button" to="/dang-ki">
+                            Đăng ký học thử miễn phí
+                        </Link>
+                        <Link className="btn text-white hero-action-button" to="/dang-ki">
+                            Đăng Ký Làm Gia Sư
+                        </Link>
+                    </div>
+                </div>
             </div>
             <h3 className="text-center fs-2 text-dark my-5">Điểm khác biệt của gia sư HTrang</h3>
             <div className="mainContent1 mb-5">
@@ -61,8 +65,8 @@ function HomePage() {
                     </Col>
                     <Col md={1}></Col>
                     <Col md={4}>
-                    <div className="my-3" style={{ backgroundImage: 'url(/image/gioithieu.png)', backgroundSize: 'cover', backgroundPosition: 'center', height: '400px' }}>
-                        <Button variant="primary" className="" style={{marginLeft: '-230px', padding: '10px 15px',fontWeight: '500', marginTop: '58px', backgroundColor: '#ff8B00', border: 'none'}}>TÌM GIA SƯ NGAY</Button>
+                    <div className="my-3 introduction-banner">
+                        <Button variant="primary" className="introduction-banner-button">TÌM GIA SƯ NGAY</Button>
                     </div>
                     </Col>
                 </Row>

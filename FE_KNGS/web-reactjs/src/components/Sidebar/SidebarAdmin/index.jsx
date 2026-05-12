@@ -83,15 +83,13 @@ import { getAdminCounts } from "../../../services/userApi";
 
 function SidebarAdmin({ isOpen }) {
     const location = useLocation();
-    const { user, adminCounts } = useAuth();
+    const { user } = useAuth();
     
     // State lưu số lượng chờ duyệt
     const [counts, setCounts] = useState({
     tutor_count: 0,
     post_count: 0,
-    booking_count: 0,
-    post_payment_count: 0, 
-    booking_payment_count: 0, 
+    verify_request_count: 0,
     review_count: 0
 });
 
@@ -122,16 +120,13 @@ function SidebarAdmin({ isOpen }) {
         const text = label.toLowerCase().trim();
 
         // 1. Quản lý gia sư
-        if (text.includes("gia sư")) return counts.tutor_count;
-
-        // 2. Quản lý bài đăng: Cộng thêm số đơn tiền nhận lớp đang chờ
-        if (text.includes("bài đăng")) {
-            return (Number(counts.post_count) || 0) + (Number(counts.post_payment_count) || 0);
+        if (text.includes("gia sư")) {
+            return (Number(counts.tutor_count) || 0) + (Number(counts.verify_request_count) || 0);
         }
 
-        // 3. Quản lý đặt lịch: Cộng thêm số đơn tiền đặt lịch đang chờ
-        if (text.includes("đặt lịch")) {
-            return (Number(counts.booking_count) || 0) + (Number(counts.booking_payment_count) || 0);
+        // 2. Quản lý bài đăng
+        if (text.includes("bài đăng")) {
+            return Number(counts.post_count) || 0;
         }
 
         if (text.includes("đánh giá")) return counts.review_count;

@@ -7,10 +7,12 @@ cron.schedule('0 0 * * *', async () => {
   console.log("--- Checking for 7-day stable classes ---");
   try {
     const sql = `
-      SELECT class_session_id, tutor_id FROM class_sessions 
-      WHERE status = 'ongoing' 
-      AND is_point_added = 0 
-      AND created_at <= DATE_SUB(NOW(), INTERVAL 7 DAY)`;
+      SELECT class_session_id, tutor_id
+      FROM class_sessions
+      WHERE status IN ('ongoing', 'completed', 'success')
+        AND deleted_at IS NULL
+        AND is_point_added = 0
+        AND created_at <= DATE_SUB(NOW(), INTERVAL 7 DAY)`;
     
     const eligibleClasses = await db.query(sql);
 

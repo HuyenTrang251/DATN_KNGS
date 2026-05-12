@@ -18,6 +18,7 @@ const Model = {
         COALESCE(p.student_quantity, 1) AS student_quantity,
         COALESCE(p.hours_per_session, b.hours_per_session) AS hours_per_session,
         COALESCE(p.sessions_per_week, b.sessions_per_week) AS sessions_per_week,
+        COALESCE(p.teaching_mode, b.teaching_mode) AS teaching_mode,
         p.note,
         -- Đánh giá hiện tại
         r.review_id, r.rating, r.comment,

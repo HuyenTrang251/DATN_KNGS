@@ -90,7 +90,7 @@ const Model = {
     const sql = `
       SELECT u.user_id, u.full_name, u.email, u.phone, u.avatar, u.status as user_status,
              t.tutor_id, t.experience, t.education, t.cv_url, t.intro_video_url, t.approval_status, t.accumulated_points, t.is_verified,
-             (SELECT id FROM payments WHERE tutor_id = t.tutor_id AND payment_type = 'verify_profile' AND status = 'pending' LIMIT 1) as verify_payment_id,
+             (SELECT id FROM payments WHERE tutor_id = t.tutor_id AND payment_type = 'verify_profile' AND status = 'success' LIMIT 1) as verify_payment_id,
              (SELECT GROUP_CONCAT(address SEPARATOR '||') FROM tutor_teaching_locations WHERE tutor_id = t.tutor_id) as locations,
              (SELECT GROUP_CONCAT(CONCAT_WS('#', s.name, tsl.level, tsl.tuition) SEPARATOR '||') 
               FROM tutor_subject_level tsl JOIN subjects s ON tsl.subject_id = s.subject_id WHERE tsl.tutor_id = t.tutor_id) as subjects,
@@ -104,7 +104,7 @@ const Model = {
 
   getApprovedList: async () => {
     const sql = `
-      SELECT u.full_name, u.avatar, u.address as home_address, t.tutor_id, t.experience, t.education, t.is_verified,
+      SELECT u.full_name, u.avatar, u.address as home_address, t.tutor_id, t.experience, t.education, t.teaching_mode, t.is_verified,
         (SELECT IFNULL(GROUP_CONCAT(address SEPARATOR '||'), '') FROM tutor_teaching_locations WHERE tutor_id = t.tutor_id) as locations,
         (SELECT IFNULL(GROUP_CONCAT(CONCAT_WS('#', s.name, tsl.level, CAST(tsl.tuition AS UNSIGNED), tsl.tutor_subject_level_id) SEPARATOR '||'), '')
          FROM tutor_subject_level tsl JOIN subjects s ON tsl.subject_id = s.subject_id WHERE tsl.tutor_id = t.tutor_id) as subject_details,
@@ -132,7 +132,7 @@ const Model = {
 
   updateVerifyStatus: async (tutorId, isVerified) => {
     return await db.query(
-      'UPDATE tutors SET is_verified = ?, approval_status = "approved" WHERE tutor_id = ?', 
+      'UPDATE tutors SET is_verified = ?, verified_at = NOW() WHERE tutor_id = ?', 
       [isVerified, tutorId]
     );
   }

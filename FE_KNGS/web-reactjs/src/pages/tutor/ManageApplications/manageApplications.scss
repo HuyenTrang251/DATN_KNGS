@@ -102,4 +102,16 @@
       font-size: 20px;
     }
   }
+
+  .manage-apps-page {
+    .application-card-actions,
+    .application-result-actions {
+      align-items: stretch !important;
+    }
+
+    .application-action-button,
+    .application-result-actions .btn {
+      width: 100% !important;
+    }
+  }
 }
