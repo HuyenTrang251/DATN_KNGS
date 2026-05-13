@@ -84,6 +84,10 @@ const UsersService = {
         return rows[0]; // Trả về user đầu tiên tìm thấy
     },
 
+    getAdminDashboardSummary: async (filters) => {
+        return await Model.getAdminDashboardSummary(filters);
+    },
+
     getBadgeCounts: async () => {
         return await Model.getPendingCounts();
     }

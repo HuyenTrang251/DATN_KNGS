@@ -94,8 +94,12 @@ const Model = {
   },
 
   // Cập nhật trạng thái
-  updateStatus: async (id, status, reason = null) => {
-    return await db.query('UPDATE class_sessions SET status = ?, cancel_reason = ? WHERE class_session_id = ?', [status, reason, id]);
+  updateStatus: async (id, status, reason = null, connection = null) => {
+    const executor = connection || db;
+    return await executor.query(
+      'UPDATE class_sessions SET status = ?, cancel_reason = ? WHERE class_session_id = ?',
+      [status, reason, id]
+    );
   },
 
   // Hàm tạo lớp học mới từ bài đăng
@@ -125,7 +129,8 @@ const Model = {
   getRawById: async (id, connection = null) => {
     const sql = 'SELECT * FROM class_sessions WHERE class_session_id = ?';
     const executor = connection || db;
-    const rows = await executor.query(sql, [id]);
+    const result = await executor.query(sql, [id]);
+    const rows = Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result;
     return rows[0];
   },
 

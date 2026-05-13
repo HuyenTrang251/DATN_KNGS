@@ -141,12 +141,25 @@ module.exports = {
     // API lấy số lượng badge cho Admin
     getAdminDashboardCounts: async (req, res) => {
         try {
-            // SỬA TẠI ĐÂY: Gọi qua Service thay vì UserModel
-            const counts = await Service.getBadgeCounts();
+            const counts = await Service.getAdminDashboardSummary({
+                mode: req.query.mode,
+                selectedValue: req.query.selectedValue
+            });
             
             res.json(counts);
         } catch (e) {
             console.error("🔥 Lỗi Controller getAdminDashboardCounts:", e.message);
+            res.status(500).json({ error: e.message });
+        }
+    },
+
+    getAdminBadgeCounts: async (req, res) => {
+        try {
+            const counts = await Service.getBadgeCounts();
+
+            res.json(counts);
+        } catch (e) {
+            console.error("🔥 Lỗi Controller getAdminBadgeCounts:", e.message);
             res.status(500).json({ error: e.message });
         }
     }

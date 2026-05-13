@@ -13,3 +13,5 @@ export const updateUserStatus = (id, status) => {
 };
 
 export const getAdminCounts = () => axiosClient.get("/users/admin/pending-counts");
+
+export const getAdminDashboardSummary = (params = {}) => axiosClient.get("/users/admin/dashboard-summary", { params });

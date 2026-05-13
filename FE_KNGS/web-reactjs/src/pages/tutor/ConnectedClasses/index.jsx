@@ -105,7 +105,7 @@ const ConnectedClasses = () => {
                                 </div>
 
                                 <div className="d-flex gap-2 mt-auto">
-                                    <Button variant="light" size="sm" className="border flex-grow-1 w-70" onClick={() => { setSelectedClass(c); setShowDetail(true); }}>
+                                    <Button variant="light" size="sm" className="border flex-grow-1 w-80" onClick={() => { setSelectedClass(c); setShowDetail(true); }}>
                                         <i className="bi bi-info-circle me-1"></i> Xem chi tiết
                                     </Button>
 
@@ -129,7 +129,7 @@ const ConnectedClasses = () => {
                                                 <Button 
                                                     variant={c.review_id ? "outline-secondary" : "outline-primary"} 
                                                     size="sm" 
-                                                    className="w-100 fw-bold shadow-sm"
+                                                    className="w-100 fw-bold shadow-sm "
                                                     onClick={() => { setSelectedClass(c); setShowReview(true); }}
                                                 >
                                                     <i className={`bi ${c.review_id ? 'bi-pencil-square' : 'bi-star-fill'} me-1`}></i>
