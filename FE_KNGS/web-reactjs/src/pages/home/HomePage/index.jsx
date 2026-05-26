@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+﻿import { Link } from "react-router-dom"
 import { Row, Col, Button } from 'react-bootstrap';
 import "./home.scss"
 import SlideShowHome from "../../../components/SlideShowHome";
@@ -120,3 +120,5 @@ function HomePage() {
     )
 }
 export default HomePage
+
+

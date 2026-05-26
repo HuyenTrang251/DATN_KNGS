@@ -1,4 +1,4 @@
-export const SidebarTutor = [
+﻿export const SidebarTutor = [
     {
     icon: "bi bi-stack",
     label: "Danh sách lớp mới",
@@ -25,3 +25,6 @@ export const SidebarTutor = [
     path: "/tutor/thong-tin-ca-nhan",
     },
 ];
+
+
+

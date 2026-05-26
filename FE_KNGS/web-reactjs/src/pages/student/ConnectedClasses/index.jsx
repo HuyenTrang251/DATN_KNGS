@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Spinner, Modal, ListGroup } from 'react-bootstrap';
 import * as classApi from '../../../services/classSessionApi';
 import RatingModal from '../../../components/RatingModal';
 import { useAuth } from '../../../contexts/AuthContext';
+import { appConfirm, appPrompt } from '../../../components/AppDialogProvider';
 
 const ConnectedClasses = () => {
     const { user } = useAuth(); // Lấy role để biết hiển thị "Gia sư" hay "Học viên"
@@ -34,47 +35,47 @@ const ConnectedClasses = () => {
     };
 
     const handleCancelClass = async (id) => {
-        const reason = prompt("Vui lòng nhập lý do hủy lớp:");
+        const reason = await appPrompt("Vui lòng nhập lý do hủy lớp:");
         if (!reason) return;
         try {
             await classApi.updateClassStatus(id, { status: 'cancelled', cancel_reason: reason });
-            alert("Đã hủy lớp học thành công.");
+            alert("�� h?y l?p h?c th�nh c�ng.");
             loadData();
         } catch (e) { alert("Lỗi khi hủy lớp."); }
     };
 
     const handleConfirmSuccess = async (id) => {
-        if (window.confirm("Xác nhận lớp học này đã hoàn thành? Gia sư sẽ được cộng 10 điểm uy tín.")) {
+        if (await appConfirm("X�c nh?n l?p h?c n�y d� ho�n th�nh? Gia su s? du?c c?ng 10 di?m uy t�n.")) {
             try {
                 await classApi.confirmCompletion(id);
-                alert("Xác nhận thành công!");
+                alert("X�c nh?n th�nh c�ng!");
                 loadData();
-            } catch (e) { alert("Lỗi xác nhận."); }
+            } catch (e) { alert("L?i x�c nh?n."); }
         }
     };
 
     const handleRatingSubmit = async (data) => {
         try {
             if (selectedClass?.review_id) {
-                // Nếu đã có review_id -> Gọi API Sửa (PUT)
+                // N?u d� c� review_id -> G?i API S?a (PUT)
                 await classApi.updateReview(selectedClass.review_id, data);
-                alert("Cập nhật đánh giá thành công!");
+                alert("C?p nh?t d�nh gi� th�nh c�ng!");
             } else {
                 // Nếu chưa có -> Gọi API Thêm mới (POST)
                 await classApi.createReview({ class_session_id: selectedClass.class_session_id, ...data });
-                alert("Đăng đánh giá thành công!");
+                alert("�ang d�nh gi� th�nh c�ng!");
             }
             setShowReview(false);
             loadData();
-        } catch (e) { alert("Lỗi xử lý đánh giá"); }
+        } catch (e) { alert("L?i x? l� d�nh gi�"); }
     };
 
-    // Hàm Xử lý Xóa đánh giá
+    // H�m X? l� X�a d�nh gi�
     const handleRatingDelete = async (reviewId) => {
-        if (!window.confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) return;
+        if (!await appConfirm("B?n c� ch?c ch?n mu?n x�a d�nh gi� n�y?")) return;
         try {
             await classApi.deleteReview(reviewId);
-            alert("Đã xóa đánh giá.");
+            alert("�� x�a d�nh gi�.");
             setShowReview(false);
             loadData();
         } catch (e) { alert("Lỗi khi xóa"); }
@@ -83,9 +84,9 @@ const ConnectedClasses = () => {
     const getStatusBadge = (status) => {
         const map = { 
             ongoing: { bg: 'primary', text: 'ĐANG GIẢNG DẠY' }, 
-            completed: { bg: 'warning', text: 'CHỜ XÁC NHẬN HT' }, 
+            completed: { bg: 'warning', text: 'CH? X�C NH?N HT' }, 
             success: { bg: 'success', text: 'HOÀN THÀNH' }, 
-            cancelled: { bg: 'danger', text: 'ĐÃ HỦY' } 
+            cancelled: { bg: 'danger', text: '�� H?Y' } 
         };
         const res = map[status] || { bg: 'secondary', text: status?.toUpperCase() };
         return <Badge bg={res.bg}>{res.text}</Badge>;
@@ -137,7 +138,7 @@ const ConnectedClasses = () => {
                                     )}
 
                                     {c.status === 'completed' && user?.role_id === 3 && (
-                                        <Button variant="success" size="sm" className="fw-bold" onClick={() => handleConfirmSuccess(c.class_session_id)}>Xác nhận xong</Button>
+                                        <Button variant="success" size="sm" className="fw-bold" onClick={() => handleConfirmSuccess(c.class_session_id)}>X�c nh?n xong</Button>
                                     )}
 
                                     {c.status === 'success' && (
@@ -148,7 +149,7 @@ const ConnectedClasses = () => {
                                             onClick={() => { setSelectedClass(c); setShowReview(true); }}
                                         >
                                             <i className={`bi ${c.review_id ? 'bi-pencil-square' : 'bi-star-fill'} me-1`}></i>
-                                            {c.review_id ? 'Sửa đánh giá' : 'Đánh giá'}
+                                            {c.review_id ? 'S?a d�nh gi�' : '��nh gi�'}
                                         </Button>
                                     )}
                                 </div>
@@ -195,7 +196,7 @@ const ConnectedClasses = () => {
                                 
                                 {selectedClass.rating && (
                                     <div className="p-3 border-start border-4 border-warning bg-warning-subtle rounded">
-                                        <div className="fw-bold text-dark small mb-1">Đánh giá chất lượng:</div>
+                                        <div className="fw-bold text-dark small mb-1">��nh gi� ch?t lu?ng:</div>
                                         <div className="text-warning mb-1">
                                             {[...Array(5)].map((_, i) => (
                                                 <i key={i} className={`bi ${i < selectedClass.rating ? 'bi-star-fill' : 'bi-star'}`}></i>
@@ -213,7 +214,7 @@ const ConnectedClasses = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* MODAL ĐÁNH GIÁ */}
+            {/* MODAL ��NH GI� */}
             <RatingModal 
                 show={showReview} 
                 onHide={() => setShowReview(false)} 
@@ -227,3 +228,9 @@ const ConnectedClasses = () => {
 };
 
 export default ConnectedClasses;
+
+
+
+
+
+

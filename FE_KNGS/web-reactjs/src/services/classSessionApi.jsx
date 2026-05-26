@@ -1,4 +1,4 @@
-import axiosClient from "../api/axiosClient";
+﻿import axiosClient from "../api/axiosClient";
 
 export const getMyClasses = () => axiosClient.get("/classSessions/my-classes");
 
@@ -12,3 +12,5 @@ export const confirmCompletion = (id) => axiosClient.post(`/classSessions/${id}/
 export const createReview = (data) => axiosClient.post("/reviews", data);
 export const updateReview = (id, data) => axiosClient.put(`/reviews/${id}`, data);
 export const deleteReview = (id) => axiosClient.delete(`/reviews/${id}`);
+
+

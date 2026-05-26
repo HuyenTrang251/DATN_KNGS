@@ -1,4 +1,4 @@
-import HeaderAdmin from "../../components/Header/HeaderAdmin";
+﻿import HeaderAdmin from "../../components/Header/HeaderAdmin";
 import { SidebarStudent } from "../../components/Sidebar/SidebarStudent";
 import LayoutUser from "./../LayoutUser/index";
 
@@ -12,3 +12,6 @@ function LayoutStudent() {
 }
 
 export default LayoutStudent;
+
+
+

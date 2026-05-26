@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Modal, ListGroup, Spinner } from 'react-bootstrap';
 import * as bookingApi from '../../../services/bookingApi';
+import { appConfirm } from '../../../components/AppDialogProvider';
 
 const ManageBookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -22,7 +23,7 @@ const ManageBookings = () => {
             const res = await bookingApi.getMyBookings();
             setBookings(Array.isArray(res) ? res : []);
         } catch (error) {
-            console.error("Lỗi lấy danh sách đặt lịch:", error);
+            console.error("L?i l?y danh s�ch d?t l?ch:", error);
         } finally {
             setLoading(false);
         }
@@ -32,25 +33,25 @@ const ManageBookings = () => {
 
     // 1. Xóa yêu cầu (Chỉ khi Pending)
     const handleDelete = async (id) => {
-        if (!window.confirm("Bạn chắc chắn muốn xóa yêu cầu mời dạy này?")) return;
+        if (!await appConfirm("Bạn chắc chắn muốn xóa yêu cầu mời dạy này?")) return;
         try {
             await bookingApi.deleteBooking(id);
-            alert("Đã xóa yêu cầu thành công!");
+            alert("�� x�a y�u c?u th�nh c�ng!");
             fetchData();
         } catch (e) { alert("Không thể xóa yêu cầu này."); }
     };
 
-    // 2. Hủy yêu cầu khi đã gửi tới gia sư nhưng chưa có phản hồi
+    // 2. H?y y�u c?u khi d� g?i t?i gia su nhung chua c� ph?n h?i
     const handleCancel = async (id) => {
-        if (!window.confirm("Hủy yêu cầu mời dạy này?")) return;
+        if (!await appConfirm("Hủy yêu cầu mời dạy này?")) return;
         try {
             await bookingApi.cancelBooking(id);
-            alert("Đã hủy yêu cầu!");
+            alert("�� h?y y�u c?u!");
             fetchData();
         } catch (e) { alert("Lỗi khi hủy."); }
     };
 
-    // Helper render trạng thái
+    // Helper render tr?ng th�i
     const renderStatus = (status) => {
         const map = {
             pending: { bg: 'warning', text: 'MỚI TẠO' },
@@ -58,7 +59,7 @@ const ManageBookings = () => {
             connecting: { bg: 'primary', text: 'ĐANG KẾT NỐI' },
             success: { bg: 'success', text: 'KẾT NỐI THÀNH CÔNG' },
             rejected: { bg: 'danger', text: 'BỊ TỪ CHỐI' },
-            cancelled: { bg: 'secondary', text: 'ĐÃ HỦY' }
+            cancelled: { bg: 'secondary', text: '�� H?Y' }
         };
         const item = map[status] || { bg: 'dark', text: status };
         return <Badge bg={item.bg} className="px-3 py-2">{item.text}</Badge>;
@@ -103,12 +104,12 @@ const ManageBookings = () => {
                                         <i className="bi bi-eye"></i> Chi tiết
                                     </Button>
 
-                                    {/* NÚT XÓA: Chỉ giữ cho bản ghi cũ còn ở trạng thái pending */}
+                                    {/* N�T X�A: Ch? gi? cho b?n ghi cu c�n ? tr?ng th�i pending */}
                                     {b.status === 'pending' && (
                                         <Button variant="outline-danger" size="sm" onClick={() => handleDelete(b.booking_id)}><i className="bi bi-trash"></i></Button>
                                     )}
 
-                                    {/* NÚT HỦY: Khi lời mời đã gửi tới gia sư nhưng gia sư chưa đồng ý */}
+                                    {/* N�T H?Y: Khi l?i m?i d� g?i t?i gia su nhung gia su chua d?ng � */}
                                     {b.status === 'approved' && (
                                         <Button variant="outline-secondary" size="sm" onClick={() => handleCancel(b.booking_id)}>Hủy yêu cầu</Button>
                                     )}
@@ -131,7 +132,7 @@ const ManageBookings = () => {
                             <ListGroup.Item><b>Môn học:</b> {selectedBooking.subject_name}</ListGroup.Item>
                             <ListGroup.Item><b>Học phí đề xuất:</b> {Number(selectedBooking.tuition).toLocaleString()}đ</ListGroup.Item>
                             <ListGroup.Item><b>Hình thức:</b> {selectedBooking.teaching_mode === 'offline' ? 'Tại nhà' : 'Online'}</ListGroup.Item>
-                            <ListGroup.Item><b>Trạng thái:</b> {selectedBooking.status.toUpperCase()}</ListGroup.Item>
+                            <ListGroup.Item><b>Tr?ng th�i:</b> {selectedBooking.status.toUpperCase()}</ListGroup.Item>
                             {selectedBooking.cancel_reason && (
                                 <ListGroup.Item className="text-danger"><b>Lý do từ chối:</b> {selectedBooking.cancel_reason}</ListGroup.Item>
                             )}
@@ -144,3 +145,9 @@ const ManageBookings = () => {
 };
 
 export default ManageBookings;
+
+
+
+
+
+

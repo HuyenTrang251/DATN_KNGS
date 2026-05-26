@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -61,7 +61,7 @@ function MenuHeader()
                         </li>
                         <li>
                             <Link className="dropdown-item" to="/action">
-                                Gia sư môn Hoá
+                                Gia sư môn Hóa
                             </Link>
                         </li>
                         <li>
@@ -143,7 +143,7 @@ function MenuHeader()
                     </Link>
                 </li>
 
-                {/* Ẩn/hiện nút Đăng ký và Đăng nhập dựa trên trạng thái đăng nhập */}
+                {/* Ẩn/hiện nút đăng ký và đăng nhập dựa trên trạng thái đăng nhập */}
                 {/* {!hideAuth && ( */}
                     {/* <>
                     <li className="nav-item ps-5">
@@ -201,4 +201,10 @@ function MenuHeader()
     )
 }
 export default MenuHeader
+
+
+
+
+
+
 

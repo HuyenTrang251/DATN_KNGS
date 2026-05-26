@@ -1,4 +1,4 @@
-import "../pages/home/HomePage/home.scss";
+﻿import "../pages/home/HomePage/home.scss";
 function SignUp(){
     return(
     <>
@@ -49,3 +49,5 @@ function SignUp(){
     )
 }
 export default SignUp
+
+

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+﻿import { Link } from "react-router-dom"
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import "./footer.scss"
 function Footer() {
@@ -63,3 +63,5 @@ function Footer() {
 }
 
 export default Footer
+
+

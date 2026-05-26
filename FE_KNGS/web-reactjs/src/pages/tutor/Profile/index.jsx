@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import './profile.scss';
 import * as tutorApi from '../../../services/tutorApi';
 import { createPaymentLink } from '../../../services/postApi';
 import { getAllSubjects } from '../../../services/subjectApi';
+import { appConfirm } from '../../../components/AppDialogProvider';
 
 const TutorProfile = () => {
   // --- STATE CHÍNH ---
@@ -35,6 +36,13 @@ const TutorProfile = () => {
   const AVATAR_BASE = "http://localhost:3300/uploads/avatars/";
 
   const [showVerifyQR, setShowVerifyQR] = useState(false);
+
+  const getApprovalStatusLabel = (status) => {
+    if (status === 'approved') return 'Đã duyệt';
+    if (status === 'pending') return 'Chờ duyệt';
+    if (status === 'rejected') return 'Từ chối';
+    return status || 'Chưa cập nhật';
+  };
 
   // --- 1. LOAD DỮ LIỆU ---
   const fetchAllData = async () => {
@@ -218,8 +226,8 @@ const TutorProfile = () => {
     }
   };
 
-  const handleRequestVerify = () => {
-      // 1. Kiểm tra điểm uy tín (đã làm ở UI nhưng check lại cho chắc)
+  const handleRequestVerify = async () => {
+      // 1. Kiểm tra điểm uy tín (đã làm ở UI nhưng kiểm tra lại cho chắc)
       if (tutorInfo.accumulated_points < 100) {
           alert("Bạn cần tối thiểu 100 điểm uy tín để thực hiện chức năng này.");
           return;
@@ -233,15 +241,15 @@ const TutorProfile = () => {
 
       // 3. Thông báo về video (Tùy chọn - không bắt buộc)
       if (!tutorInfo.intro_video_url) {
-          const proceedWithoutVideo = window.confirm(
-              "Hệ thống nhận thấy bạn chưa có Video giới thiệu. Video giúp tăng tỷ lệ duyệt hồ sơ cao hơn. Bạn vẫn muốn tiếp tục thanh toán chứ?"
+          const proceedWithoutVideo = await appConfirm(
+              "Hệ thống nhận thấy bạn chưa có video giới thiệu. Video giúp tăng tỷ lệ duyệt hồ sơ cao hơn. Bạn vẫn muốn tiếp tục thanh toán chứ?"
           );
           if (!proceedWithoutVideo) return;
       }
 
       // 4. Xác nhận cuối cùng
-        const confirmMsg = "Xác nhận đăng ký Tích xanh:\n- Phí duyệt hồ sơ: 200.000đ (Không hoàn trả).\n- Thời gian duyệt: 1-3 ngày làm việc.\n\nBạn nhấn OK để chọn hình thức thanh toán.";
-      if (window.confirm(confirmMsg)) {
+      const confirmMsg = "Xác nhận đăng ký Tích xanh:\n- Phí duyệt hồ sơ: 200.000đ (Không hoàn trả).\n- Thời gian duyệt: 1-3 ngày làm việc.\n\nBạn nhấn OK để chọn hình thức thanh toán.";
+      if (await appConfirm(confirmMsg)) {
           setShowVerifyQR(true); 
       }
   };
@@ -253,7 +261,7 @@ const TutorProfile = () => {
           <h3 className="fw-bold text-primary">Thông tin cá nhân Gia sư</h3>
 
           <div className="status-group">
-              <span className={`status-badge ${tutorInfo.approval_status}`}>Duyệt: {tutorInfo.approval_status}</span>
+              <span className={`status-badge ${tutorInfo.approval_status}`}>Duyệt: {getApprovalStatusLabel(tutorInfo.approval_status)}</span>
               
               {/* HIỂN THỊ ĐIỂM UY TÍN */}
               <span className="status-badge">
@@ -459,3 +467,9 @@ const TutorProfile = () => {
   );
 };
 export default TutorProfile;
+
+
+
+
+
+

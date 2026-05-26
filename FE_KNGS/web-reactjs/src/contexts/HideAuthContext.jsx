@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+﻿import React, { createContext, useState, useContext } from 'react';
 
 const HideAuthContext = createContext();
 
@@ -13,3 +13,5 @@ export const HideAuthProvider = ({ children }) => {
 };
 
 export const useHideAuth = () => useContext(HideAuthContext);
+
+

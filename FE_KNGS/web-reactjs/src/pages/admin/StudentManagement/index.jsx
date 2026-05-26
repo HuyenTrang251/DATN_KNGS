@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Table, Badge, Button, Modal, Row, Col } from 'react-bootstrap';
 import { getAllStudents } from '../../../services/studentApi';
 import axiosClient from '../../../api/axiosClient'; // Dùng chung để gọi API status
+import { appConfirm } from '../../../components/AppDialogProvider';
 
 const StudentManagement = () => {
     const [students, setStudents] = useState([]);
@@ -31,9 +32,9 @@ const handleUpdateStatus = async (userId, newStatus) => {
         locked: "Khóa"
     };
 
-    if (window.confirm(`Xác nhận chuyển trạng thái sang: ${statusMap[newStatus]}?`)) {
+    if (await appConfirm(`Xác nhận chuyển trạng thái sang: ${statusMap[newStatus]}?`)) {
         try {
-            // Gọi api update status đã viết ở bước trước
+            // Gọi API cập nhật trạng thái
             await axiosClient.put(`/users/status/${userId}`, { status: newStatus });
             fetchData(); // Load lại danh sách
         } catch (error) {
@@ -45,6 +46,12 @@ const handleUpdateStatus = async (userId, newStatus) => {
     const handleViewDetail = (student) => {
         setSelectedStudent(student);
         setShowDetail(true);
+    };
+
+    const statusLabelMap = {
+        active: 'Hoạt động',
+        warning: 'Cảnh cáo',
+        locked: 'Khóa'
     };
 
     return (
@@ -78,7 +85,7 @@ const handleUpdateStatus = async (userId, newStatus) => {
                             <td>{s.grade || 'N/A'}</td>
                             <td className="text-center">
                                 <Badge bg={s.status === 'active' ? 'success' : s.status === 'locked' ? 'danger' : 'warning'}>
-                                    {s.status.toUpperCase()}
+                                    {statusLabelMap[s.status] || s.status}
                                 </Badge>
                             </td>
                             <td className="text-center">
@@ -87,7 +94,7 @@ const handleUpdateStatus = async (userId, newStatus) => {
                                 <i className="bi bi-eye"></i>
                             </Button>
 
-                            {/* Logic hiển thị nút theo trạng thái hiện tại */}
+                            {/* Hiển thị nút theo trạng thái hiện tại */}
                             {s.status === 'active' && (
                                 <>
                                     <Button variant="outline-warning" size="sm" className="me-1" onClick={() => handleUpdateStatus(s.user_id, 'warning')} title="Cảnh cáo">
@@ -182,3 +189,10 @@ const handleUpdateStatus = async (userId, newStatus) => {
 };
 
 export default StudentManagement;
+
+
+
+
+
+
+

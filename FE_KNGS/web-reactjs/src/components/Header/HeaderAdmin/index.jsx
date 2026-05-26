@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
@@ -30,7 +30,7 @@ function HeaderAdmin({ toggleSidebar }) {
 
     let fileName = user.avatar;
 
-    // Nếu lỡ dữ liệu bị lưu dạng JSON {"avatar":"img-xxx.png"} thì bóc tách lấy mỗi tên file
+    // Nếu là dữ liệu bị lưu dạng JSON {"avatar":"img-xxx.png"} thì bóc tách lấy mỗi tên file
     if (typeof fileName === "string" && fileName.startsWith("{")) {
       try {
         const parsed = JSON.parse(fileName);
@@ -40,7 +40,7 @@ function HeaderAdmin({ toggleSidebar }) {
       }
     }
 
-    // Ghép với URL Backend (Port 3300 như bạn cung cấp)
+    // Ghép với URL Backend (Port 3300 như bạn cũng cấp)
     return `http://localhost:3300/uploads/avatars/${fileName}`;
   }, [user?.avatar]);
 
@@ -248,3 +248,9 @@ function HeaderAdmin({ toggleSidebar }) {
 }
 
 export default HeaderAdmin;
+
+
+
+
+
+

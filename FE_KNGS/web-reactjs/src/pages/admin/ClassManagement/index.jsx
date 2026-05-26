@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Table, Badge, Button, Modal, Form, Row, Col, Card, Spinner, ListGroup } from 'react-bootstrap';
 import * as classApi from '../../../services/classSessionApi';
 import "../admin.scss"; 
@@ -89,7 +89,7 @@ const ClassManagement = () => {
                                 <td className="text-start">{item.student_name}</td>
                                 <td className="text-start">{item.tutor_name}</td>
                                 <td className="fw-bold text-danger">
-                                    {/* Fix lỗi NaN: Kiểm tra nếu có giá trị mới format */}
+                                    {/* Giữ fallback 0 để tránh lỗi format khi dữ liệu rỗng */}
                                     {item.tuition ? Number(item.tuition).toLocaleString() : '0'}đ
                                 </td>
                                 <td>{getStatusBadge(item.status)}</td>
@@ -140,7 +140,7 @@ const ClassManagement = () => {
                                 <p className="mb-0"><b>Địa chỉ lớp:</b> {selected.teaching_address}</p>
                             </div>
 
-                            {/* Phần Đánh giá 2 chiều (Giữ nguyên logic renderStars của bạn) */}
+                            {/* Phần đánh giá 2 chiều */}
                             <h6 className="modal-section-title"><i className="bi bi-chat-square-quote-fill"></i> Đánh giá từ hai phía</h6>
                             <Row>
                                 <Col md={6} className="mb-3">
@@ -178,3 +178,9 @@ const ClassManagement = () => {
 };
 
 export default ClassManagement;
+
+
+
+
+
+

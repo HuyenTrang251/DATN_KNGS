@@ -35,33 +35,53 @@ const Model = {
   },
   
   getTutorIdByUserId: async (userId) => {
-    // Luôn bóc tách [rows] từ db.query
     const [rows] = await db.query(
       'SELECT tutor_id FROM tutors WHERE user_id = ? AND deleted_at IS NULL',
       [userId]
     );
-    return rows; // Trả về mảng để Service tự xử lý cho an toàn
+    return rows;
   },
 
-  checkExist: async (postId, tutorId) => {
+  getExistingApplication: async (postId, tutorId) => {
     const [rows] = await db.query(
-      'SELECT * FROM post_applications WHERE post_id = ? AND tutor_id = ? AND deleted_at IS NULL',
+      `SELECT post_application_id, status
+       FROM post_applications
+       WHERE post_id = ? AND tutor_id = ? AND deleted_at IS NULL
+       ORDER BY post_application_id DESC
+       LIMIT 1`,
       [postId, tutorId]
     );
-    return rows && rows.length > 0; 
+    return rows?.[0] || null;
+  },
+
+  hasAgreedApplication: async (postId) => {
+    const [rows] = await db.query(
+      `SELECT post_application_id
+       FROM post_applications
+       WHERE post_id = ? AND status = 'agreed' AND deleted_at IS NULL
+       LIMIT 1`,
+      [postId]
+    );
+    return rows && rows.length > 0;
   },
 
   create: async (data) => {
-    // Dùng mảng tham số để tránh lỗi cú pháp SQL
     const sql = 'INSERT INTO post_applications (post_id, tutor_id, status) VALUES (?, ?, ?)';
     const params = [data.post_id, data.tutor_id, data.status || 'pending'];
     return await db.query(sql, params);
   },
 
+  resetToPending: async (postApplicationId) => {
+    return await db.query(
+      'UPDATE post_applications SET status = ? WHERE post_application_id = ?',
+      ['pending', postApplicationId]
+    );
+  },
+
   getAgreedTutor: async (postId) => {
     const sql = `SELECT tutor_id FROM post_applications WHERE post_id = ? AND status = 'agreed' LIMIT 1`;
     const rows = await db.query(sql, [postId]);
-    return rows[0]; // Trả về { tutor_id: ... }
+    return rows[0];
   },
 
   updateStatusByTutor: async (postId, tutorId, status) => {

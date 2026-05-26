@@ -1,4 +1,4 @@
-import "../pages/home/HomePage/home.scss";
+﻿import "../pages/home/HomePage/home.scss";
 
 function CommentTutor(){
     return(
@@ -71,3 +71,5 @@ function CommentTutor(){
     )
 }
 export default CommentTutor
+
+

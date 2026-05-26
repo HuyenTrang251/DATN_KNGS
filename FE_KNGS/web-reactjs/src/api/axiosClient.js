@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 import Cookies from "js-cookie";
 
 const axiosClient = axios.create({
@@ -17,16 +17,22 @@ axiosClient.interceptors.request.use((config) => {
   return config;
 });
 
-// 2. Tự động bóc tách dữ liệu (Response Interceptor) - THÊM MỚI TẠI ĐÂY
+// 2. T? d?ng b�c t�ch d? li?u (Response Interceptor) - TH�M M?I T?I ��Y
 axiosClient.interceptors.response.use(
   (response) => {
     // Chỉ trả về data, bỏ qua vỏ bọc của Axios (status, config, headers...)
     return response.data; 
   },
   (error) => {
-    // Xử lý lỗi tập trung (ví dụ: 401 logout, 500 thông báo lỗi)
+    // X? l� l?i t?p trung (v� d?: 401 logout, 500 th�ng b�o l?i)
     return Promise.reject(error);
   }
 );
 
 export default axiosClient;
+
+
+
+
+
+

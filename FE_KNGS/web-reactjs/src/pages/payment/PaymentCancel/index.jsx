@@ -1,4 +1,4 @@
-import { Alert, Button, Container } from "react-bootstrap";
+﻿import { Alert, Button, Container } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const getProviderLabel = (provider) => {
@@ -28,3 +28,6 @@ const PaymentCancel = () => {
 };
 
 export default PaymentCancel;
+
+
+

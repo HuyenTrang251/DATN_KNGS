@@ -1,4 +1,4 @@
-import axiosClient from "../api/axiosClient";
+﻿import axiosClient from "../api/axiosClient";
 
 // Lấy danh sách học viên (Dành cho Admin)
 export const getAllStudents = () => {
@@ -14,3 +14,5 @@ export const getStudentById = (id) => {
 export const updateStudentProfile = (id, data) => {
     return axiosClient.put(`/students/${id}`, data);
 };
+
+

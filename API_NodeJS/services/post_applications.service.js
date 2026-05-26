@@ -2,10 +2,8 @@ const Model = require('../models/post_applications.model');
 
 const Service = {
   addApplication: async (userId, postId) => {
-    // 1. Lấy dữ liệu
     const result = await Model.getTutorIdByUserId(userId);
 
-    // 2. Lấy tutorId (Hỗ trợ cả mảng và object)
     let tutorId = null;
     if (Array.isArray(result) && result.length > 0) {
       tutorId = result[0].tutor_id;
@@ -17,13 +15,26 @@ const Service = {
       throw new Error("Tài khoản của bạn chưa cập nhật hồ sơ Gia sư.");
     }
 
-    // 3. Kiểm tra trùng lặp (Hàm này vừa được sửa ở Model)
-    const isApplied = await Model.checkExist(postId, tutorId);
-    if (isApplied) {
-      throw new Error("Bạn đã gửi yêu cầu nhận lớp này rồi.");
+    const hasAgreedApplication = await Model.hasAgreedApplication(postId);
+    if (hasAgreedApplication) {
+      throw new Error("Lớp này đã có gia sư được học viên đồng ý.");
     }
 
-    // 4. Lưu vào database
+    const existingApplication = await Model.getExistingApplication(postId, tutorId);
+
+    if (existingApplication?.status === 'pending') {
+      throw new Error("Bạn đã nhận lớp này rồi, đang chờ học viên phản hồi.");
+    }
+
+    if (existingApplication?.status === 'agreed') {
+      throw new Error("Bạn đã được học viên đồng ý cho lớp này.");
+    }
+
+    if (existingApplication?.status === 'rejected') {
+      await Model.resetToPending(existingApplication.post_application_id);
+      return { post_application_id: existingApplication.post_application_id, status: 'pending' };
+    }
+
     return await Model.create({ post_id: postId, tutor_id: tutorId, status: 'pending' });
   },
 };

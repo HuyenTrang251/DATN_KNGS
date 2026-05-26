@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
 const RatingModal = ({ show, onHide, onSubmit, onDelete, initialData, targetName }) => {
@@ -57,3 +57,5 @@ const RatingModal = ({ show, onHide, onSubmit, onDelete, initialData, targetName
 };
 
 export default RatingModal;
+
+

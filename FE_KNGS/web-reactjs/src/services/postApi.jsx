@@ -1,4 +1,4 @@
-import axiosClient from "../api/axiosClient";
+﻿import axiosClient from "../api/axiosClient";
 
 // --- NHÓM API BÀI ĐĂNG (POSTS) ---
 export const getAllPostsAdmin = () => axiosClient.get("/posts");
@@ -46,3 +46,6 @@ export const finalizePost = (id, data) => axiosClient.post(`/posts/finalize/${id
 // --- NHÓM USER & SUBJECT ---
 export const getMe = () => axiosClient.get("/auth/me");
 export const getAllSubjects = () => axiosClient.get("/subjects");
+
+
+

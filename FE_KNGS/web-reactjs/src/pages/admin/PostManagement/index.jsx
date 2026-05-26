@@ -1,4 +1,4 @@
-// import React, { useEffect, useState } from 'react';
+﻿// import React, { useEffect, useState } from 'react';
 // import { Table, Button, Modal, Form, Badge, Row, Col, ListGroup } from 'react-bootstrap';
 // import * as postApi from '../../../services/postApi';
 // import "../admin.scss"; 
@@ -24,7 +24,7 @@
 
 //     useEffect(() => { loadPosts(); }, []);
 
-//     // Lọc dữ liệu khi statusFilter hoặc danh sách posts thay đổi
+//     // L?c d? li?u khi statusFilter ho?c danh s�ch posts thay d?i
 //     useEffect(() => {
 //         if (statusFilter === 'all') {
 //             setFilteredPosts(posts);
@@ -66,20 +66,20 @@
 //                 reason: approveForm.reason
 //             });
             
-//             alert(status === 'approved' ? "Đã duyệt bài đăng!" : "Đã từ chối bài đăng!");
+//             alert(status === 'approved' ? "�� duy?t b�i dang!" : "�� t? ch?i b�i dang!");
 //             setShowDetail(false);
 //             loadPosts();
 //         } catch (err) {
-//             alert("Lỗi: " + (err.response?.data?.message || "Thao tác thất bại"));
+//             alert("L?i: " + (err.response?.data?.message || "Thao t�c th?t b?i"));
 //         }
 //     };
 
 //     const renderStatusBadge = (status) => {
 //         const map = {
-//             approved: { bg: 'success', text: 'ĐÃ DUYỆT' },
+//             approved: { bg: 'success', text: '�� DUY?T' },
 //             pending: { bg: 'warning', text: 'CHỜ DUYỆT' },
 //             rejected: { bg: 'danger', text: 'TỪ CHỐI' },
-//             success: { bg: 'primary', text: 'ĐÃ KẾT NỐI' }
+//             success: { bg: 'primary', text: '�� K?T N?I' }
 //         };
 //         const item = map[status] || { bg: 'secondary', text: status };
 //         return <Badge bg={item.bg}>{item.text}</Badge>;
@@ -92,9 +92,9 @@
 //             <div className="d-flex justify-content-between align-items-center mb-4">
 //                 <h3 className="page-title mb-0">Quản lý bài đăng tìm Gia sư</h3>
                 
-//                 {/* BỘ LỌC TRẠNG THÁI */}
+//                 {/* B? L?C TR?NG TH�I */}
 //                 <div className="d-flex align-items-center gap-2">
-//                     <span className="fw-bold small text-muted">Lọc trạng thái:</span>
+//                     <span className="fw-bold small text-muted">L?c tr?ng th�i:</span>
 //                     <Form.Select 
 //                         size="sm" 
 //                         style={{ width: '180px' }}
@@ -103,9 +103,9 @@
 //                     >
 //                         <option value="all">Tất cả bài đăng</option>
 //                         <option value="pending">Chờ phê duyệt</option>
-//                         <option value="approved">Đã phê duyệt</option>
-//                         <option value="rejected">Đã từ chối</option>
-//                         <option value="success">Đã kết nối lớp</option>
+//                         <option value="approved">�� ph� duy?t</option>
+//                         <option value="rejected">�� t? ch?i</option>
+//                         <option value="success">�� k?t n?i l?p</option>
 //                     </Form.Select>
 //                 </div>
 //             </div>
@@ -117,9 +117,9 @@
 //                             <th>Học viên</th>
 //                             <th>Môn học / Lớp</th>
 //                             <th className="text-center">Học phí</th>
-//                             <th className="text-center">Trạng thái</th>
+//                             <th className="text-center">Tr?ng th�i</th>
 //                             <th className="text-center">Phí nhận lớp</th>
-//                             <th className="text-center">Thao tác</th>
+//                             <th className="text-center">Thao t�c</th>
 //                         </tr>
 //                     </thead>
 //                     <tbody>
@@ -178,8 +178,8 @@
 //                                         <ListGroup.Item><b>Thời gian:</b> {selectedPost.sessions_per_week} buổi/tuần ({Number(selectedPost.hours_per_session)}h/buổi)</ListGroup.Item>
 //                                         <ListGroup.Item><b>Hình thức:</b> {selectedPost.teaching_mode} - <b>Số lượng:</b> {selectedPost.student_quantity} HS</ListGroup.Item>
 //                                         <ListGroup.Item><b>Yêu cầu gia sư:</b> {
-//                                             selectedPost.tutor_type === 'teacher' ? 'Giáo viên' : 
-//                                             selectedPost.tutor_type === 'student' ? 'Sinh viên' : 'Sinh viên, Giáo viên'
+//                                             selectedPost.tutor_type === 'teacher' ? 'Gi�o vi�n' : 
+//                                             selectedPost.tutor_type === 'student' ? 'Sinh vi�n' : 'Sinh vi�n, Gi�o vi�n'
 //                                         } ({
 //                                             selectedPost.preferred_gender === 'male' ? 'Nam' : 
 //                                             selectedPost.preferred_gender === 'female' ? 'Nữ' : 'Không yêu cầu'
@@ -228,7 +228,7 @@
 //                                     </Row>
 //                                 ) : (
 //                                     <div className="d-flex justify-content-between">
-//                                         <span>Trạng thái hiện tại: {renderStatusBadge(selectedPost.status)}</span>
+//                                         <span>Tr?ng th�i hi?n t?i: {renderStatusBadge(selectedPost.status)}</span>
 //                                         <span>Phí thu: <b>{Number(selectedPost.fee_receive).toLocaleString()}đ</b></span>
 //                                     </div>
 //                                 )}
@@ -247,6 +247,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Badge, Row, Col, ListGroup, Spinner } from 'react-bootstrap';
 import * as postApi from '../../../services/postApi';
 import { useAuth } from "../../../contexts/AuthContext";
+import { appConfirm } from '../../../components/AppDialogProvider';
 import "../admin.scss"; 
 
 const getPaymentProvider = (transactionCode = '') => {
@@ -325,7 +326,7 @@ const PostManagement = () => {
         }
     };
 
-    // --- HÀM MỞ DANH SÁCH GIA SƯ ỨNG TUYỂN ---
+    // Mở danh sách gia sư ứng tuyển
     const handleOpenTutorApps = async (postId) => {
         try {
             setShowTutorApps(true);
@@ -376,7 +377,7 @@ const PostManagement = () => {
             provider: getPaymentProvider(app.transaction_code),
             toBin: '',
             toAccountNumber: '',
-            description: `Hoan phi post #${app.post_id}`
+            description: `Hoàn phí post #${app.post_id}`
         });
         setShowRefundModal(true);
     };
@@ -487,13 +488,13 @@ const PostManagement = () => {
                                         className="p-2 cursor-pointer" 
                                         style={{ cursor: 'pointer', minWidth: '35px' }}
                                         onClick={() => handleOpenTutorApps(p.post_id)}
-                                        title="Click để xem danh sách gia sư"
+                                        title="Bấm để xem danh sách gia sư"
                                     >
                                         {p.total_applications || 0}
                                     </Badge>
                                 </td>
                                 <td className="text-center">{renderStatusBadge(p.status)}
-                                    {/* CẢNH BÁO DUYỆT TIỀN */}
+                                    {/* Cảnh báo duyệt tiền */}
                                     {p.pending_payments > 0 && (
                                         <Badge 
                                             pill 
@@ -512,7 +513,7 @@ const PostManagement = () => {
                                     <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleViewDetail(p)}>
                                         <i className="bi bi-eye"></i>
                                     </Button>
-                                    <Button variant="outline-danger" size="sm" onClick={() => {if(window.confirm("Bạn chắc chắn muốn xóa bài đăng?")) postApi.deletePost(p.post_id).then(()=>loadPosts())}}>
+                                    <Button variant="outline-danger" size="sm" onClick={async () => { if (await appConfirm("Bạn chắc chắn muốn xóa bài đăng?")) postApi.deletePost(p.post_id).then(()=>loadPosts()); }}>
                                         <i className="bi bi-trash"></i>
                                     </Button>
                                 </td>
@@ -642,7 +643,7 @@ const PostManagement = () => {
                                             <div className="small text-dark mt-2"><b>Trình độ:</b> {app.education}</div>
                                         </Col>
                                         <Col xs={4} className="text-end border-start">
-                                            {/* Trạng thái Phản hồi của Học viên */}
+                                            {/* Trạng thái phản hồi của học viên */}
                                             <div className="mb-2">
                                                 <small className="text-muted d-block mb-1">Học viên phản hồi:</small>
                                                 <Badge bg={app.apply_status === 'pending' ? 'warning' : app.apply_status === 'agreed' ? 'success' : 'danger'}>
@@ -650,7 +651,7 @@ const PostManagement = () => {
                                                 </Badge>
                                             </div>
 
-                                            {/* TRẠNG THÁI THANH TOÁN (Tự động xác nhận sau khi cổng thanh toán báo thành công) */}
+                                            {/* Trạng thái thanh toán */}
                                             {app.apply_status === 'agreed' && (
                                                 <div className="mt-3 pt-2 border-top">
                                                     <small className="text-muted d-block mb-1">Trạng thái thanh toán:</small>
@@ -743,3 +744,9 @@ const PostManagement = () => {
 };
 
 export default PostManagement;
+
+
+
+
+
+

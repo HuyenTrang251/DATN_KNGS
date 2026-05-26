@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { Button, Badge, Row, Col, Card, Modal, Spinner, ListGroup } from "react-bootstrap";
 import * as postApi from "../../../services/postApi";
+import { appConfirm } from "../../../components/AppDialogProvider";
 import "./manageApplications.scss";
 
 const ManageApplications = () => {
@@ -61,11 +62,11 @@ const ManageApplications = () => {
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
-        alert(`Loi: Khong the lay link thanh toan cho ma giao dich ${res?.transactionCode || "cu"}.`);
+        alert(`Lỗi: Không thể lấy link thanh toán cho mã giao dịch ${res?.transactionCode || "cũ"}.`);
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Khong the gui yeu cau thanh toan";
-      alert("Loi: " + errorMsg);
+      const errorMsg = error.response?.data?.message || "Không thể gửi yêu cầu thanh toán";
+      alert("Lỗi: " + errorMsg);
     } finally {
       setLoading(false);
     }
@@ -77,13 +78,13 @@ const ManageApplications = () => {
         ? "Xác nhận kết nối thành công và chốt lớp dạy?"
         : "Xác nhận không liên hệ được học viên?";
 
-    if (!window.confirm(confirmMsg)) return;
+    if (!(await appConfirm(confirmMsg))) return;
 
     try {
       setLoading(true);
       const result = await postApi.finalizePost(item.post_id, { action });
       alert(
-        result?.message ||
+        result.message ||
         (action === "success"
           ? "Chúc mừng! Lớp học đã chính thức bắt đầu."
           : "Đã ghi nhận liên hệ thất bại.")
@@ -266,8 +267,8 @@ const ManageApplications = () => {
                   <ListGroup.Item><b>Yêu cầu gia sư:</b> {selectedJob.tutor_type === "teacher" ? "Giáo viên" : "Sinh viên"}</ListGroup.Item>
                   <ListGroup.Item><b>Giới tính ưu tiên:</b> {translateGender(selectedJob.preferred_gender)}</ListGroup.Item>
                   <ListGroup.Item><b>Địa chỉ:</b> {selectedJob.address}</ListGroup.Item>
-                  <ListGroup.Item><b>Học phí/buổi:</b> <span className="text-success fw-bold">{Number(selectedJob.tuition_fee_per_session).toLocaleString()}d</span></ListGroup.Item>
-                  <ListGroup.Item><b>Phí nhận lớp:</b> <span className="text-danger fw-bold">{Number(selectedJob.fee_receive).toLocaleString()}d</span></ListGroup.Item>
+                  <ListGroup.Item><b>Học phí/buổi:</b> <span className="text-success fw-bold">{Number(selectedJob.tuition_fee_per_session).toLocaleString()}đ</span></ListGroup.Item>
+                  <ListGroup.Item><b>Phí nhận lớp:</b> <span className="text-danger fw-bold">{Number(selectedJob.fee_receive).toLocaleString()}đ</span></ListGroup.Item>
                   <ListGroup.Item><b>Hỗ trợ nợ phí:</b> {selectedJob.support}%</ListGroup.Item>
                 </ListGroup>
               </Col>
@@ -302,7 +303,7 @@ const ManageApplications = () => {
         </Modal.Header>
         <Modal.Body className="text-center p-4">
           <p className="mb-2">Bạn đang thực hiện thanh toán phí nhận lớp:</p>
-          <h4 className="text-danger fw-bold">{Number(selectedJob?.fee_receive).toLocaleString()}d</h4>
+          <h4 className="text-danger fw-bold">{Number(selectedJob?.fee_receive).toLocaleString()}đ</h4>
 
           <div className="alert alert-warning small">
             Chọn một hình thức thanh toán bên dưới. Sau khi thanh toán thành công,
@@ -327,3 +328,9 @@ const ManageApplications = () => {
 };
 
 export default ManageApplications;
+
+
+
+
+
+

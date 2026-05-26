@@ -1,4 +1,4 @@
-// import { BrowserRouter, Routes, Route } from "react-router-dom";
+﻿// import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // import LayoutDefault from "./layouts/LayoutDefault/index.jsx";
 // // import LayoutAdmin from "./layouts/LayoutAdmin/index.js";
@@ -206,7 +206,7 @@ function AppRoutes() {
         <Route path="thong-tin-ca-nhan" element={<ProfileS />} />
       </Route>
 
-      {/* 4. ROUTES CHO GIA SƯ (TUTOR) */}
+      {/* 4. ROUTES CHO GIA SÆ¯ (TUTOR) */}
       <Route path="/tutor" element={<LayoutTutor />}>
         {/* Các đường dẫn phải khớp với SidebarTutor.jsx */}
         <Route index element={<Navigate to="quan-ly-nhan-lop" replace />} />
@@ -219,6 +219,8 @@ function AppRoutes() {
       {/* 5. AUTH ROUTES */}
       <Route path="dang-nhap" element={<LoginPage />} />
       <Route path="dang-ki" element={<SignupPage />} />
+      <Route path="đăng-nhap" element={<Navigate to="/dang-nhap" replace />} />
+      <Route path="đăng-ki" element={<Navigate to="/dang-ki" replace />} />
       <Route path="payment-success" element={<PaymentSuccess />} />
       <Route path="payment-cancel" element={<PaymentCancel />} />
 
@@ -227,3 +229,6 @@ function AppRoutes() {
 }
 
 export default AppRoutes;
+
+
+

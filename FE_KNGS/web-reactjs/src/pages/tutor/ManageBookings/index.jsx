@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Badge, Button, Modal, ListGroup, Spinner } from "react-bootstrap";
 import * as bookingApi from "../../../services/bookingApi";
 import * as postApi from "../../../services/postApi";
+import { appConfirm } from "../../../components/AppDialogProvider";
 import "./manageBookings.scss";
 
 const TutorBookingManagement = () => {
@@ -35,7 +36,7 @@ const TutorBookingManagement = () => {
       status === "agreed"
         ? "Bạn đồng ý nhận lớp này và sẽ tiến hành nộp phí?"
         : "Bạn muốn từ chối lời mời này?";
-    if (!window.confirm(msg)) return;
+    if (!(await appConfirm(msg))) return;
 
     try {
       await bookingApi.respondToInvitation(id, { status });
@@ -89,12 +90,12 @@ const TutorBookingManagement = () => {
         ? "Xác nhận bạn đã liên hệ thành công và chốt lớp dạy?"
         : "Xác nhận bạn không thể liên hệ được học viên này?";
 
-    if (!window.confirm(confirmMsg)) return;
+    if (!(await appConfirm(confirmMsg))) return;
 
     try {
       const result = await bookingApi.confirmConnectionSuccess(id, { action });
       alert(
-        result?.message ||
+        result.message ||
         (action === "success"
           ? "Chúc mừng! Lớp học đã được tạo thành công."
           : "Đã ghi nhận liên hệ thất bại.")
@@ -177,7 +178,7 @@ const TutorBookingManagement = () => {
                       ) : (
                         <div className="text-muted small italic text-center">
                           <i className="bi bi-lock-fill me-1"></i>
-                          SDT học viên sẽ hiển thị ngay sau khi hệ thống xác nhận thanh toán thành công.
+                          SĐT học viên sẽ hiển thị ngay sau khi hệ thống xác nhận thanh toán thành công.
                         </div>
                       )}
                     </div>
@@ -301,7 +302,7 @@ const TutorBookingManagement = () => {
         <Modal.Body className="text-center p-4">
           <h6 className="fw-bold mb-3 text-uppercase">Nộp phí kết nối đặt lịch</h6>
           <h3 className="text-danger fw-bold">
-            {Number(selected?.tuition * 0.3).toLocaleString()}d
+            {Number(selected?.tuition * 0.3).toLocaleString()}đ
           </h3>
           <div className="alert alert-info small mt-3 mb-4">
             Chọn một hình thức thanh toán. Sau khi giao dịch thành công, số điện thoại học viên sẽ tự động được mở khóa.
@@ -314,7 +315,7 @@ const TutorBookingManagement = () => {
               THANH TOÁN QUA ZALOPAY
             </Button>
             <Button variant="outline-dark" className="w-100 fw-bold py-3 shadow-sm" onClick={() => handleCheckout("momo")}>
-              THANH TOÁN QUA VI MOMO
+              THANH TOÁN QUA VÍ MOMO
             </Button>
           </div>
         </Modal.Body>
@@ -324,3 +325,9 @@ const TutorBookingManagement = () => {
 };
 
 export default TutorBookingManagement;
+
+
+
+
+
+

@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Spinner, Modal, ListGroup } from 'react-bootstrap';
 import * as classApi from '../../../services/classSessionApi';
 import RatingModal from '../../../components/RatingModal';
 import { useAuth } from '../../../contexts/AuthContext';
+import { appConfirm, appPrompt } from '../../../components/AppDialogProvider';
 
 const ConnectedClasses = () => {
     const { user } = useAuth();
     const [classes, setClasses] = useState([]);
     const [loading, setLoading] = useState(true);
     
-    // Modal Đánh giá
+    // Modal đánh giá
     const [showReview, setShowReview] = useState(false);
     // Modal Chi tiết
     const [showDetail, setShowDetail] = useState(false);
@@ -26,7 +27,7 @@ const ConnectedClasses = () => {
     };
 
     const handleRequestComplete = async (id) => {
-        if (window.confirm("Xác nhận kết thúc lớp học này? Yêu cầu sẽ gửi tới học viên.")) {
+        if (await appConfirm("Xác nhận kết thúc lớp học này? Yêu cầu sẽ gửi tới học viên.")) {
             await classApi.updateClassStatus(id, { status: 'completed' });
             alert("Đã gửi yêu cầu hoàn thành.");
             loadData();
@@ -49,9 +50,9 @@ const ConnectedClasses = () => {
         } catch (e) { alert("Lỗi xử lý đánh giá"); }
     };
 
-    // Hàm Xử lý Xóa đánh giá
+    // Hàm xử lý xóa đánh giá
     const handleRatingDelete = async (reviewId) => {
-        if (!window.confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) return;
+        if (!await appConfirm("Bạn có chắc chắn muốn xóa đánh giá này?")) return;
         try {
             await classApi.deleteReview(reviewId);
             alert("Đã xóa đánh giá.");
@@ -61,7 +62,7 @@ const ConnectedClasses = () => {
     };
 
     const handleCancelClass = async (id) => {
-        const reason = prompt("Lý do hủy lớp:");
+        const reason = await appPrompt("Lý do hủy lớp:");
         if (reason) {
             await classApi.updateClassStatus(id, { status: 'cancelled', cancel_reason: reason });
             alert("Đã hủy lớp.");
@@ -172,7 +173,7 @@ const ConnectedClasses = () => {
                                 </ListGroup>
                             </Col>
                             <Col md={12} className="mt-3">
-                                <h6 className="fw-bold border-bottom pb-2 mb-2 text-success">Ghi chú & Đánh giá</h6>
+                                <h6 className="fw-bold border-bottom pb-2 mb-2 text-success">Ghi chú & đánh giá</h6>
                                 <div className="p-3 bg-light rounded border mb-3 small italic">
                                     "{selectedClass.note || "Không có ghi chú thêm."}"
                                 </div>
@@ -209,3 +210,9 @@ const ConnectedClasses = () => {
 };
 
 export default ConnectedClasses;
+
+
+
+
+
+

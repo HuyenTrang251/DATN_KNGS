@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Table, Button, Badge, Modal, Row, Col, Form, ListGroup, Spinner } from 'react-bootstrap';
 import * as bookingApi from '../../../services/bookingApi';
 import "../admin.scss"; 
 import { useAuth } from "../../../contexts/AuthContext";
+import { appConfirm } from "../../../components/AppDialogProvider";
 
 const getPaymentProvider = (transactionCode = '') => {
     const normalizedCode = String(transactionCode).toUpperCase();
@@ -187,7 +188,7 @@ const AdminBookingManagement = () => {
                                     <Button variant="outline-primary" size="sm" className="me-1" onClick={() => handleViewDetail(b.booking_id)}>
                                         <i className="bi bi-eye"></i>
                                     </Button>
-                                    <Button variant="outline-danger" size="sm" onClick={() => {if(window.confirm("Xóa lịch?")) bookingApi.adminDeleteBooking(b.booking_id).then(()=>loadData())}}>
+                                    <Button variant="outline-danger" size="sm" onClick={async () => { if (await appConfirm("Xóa lịch?")) bookingApi.adminDeleteBooking(b.booking_id).then(()=>loadData()); }}>
                                         <i className="bi bi-trash"></i>
                                     </Button>
                                 </td>
@@ -200,7 +201,7 @@ const AdminBookingManagement = () => {
             {/* MODAL CHI TIẾT */}
             <Modal show={showDetail} onHide={() => setShowDetail(false)} size="lg" centered>
                 <Modal.Header closeButton className="bg-light">
-                    <Modal.Title className="fw-bold" style={{color: '#0c024c'}}>Chi tiết lịch hẹn #{selected?.booking_id}</Modal.Title>
+                    <Modal.Title className="fw-bold" style={{color: '#0c024c'}}>Chi tiết lớp học #{selected?.booking_id}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="p-4">
                     {loadingDetail ? <div className="text-center"><Spinner animation="grow" /></div> : selected && (
@@ -330,3 +331,9 @@ const AdminBookingManagement = () => {
 };
 
 export default AdminBookingManagement;
+
+
+
+
+
+

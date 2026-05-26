@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Table, Button, Badge, Modal, Row, Col, Form } from 'react-bootstrap';
 import * as tutorApi from "../../../services/tutorApi";
 import * as userApi from "../../../services/userApi"; 
 import axiosClient from "../../../api/axiosClient";
 import { useAuth } from "../../../contexts/AuthContext";
+import { appConfirm, appPrompt } from "../../../components/AppDialogProvider";
 import "../admin.scss";
 
 const TutorManagement = () => {
@@ -45,7 +46,7 @@ const TutorManagement = () => {
     const handleUpdateStatus = async (userId, newStatus) => {
         const statusMap = { 'active': 'KÍCH HOẠT', 'warning': 'CẢNH CÁO', 'locked': 'KHÓA' };
         
-        if (window.confirm(`Xác nhận chuyển trạng thái tài khoản sang: ${statusMap[newStatus]}?`)) {
+        if (await appConfirm(`Xác nhận chuyển trạng thái tài khoản sang: ${statusMap[newStatus]}?`)) {
             try {
                 // Gọi API từ userApi thay vì tutorApi
                 await userApi.updateUserStatus(userId, newStatus);
@@ -59,7 +60,7 @@ const TutorManagement = () => {
     };
 
     const handleVerifyBlueTick = async (tutorId) => {
-        if (!window.confirm("Xác nhận cấp tích xanh cho gia sư này?")) return;
+        if (!(await appConfirm("Xác nhận cấp tích xanh cho gia sư này?"))) return;
 
         try {
             await tutorApi.verifyTutorBlueTick(tutorId);
@@ -73,7 +74,7 @@ const TutorManagement = () => {
     };
 
     const handleRejectVerify = async (userId) => {
-        const reason = prompt("Nhập nội dung yêu cầu bổ sung (Ví dụ: Thiếu bằng đại học, CV mờ...):");
+        const reason = await appPrompt("Nhập nội dung yêu cầu bổ sung (Ví dụ: Thiếu bằng đại học, CV mờ...):");
         if (!reason) return;
         
         try {
@@ -296,3 +297,6 @@ const TutorManagement = () => {
 };
 
 export default TutorManagement;
+
+
+

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+﻿import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { login  as loginAPI } from "../services/authApi";
@@ -42,13 +42,13 @@ function Login() {
 
   //     const data = res.data;
 
-  //     // lưu token
+  //     // lÆ°u token
   //     Cookies.set("token", data.token, {
   //       expires: 1,
   //       path: "/"
   //     });
 
-  //     // lưu user
+  //     // lÆ°u user
   //     login(data.user);
 
   //     // localStorage.setItem("user", JSON.stringify(data.user));
@@ -99,8 +99,8 @@ function Login() {
         password: password
       });
 
-      // VÌ ĐÃ CÓ INTERCEPTOR, 'res' CHÍNH LÀ DỮ LIỆU CẦN THIẾT
-      // Bạn có thể gán thẳng hoặc đổi tên biến cho dễ hiểu
+      // V� �� C� INTERCEPTOR, 'res' CH�NH L� D? LI?U C?N THI?T
+      // B?n c� th? g�n th?ng ho?c d?i t�n bi?n cho d? hi?u
       const data = res; 
 
       if (data && data.token) {
@@ -127,7 +127,7 @@ function Login() {
 
     } catch (error) {
       console.error(error);
-      // Xử lý lỗi cũng cần gọn hơn vì interceptor có thể đã xử lý một phần
+      // X? l� l?i cung c?n g?n hon v� interceptor c� th? d� x? l� m?t ph?n
       alert(error.response?.data?.message || "Đăng nhập thất bại");
     } finally {
       setLoading(false);
@@ -233,3 +233,9 @@ function Login() {
 }
 
 export default Login;
+
+
+
+
+
+

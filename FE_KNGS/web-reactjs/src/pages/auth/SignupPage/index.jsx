@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerStudent, registerTutor } from "../../../services/authApi";
 import "./signup.scss";
@@ -139,8 +139,8 @@ function SignupPage() {
                 type="radio"
                 id="tutor"
                 name="role"
-                value="gia sư"
-                checked={formData.role === "gia sư"}
+                value="gia sÆ°"
+                checked={formData.role === "gia sÆ°"}
                 onChange={handleRoleChange}
               />
               <label htmlFor="tutor" className="ms-2">
@@ -276,3 +276,5 @@ function SignupPage() {
 }
 
 export default SignupPage;
+
+

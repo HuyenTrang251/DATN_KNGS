@@ -1,4 +1,4 @@
-import axiosClient from "../api/axiosClient";
+﻿import axiosClient from "../api/axiosClient";
 
 export const registerStudent = (data) => {
   return axiosClient.post("/auth/register/student", data);
@@ -11,3 +11,5 @@ export const registerTutor = (data) => {
 export const login = (data) => {
   return axiosClient.post("/auth/login", data);
 };
+
+

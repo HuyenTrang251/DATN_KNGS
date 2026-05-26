@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+﻿import { Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import "../LayoutAdmin/LayoutAdmin.scss"; 
 import Sidebar from "../../components/Sidebar";
@@ -82,3 +82,5 @@ function LayoutUser({ HeaderRole, SidebarRole }) {
 }
 
 export default LayoutUser;
+
+

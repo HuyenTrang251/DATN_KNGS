@@ -1,6 +1,6 @@
-// import React, { useEffect, useState } from 'react';
+﻿// import React, { useEffect, useState } from 'react';
 // import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
-// // Import các hàm từ studentApi
+// // Import c�c h�m t? studentApi
 // import { getStudentById, updateStudentProfile } from '../../../services/studentApi';
 // import { useAuth } from '../../../contexts/AuthContext';
 
@@ -38,7 +38,7 @@
 //             const data = await getStudentById();
 //             setProfile(data);
             
-//             // Kiểm tra xem trong DB đã có ngày sinh/giới tính chưa
+//             // Ki?m tra xem trong DB d� c� ng�y sinh/gi?i t�nh chua
 //             if (data.date_of_birth) {
 //                 setIsInitialBirthdaySet(true); 
 //             }
@@ -84,7 +84,7 @@
 //     return (
 //         <Container className="mt-5 pb-5">
 //             <Row>
-//                 {/* Cột trái: Ảnh đại diện
+//                 {/* C?t tr�i: ?nh d?i di?n
 //                 <Col md={4} className="text-center">
 //                     <Card className="p-4 shadow-sm border-0">
 //                         <div className="mb-3">
@@ -114,7 +114,7 @@
 //                 {/* Thông tin chi tiết */}
 //                 <Col md={12}>
 //                     <Card className="p-1 shadow-sm border-0">
-//                         <h3 className="mb-4 fw-bold text-primary border-bottom pb-2">Thông tin cá nhân Học viên</h3>
+//                         <h3 className="mb-4 fw-bold text-primary border-bottom pb-2">Th�ng tin c� nh�n H?c vi�n</h3>
 //                         <Form onSubmit={handleUpdateProfile}>
 //                             <Row className="mb-3">
 //                                 <Col md={6}>
@@ -145,14 +145,14 @@
 //                                     <Form.Select 
 //                                         value={profile.gender || ''} 
 //                                         onChange={(e) => setProfile({...profile, gender: e.target.value})}
-//                                         // KHÓA NẾU ĐÃ CÓ DỮ LIỆU
+//                                         // KH�A N?U �� C� D? LI?U
 //                                         disabled={isInitialGenderSet}
 //                                         className={isInitialGenderSet ? "bg-light text-muted border-0" : ""}
 //                                     >
 //                                         <option value="">-- Chọn giới tính --</option>
 //                                         <option value="male">Nam</option>
 //                                         <option value="female">Nữ</option>
-//                                         <option value="other">Khác</option>
+//                                         <option value="other">Kh�c</option>
 //                                     </Form.Select>
 //                                 </Col>
 //                                 <Col md={6}>
@@ -162,7 +162,7 @@
 //                                         placeholder="Ngày sinh"
 //                                         value={profile.date_of_birth || ''} 
 //                                         onChange={(e) => setProfile({...profile, date_of_birth: e.target.value})} 
-//                                         // KHÓA NẾU ĐÃ CÓ DỮ LIỆU
+//                                         // KH�A N?U �� C� D? LI?U
 //                                         readOnly={isInitialBirthdaySet}
 //                                         className={isInitialBirthdaySet ? "bg-light text-muted border-0" : ""}
 //                                     />
@@ -208,7 +208,7 @@
 //                                 <Form.Control 
 //                                     as="textarea" 
 //                                     rows={3}
-//                                     placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
+//                                     placeholder="S? nh�, t�n du?ng, Phu?ng/X�, Qu?n/Huy?n, T?nh/Th�nh ph?"
 //                                     value={profile.address || ''} 
 //                                     onChange={(e) => setProfile({...profile, address: e.target.value})} 
 //                                 />
@@ -400,3 +400,9 @@ const StudentProfile = () => {
 };
 
 export default StudentProfile;
+
+
+
+
+
+
