@@ -140,6 +140,7 @@ import LayoutTutor from "./layouts/LayoutTutor"; // Giả định đường dẫ
 import HomePage from "./pages/home/HomePage";
 import ListTutorPage from "./pages/home/ListTutorPage";
 import ListNewClassPage from "./pages/home/ListNewClassPage";
+import ClassRulesPage from "./pages/home/ClassRulesPage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
@@ -180,6 +181,7 @@ function AppRoutes() {
         <Route index element={<HomePage />} />
         <Route path="danh-sach-gia-su" element={<ListTutorPage />} />
         <Route path="danh-sach-lop-moi" element={<ListNewClassPage />} />
+        <Route path="noi-quy-nhan-lop" element={<ClassRulesPage />} />
       </Route>
 
       {/* 2. ROUTES CHO ADMIN */}

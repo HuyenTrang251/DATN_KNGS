@@ -38,7 +38,7 @@ function Footer() {
                                     <ul className="list-unstyled fos footer-list">
                                     <li><Link to="/" className="text-dark text-decoration-none">Chính sách bảo mật</Link></li>
                                     <li><Link to="/khoa-hoc" className="text-dark text-decoration-none">Điều khoản dịch vụ</Link></li>
-                                    <li><Link to="/gia-su" className="text-dark text-decoration-none">Nội quy nhận lớp</Link></li>
+                                    <li><Link to="/noi-quy-nhan-lop" className="text-dark text-decoration-none">Nội quy nhận lớp</Link></li>
                                     </ul>
                                 </div>
 

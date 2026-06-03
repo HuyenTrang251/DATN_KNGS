@@ -1,0 +1,243 @@
+.class-rules-page {
+  background:
+    radial-gradient(circle at top right, rgba(255, 171, 71, 0.18), transparent 28%),
+    linear-gradient(180deg, #f5f8fc 0%, #ffffff 38%, #f8fafc 100%);
+  color: #10233d;
+  min-height: 100vh;
+}
+
+.class-rules-hero {
+  padding: 120px 0 36px;
+}
+
+.class-rules-hero-card {
+  background: linear-gradient(135deg, #0d376e 0%, #0f5ea3 58%, #1a78c2 100%);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(13, 55, 110, 0.18);
+  color: #fff;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.class-rules-hero-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -40px -60px auto;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(255, 196, 99, 0.45) 0%, rgba(255, 196, 99, 0) 72%);
+}
+
+.class-rules-kicker {
+  color: #ffd28b;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.class-rules-hero-card h1 {
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.class-rules-lead {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  margin: 0;
+  max-width: 760px;
+  position: relative;
+  z-index: 1;
+}
+
+.class-rules-content {
+  padding-bottom: 72px;
+}
+
+.class-rules-intro {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  margin-bottom: 28px;
+}
+
+.class-rules-intro-main,
+.class-rules-highlight,
+.class-rules-final,
+.class-rules-related {
+  background: #fff;
+  border: 1px solid rgba(16, 35, 61, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(16, 35, 61, 0.06);
+}
+
+.class-rules-intro-main {
+  padding: 30px 32px;
+}
+
+.class-rules-intro-main h2,
+.class-rules-final h2,
+.class-rules-related h2 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.class-rules-intro-main p,
+.class-rules-highlight p,
+.class-rules-final li {
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.class-rules-highlight {
+  background: linear-gradient(180deg, #fff7ea 0%, #fff 100%);
+  padding: 28px;
+}
+
+.class-rules-highlight h3 {
+  color: #9a5a00;
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.class-rules-section {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: 170px minmax(0, 1fr);
+  margin-bottom: 20px;
+}
+
+.class-rules-section-number,
+.class-rules-section-body {
+  border-radius: 24px;
+}
+
+.class-rules-section-number {
+  align-items: flex-start;
+  background: #123f76;
+  color: #fff;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 800;
+  justify-content: center;
+  padding: 28px 18px;
+}
+
+.class-rules-section-body {
+  background: #fff;
+  border: 1px solid rgba(16, 35, 61, 0.08);
+  box-shadow: 0 18px 40px rgba(16, 35, 61, 0.06);
+  padding: 30px 32px;
+}
+
+.class-rules-section-gold .class-rules-section-number {
+  background: linear-gradient(180deg, #f0b23d 0%, #d59521 100%);
+  color: #3d2600;
+}
+
+.class-rules-section-body h2 {
+  font-size: 1.55rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.class-rules-section-body ul,
+.class-rules-final ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.class-rules-section-body li,
+.class-rules-final li {
+  line-height: 1.8;
+}
+
+.class-rules-section-body li + li,
+.class-rules-final li + li {
+  margin-top: 10px;
+}
+
+.class-rules-final {
+  margin-top: 10px;
+  padding: 30px 32px;
+}
+
+.class-rules-related {
+  margin-top: 24px;
+  padding: 30px 32px 34px;
+}
+
+.class-rules-related-header p {
+  color: #0f5ea3;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.class-rules-related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.class-rules-related-card {
+  background: linear-gradient(180deg, #f6f9fd 0%, #ffffff 100%);
+  border: 1px solid rgba(15, 94, 163, 0.12);
+  border-radius: 18px;
+  min-height: 110px;
+  padding: 22px;
+}
+
+.class-rules-related-card span {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+@media (max-width: 991.98px) {
+  .class-rules-hero {
+    padding: 108px 0 28px;
+  }
+
+  .class-rules-hero-card {
+    padding: 36px 28px;
+  }
+
+  .class-rules-intro,
+  .class-rules-section {
+    grid-template-columns: 1fr;
+  }
+
+  .class-rules-section-number {
+    justify-content: flex-start;
+    padding: 18px 22px;
+  }
+
+  .class-rules-related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .class-rules-hero-card,
+  .class-rules-intro-main,
+  .class-rules-highlight,
+  .class-rules-section-body,
+  .class-rules-final,
+  .class-rules-related {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .class-rules-related-grid {
+    grid-template-columns: 1fr;
+  }
+}

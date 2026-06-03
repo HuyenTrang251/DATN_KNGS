@@ -14,11 +14,11 @@ const getSuccessMessage = (providerLabel, paymentType) => {
   switch (paymentType) {
     case "receive_job":
     case "receive_booking":
-      return `Thanh toan ${providerLabel} thanh cong. Ban da mo khoa thong tin lien he va co the tiep tuc xu ly lop hoc.`;
+      return `Thanh toán ${providerLabel} thành công. Bạn đã mở khóa thông tin liên hệ và có thể tiếp tục xử lý lớp học.`;
     case "verify_profile":
-      return `Thanh toan ${providerLabel} thanh cong. Yeu cau xac minh ho so da duoc ghi nhan.`;
+      return `Thanh toán ${providerLabel} thành công. Yêu cầu xác minh hồ sơ đã được ghi nhận.`;
     default:
-      return `Thanh toan ${providerLabel} thanh cong.`;
+      return `Thanh toán ${providerLabel} thành công.`;
   }
 };
 
@@ -28,7 +28,7 @@ const PaymentSuccess = () => {
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [countdown, setCountdown] = useState(5);
-  const [message, setMessage] = useState("Dang xac nhan thanh toan voi he thong...");
+  const [message, setMessage] = useState("Đang xác nhận thanh toán với hệ thống...");
 
   const redirectPath = searchParams.get("redirect") || "/";
   const provider = (searchParams.get("provider") || "payos").toLowerCase();
@@ -49,13 +49,13 @@ const PaymentSuccess = () => {
           : orderCode;
 
       if (!transactionCode) {
-        setMessage(`Khong tim thay ma giao dich ${providerLabel}.`);
+        setMessage(`Không tìm thấy mã giao dịch ${providerLabel}.`);
         setLoading(false);
         return;
       }
 
       if (provider === "momo" && momoResultCode && Number(momoResultCode) !== 0) {
-        setMessage(searchParams.get("message") || "Giao dich MoMo chua thanh cong.");
+        setMessage(searchParams.get("message") || "Giao dịch MoMo chưa thành công.");
         setLoading(false);
         return;
       }
@@ -73,7 +73,7 @@ const PaymentSuccess = () => {
       } catch (error) {
         if (!active) return;
         setIsSuccess(false);
-        setMessage(error.response?.data?.message || `Khong the xac nhan giao dich ${providerLabel}.`);
+        setMessage(error.response?.data?.message || `Không thể xác nhận giao dịch ${providerLabel}.`);
       } finally {
         if (active) {
           setLoading(false);
@@ -128,14 +128,14 @@ const PaymentSuccess = () => {
 
             <span className="payment-success-provider">{providerLabel}</span>
             <h1 className="payment-success-title">
-              {loading ? "Dang xac nhan giao dich" : isSuccess ? "Thanh toan thanh cong" : "Xac nhan thanh toan that bai"}
+              {loading ? "Đang xác nhận giao dịch" : isSuccess ? "Thanh toán thành công" : "Xác nhận thanh toán thất bại"}
             </h1>
             <p className="payment-success-subtitle">
               {loading
-                ? "He thong dang doi soat ket qua tu cong thanh toan. Vui long khong dong trinh duyet."
+                ? "Hệ thống đang đối soát kết quả từ cổng thanh toán. Vui lòng không đóng trình duyệt."
                 : isSuccess
-                  ? "Giao dich da hoan tat va he thong da cap nhat trang thai thanh cong."
-                  : "Khong the xac nhan giao dich tu cong thanh toan. Ban co the quay lai trang truoc de kiem tra lai."}
+                  ? "Giao dịch đã hoàn tất và hệ thống đã cập nhật trạng thái thành công."
+                  : "Không thể xác nhận giao dịch từ cổng thanh toán. Bạn có thể quay lại trang trước để kiểm tra lại."}
             </p>
 
             {!loading && (
@@ -146,13 +146,13 @@ const PaymentSuccess = () => {
 
             {isSuccess && !loading && (
               <div className="payment-success-countdown">
-                Tu dong quay lai trong <strong>{countdown}s</strong>
+                Tự động quay lại trong <strong>{countdown}s</strong>
               </div>
             )}
 
             <div className="payment-success-actions">
               <Button variant={isSuccess ? "success" : "primary"} size="lg" onClick={() => navigate(redirectPath)}>
-                {isSuccess ? "Quay lai ngay" : "Quay lai trang truoc"}
+                {isSuccess ? "Quay lại ngay" : "Quay lại trang trước"}
               </Button>
             </div>
           </div>

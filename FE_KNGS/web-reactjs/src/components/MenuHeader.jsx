@@ -110,7 +110,7 @@ function MenuHeader()
                     </Link>
                     <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
                         <li>
-                            <Link className="dropdown-item" to="/action">
+                            <Link className="dropdown-item" to="/noi-quy-nhan-lop">
                                 Nội quy nhận lớp
                             </Link>
                         </li>

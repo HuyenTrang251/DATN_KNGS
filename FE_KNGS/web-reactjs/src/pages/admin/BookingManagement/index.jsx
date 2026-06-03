@@ -18,6 +18,18 @@ const getPaymentProviderLabel = (provider = 'payos') => {
     return 'PayOS';
 };
 
+const getPaymentStatusLabel = (status) => {
+    const statusMap = {
+        pending: 'Đang xử lý',
+        success: 'Thành công',
+        refunded: 'Đã hoàn tiền',
+        failed: 'Thất bại',
+        cancelled: 'Đã hủy'
+    };
+
+    return statusMap[status] || status || '---';
+};
+
 const createRefundForm = () => ({
     paymentId: null,
     provider: 'payos',
@@ -182,7 +194,7 @@ const AdminBookingManagement = () => {
                                 <td className="text-danger fw-bold">{Number(b.tuition).toLocaleString()}đ</td>
                                 <td>{renderStatus(b.status)}</td>
                                 <td>
-                                    <span className="small text-muted">{b.payment_status || '---'}</span>
+                                    <span className="small text-muted">{getPaymentStatusLabel(b.payment_status)}</span>
                                 </td>
                                 <td>
                                     <Button variant="outline-primary" size="sm" className="me-1" onClick={() => handleViewDetail(b.booking_id)}>

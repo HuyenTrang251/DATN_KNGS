@@ -115,8 +115,8 @@ require('./jobs/pointCron');
 const PORT = process.env.PORT || 3300;
 app.listen(PORT, () => {
     console.log(`================================================`);
-    console.log(`🚀 SERVER RUNNING AT: http://localhost:${PORT}`);
-    console.log(`🔑 SECRET_KEY STATUS: ${process.env.SECRET_KEY ? 'READY' : 'MISSING'}`);
+    console.log(`SERVER RUNNING AT: http://localhost:${PORT}`);
+    console.log(`SECRET_KEY STATUS: ${process.env.SECRET_KEY ? 'READY' : 'MISSING'}`);
     console.log(`================================================`);
 });
 
